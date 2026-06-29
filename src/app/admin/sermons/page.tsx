@@ -10,12 +10,12 @@ import { formatDate } from "@/lib/utils";
 export default function AdminSermonsPage() {
   const [sermons, setSermons] = useState<Sermon[]>(sampleSermons.map((s, i) => ({ ...s, id: `sermon-${i}` })));
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: "", preacher: "", scripture: "", description: "", series: "", type: "video" as const, youtubeId: "", audioUrl: "" });
+  const [form, setForm] = useState({ title: "", preacher: "", scripture: "", description: "", series: "", type: "video" as "audio" | "video", youtubeId: "", audioUrl: "" });
 
   const handleSave = () => {
     setSermons([{ ...form, id: `sermon-${Date.now()}`, date: new Date().toISOString().split("T")[0], featured: false }, ...sermons]);
     setShowForm(false);
-    setForm({ title: "", preacher: "", scripture: "", description: "", series: "", type: "video", youtubeId: "", audioUrl: "" });
+    setForm({ title: "", preacher: "", scripture: "", description: "", series: "", type: "video" as "audio" | "video", youtubeId: "", audioUrl: "" });
   };
 
   const handleDelete = (id: string) => { if (confirm("Delete?")) setSermons(sermons.filter((s) => s.id !== id)); };

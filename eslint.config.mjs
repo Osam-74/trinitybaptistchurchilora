@@ -11,11 +11,10 @@ const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     rules: {
-      // Downgrade to warnings so lint never blocks production build
       "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
-      "react/no-unescaped-entities": "warn",
-      "@next/next/no-img-element": "warn",
+      "react/no-unescaped-entities": "off",
+      "@next/next/no-img-element": "off",
       "react-hooks/exhaustive-deps": "warn",
     },
   },
