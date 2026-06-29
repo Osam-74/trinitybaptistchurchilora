@@ -99,7 +99,7 @@ export default function AdminUsersPage() {
                   ].map(f => (
                     <div key={f.key}>
                       <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">{f.label}</label>
-                      <input type={f.type} required={f.required} value={(form as Record<string, string>)[f.key] ?? ""} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} className="input-field"/>
+                      <input type={f.type} required={f.required} value={(form as unknown as Record<string, string>)[f.key] ?? ""} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} className="input-field"/>
                     </div>
                   ))}
 

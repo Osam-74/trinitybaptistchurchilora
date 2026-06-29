@@ -176,7 +176,7 @@ function SignUpModal({ dept, onClose }: { dept: string; onClose: () => void }) {
             ].map(field => (
               <div key={field.key}>
                 <label className="block text-sm font-medium text-primary mb-1.5">{field.label}</label>
-                <input type={field.type} required={field.required} value={(form as unknown)[field.key]}
+                <input type={field.type} required={field.required} value={(form as unknown as Record<string, string>)[field.key] ?? ""}
                   onChange={e => setForm(prev => ({ ...prev, [field.key]: e.target.value }))}
                   className="input-field"/>
               </div>
