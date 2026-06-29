@@ -20,7 +20,6 @@ export default function AdminGalleryPage() {
   const [urlInput, setUrlInput] = useState("");
   const [caption, setCaption] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
 
 
   const handleAdd = () => {

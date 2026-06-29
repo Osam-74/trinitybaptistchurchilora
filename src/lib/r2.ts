@@ -39,7 +39,7 @@ export async function uploadToR2(
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error((err as any)?.error ?? `Upload failed: ${res.status}`);
+    throw new Error((err as Record<string,string>)?.error ?? `Upload failed: ${res.status}`);
   }
 
   const data = (await res.json()) as { ok: boolean; url: string };

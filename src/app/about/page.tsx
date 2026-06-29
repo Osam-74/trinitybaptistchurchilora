@@ -19,8 +19,8 @@ function useScrollReveal() {
 const leaders = [
   { name: "Rev'd Dr S. O. Mosebolatan", role: "Senior Pastor", bio: "A revered shepherd of the Trinity Baptist Church, Ilora flock, Rev'd Dr Mosebolatan has led the church with wisdom, grace, and unwavering faith for decades.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face", active: true },
   { name: "Pastor Mrs. Mosebolatan", role: "Co-Pastor / Women's Leader", bio: "A pillar of strength and encouragement, Pastor Mrs. Mosebolatan leads the women's ministry with passion and dedication to nurturing spiritual growth.", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&crop=face", active: true },
-  { name: "Deacon J. Adeyemi", role: "Church Secretary", bio: "Serving with diligence and integrity, Deacon Adeyemi ensures the smooth administrative operation of the church's affairs.", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face", active: true },
-  { name: "Deaconess F. Ogunleye", role: "Treasurer", bio: "Faithful steward of the church's resources, ensuring transparent and godly management of all financial matters.", image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=400&fit=crop&crop=face", active: true },
+  { name: "Deacon J. Adeyemi", role: "Church Secretary", bio: "Serving with diligence and integrity, Deacon Adeyemi ensures the smooth administrative operation of the church&apos;s affairs.", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face", active: true },
+  { name: "Deaconess F. Ogunleye", role: "Treasurer", bio: "Faithful steward of the church&apos;s resources, ensuring transparent and godly management of all financial matters.", image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=400&fit=crop&crop=face", active: true },
 ];
 
 const values = [
@@ -72,7 +72,7 @@ export default function AboutPage() {
                 Built on the <span className="text-gradient-gold">Rock</span> of Christ
               </h2>
               <p className="text-text-muted text-lg leading-relaxed mb-5">
-                Trinity Baptist Church, Ilora was founded with a singular vision: to be a <em className="text-primary font-medium">Sanctuary of Praise</em> — a place where lives are transformed by the power of God's Word and the love of a genuine community.
+                Trinity Baptist Church, Ilora was founded with a singular vision: to be a <em className="text-primary font-medium">Sanctuary of Praise</em> — a place where lives are transformed by the power of God&apos;s Word and the love of a genuine community.
               </p>
               <p className="text-text-muted leading-relaxed mb-8">
                 Through decades of faithful ministry under the leadership of Rev&apos;d Dr S. O. Mosebolatan, we have grown into a vibrant congregation committed to evangelism, discipleship, and community impact across Ilora and beyond.

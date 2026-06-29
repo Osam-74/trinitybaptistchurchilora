@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {useState} from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -267,7 +267,7 @@ export default function BookPage() {
                     ].map(f => (
                       <div key={f.key}>
                         <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">{f.label}</label>
-                        <input type={f.type} required={f.required} value={(formData as any)[f.key]}
+                        <input type={f.type} required={f.required} value={(formData as unknown)[f.key]}
                           onChange={e => setFormData(prev => ({ ...prev, [f.key]: e.target.value }))}
                           className="input-field"/>
                       </div>
@@ -281,7 +281,7 @@ export default function BookPage() {
                       <label className="block text-xs font-semibold text-primary mb-2 uppercase tracking-wide">Meeting Type</label>
                       <div className="grid grid-cols-2 gap-2">
                         {([["in_person", "In Person", "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z"], ["video", "Video Call", "M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"]] as [string, string, string][]).map(([value, label, icon]) => (
-                          <button type="button" key={value} onClick={() => setFormData(prev => ({ ...prev, meetingType: value as any }))}
+                          <button type="button" key={value} onClick={() => setFormData(prev => ({ ...prev, meetingType: value as unknown }))}
                             className={`flex flex-col items-center gap-2 p-3.5 rounded-xl border-2 transition-all text-sm font-medium ${
                               formData.meetingType === value ? "border-accent bg-accent/8 text-primary" : "border-stone-200 text-text-muted hover:border-accent/40"
                             }`}>

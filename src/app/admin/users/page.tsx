@@ -19,7 +19,6 @@ export default function AdminUsersPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
   const [form, setForm] = useState({ email: "", displayName: "", role: "editor", permissions: [] as Permission[] });
-  const [savingId, setSavingId] = useState<string | null>(null);
 
   const openNew = () => {
     setEditingUser(null);
@@ -100,7 +99,7 @@ export default function AdminUsersPage() {
                   ].map(f => (
                     <div key={f.key}>
                       <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">{f.label}</label>
-                      <input type={f.type} required={f.required} value={(form as any)[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} className="input-field"/>
+                      <input type={f.type} required={f.required} value={(form as Record<string, unknown>)[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} className="input-field"/>
                     </div>
                   ))}
 

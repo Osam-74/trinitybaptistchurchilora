@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import {useState, useEffect,  } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Post, Sermon } from "@/types";
 import { formatDate, getYouTubeThumbnail } from "@/lib/utils";
-import { samplePosts, sampleSermons, defaultSettings } from "@/lib/seed-data";
+import { samplePosts, sampleSermons} from "@/lib/seed-data";
 
 function useScrollReveal() {
   useEffect(() => {

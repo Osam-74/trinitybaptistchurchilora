@@ -64,10 +64,10 @@ export default function R2Uploader({
       setProgress(100);
       setTimeout(() => { setUploading(false); setProgress(0); }, 600);
       onUploaded(url);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setUploading(false);
       setProgress(0);
-      const msg = err?.message ?? "Upload failed";
+      const msg = (err as Error)?.message ?? "Upload failed";
       setError(msg);
       onError?.(msg);
     }
