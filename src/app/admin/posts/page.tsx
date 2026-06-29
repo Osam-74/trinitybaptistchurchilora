@@ -7,7 +7,7 @@ import { samplePosts } from "@/lib/seed-data";
 import { formatDate } from "@/lib/utils";
 
 export default function AdminPostsPage() {
-  const [posts, setPosts] = useState<Post[]>(samplePosts.map((p, _i) => ({ ...p, id: `post-${i}` })));
+  const [posts, setPosts] = useState<Post[]>(samplePosts.map((p, i) => ({ ...p, id: `post-${i}` })));
   const [showForm, setShowForm] = useState(false);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [form, setForm] = useState({ title: "", body: "", scripture: "", mediaType: "text" as Post["mediaType"], mediaUrl: "", pinned: false, status: "published" as Post["status"] });
@@ -138,7 +138,7 @@ export default function AdminPostsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {posts.map((post, _i) => (
+                  {posts.map((post) => (
                     <tr key={post.id} className="border-b border-stone-50 hover:bg-stone-50/50 transition-colors">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
