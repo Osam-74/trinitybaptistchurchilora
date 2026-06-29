@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import R2Uploader from "@/components/R2Uploader";
 import AdminSidebar from "@/components/AdminSidebar";
 import { Sermon } from "@/types";
 import { sampleSermons } from "@/lib/seed-data";
@@ -41,7 +42,25 @@ export default function AdminSermonsPage() {
               <option value="video">Video (YouTube)</option>
               <option value="audio">Audio</option>
             </select>
-            <input type="text" placeholder={form.type === "video" ? "YouTube Video ID" : "Audio URL"} value={form.type === "video" ? form.youtubeId : form.audioUrl} onChange={(e) => form.type === "video" ? setForm({ ...form, youtubeId: e.target.value }) : setForm({ ...form, audioUrl: e.target.value })} className="px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-accent/30" />
+            {form.type === "video" ? (
+              <input type="text" placeholder="YouTube Video ID (e.g. dQw4w9WgXcQ)" value={form.youtubeId} onChange={(e) => setForm({ ...form, youtubeId: e.target.value })} className="input-field" />
+            ) : (
+              <div className="space-y-2">
+                <R2Uploader
+                  folder="sermons"
+                  accept="audio/*"
+                  label="Upload sermon audio (MP3/M4A)"
+                  maxMB={80}
+                  onUploaded={(url) => setForm({ ...form, audioUrl: url })}
+                />
+                {form.audioUrl && (
+                  <p className="text-xs text-green-600 flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+                    Uploaded to R2
+                  </p>
+                )}
+              </div>
+            )}
             <textarea placeholder="Description" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="sm:col-span-2 px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-accent/30 resize-none" />
           </div>
           <div className="flex gap-3 mt-4">

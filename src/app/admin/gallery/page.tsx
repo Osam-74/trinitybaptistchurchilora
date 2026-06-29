@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
+import R2Uploader from "@/components/R2Uploader";
 import AdminSidebar from "@/components/AdminSidebar";
 
 interface GalleryItem { id: string; url: string; caption: string; source: "url" | "upload"; createdAt: string; }
@@ -20,15 +21,7 @@ export default function AdminGalleryPage() {
   const [caption, setCaption] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-    }
-  };
 
   const handleAdd = () => {
     const url = addMode === "url" ? urlInput : previewUrl;
@@ -91,23 +84,14 @@ export default function AdminGalleryPage() {
 
                   {addMode === "upload" ? (
                     <div>
-                      <div
-                        onClick={() => fileRef.current?.click()}
-                        className="border-2 border-dashed border-stone-300 rounded-2xl p-8 text-center cursor-pointer hover:border-accent transition-colors"
-                      >
-                        {previewUrl ? (
-                          <img src={previewUrl} alt="Preview" className="w-full h-40 object-cover rounded-xl"/>
-                        ) : (
-                          <>
-                            <svg className="w-10 h-10 text-stone-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                            </svg>
-                            <p className="text-sm font-medium text-primary">Click to select a photo</p>
-                            <p className="text-xs text-text-muted mt-1">JPG, PNG, WebP — max 10MB</p>
-                          </>
-                        )}
-                      </div>
-                      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect}/>
+                      <R2Uploader
+                        folder="gallery"
+                        accept="image/*"
+                        label="Click or drag to upload photo"
+                        maxMB={10}
+                        onUploaded={(url) => setPreviewUrl(url)}
+                        onError={(msg) => alert(msg)}
+                      />
                     </div>
                   ) : (
                     <div>
