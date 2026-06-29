@@ -45,6 +45,7 @@ function HeroSection() {
       setCurrentBg((prev) => (prev + 1) % backgrounds.length);
     }, 7000);
     return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const particles = [
