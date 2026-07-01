@@ -26,16 +26,6 @@ export interface Post {
   authorName?: string;
 }
 
-export interface Comment {
-  id: string;
-  postId: string;
-  displayName: string;
-  text: string;
-  status: "visible" | "pending" | "hidden";
-  createdAt: string;
-  deviceToken: string;
-}
-
 export interface LiveStream {
   id: string;
   title: string;
@@ -140,8 +130,18 @@ export interface SiteSettings {
     instagram?: string;
     youtube?: string;
   };
-  commentsRequireApproval: boolean;
   gmailSenderEmail?: string;
+}
+
+export interface Hymn {
+  id: string;
+  number: number;
+  category: "english" | "yoruba";
+  title: string;
+  lyrics: string; // verses separated by a blank line; use "Chorus:" / "Ègbè:" to label a repeated chorus
+  author?: string;
+  composer?: string;
+  createdAt?: string;
 }
 
 export interface CalendarEvent {
@@ -165,7 +165,6 @@ export const PERMISSIONS = [
   "manage_gallery",
   "manage_sermons",
   "manage_activities",
-  "moderate_comments",
   "manage_settings",
   "manage_calendar",
 ] as const;
@@ -176,16 +175,16 @@ export const ROLE_DEFAULTS: Record<string, Permission[]> = {
   master_admin: [
     "manage_users", "manage_posts", "manage_bookings", "manage_availability",
     "manage_streams", "manage_gallery", "manage_sermons", "manage_activities",
-    "moderate_comments", "manage_settings", "manage_calendar",
+    "manage_settings", "manage_calendar",
   ],
   pastor: [
     "manage_posts", "manage_bookings", "manage_availability",
-    "manage_streams", "manage_sermons", "moderate_comments",
+    "manage_streams", "manage_sermons",
   ],
   media_team: [
     "manage_gallery", "manage_sermons", "manage_streams",
   ],
   editor: [
-    "manage_posts", "manage_activities", "moderate_comments",
+    "manage_posts", "manage_activities",
   ],
 };

@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { getSiteSettings } from "@/lib/settings";
 
 const quickLinks = [
   { href: "/", label: "Home" },
@@ -14,6 +16,12 @@ const quickLinks = [
 ];
 
 export default function Footer() {
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    getSiteSettings().then((s) => setLogoUrl(s.logoUrl || null));
+  }, []);
+
   return (
     <footer className="relative bg-primary-dark text-white/70 overflow-hidden">
       {/* Decorative top line */}
@@ -32,12 +40,16 @@ export default function Footer() {
           {/* Church Info */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center shadow-lg">
-                <svg className="w-5 h-5 text-primary-dark" viewBox="0 0 24 24" fill="currentColor">
-                  <rect x="10.5" y="2" width="3" height="20" rx="1.5"/>
-                  <rect x="2" y="8" width="20" height="3" rx="1.5"/>
-                </svg>
-              </div>
+              {logoUrl ? (
+                <img src={logoUrl} alt="Trinity Baptist Church, Ilora logo" className="w-11 h-11 rounded-full object-cover shadow-lg" />
+              ) : (
+                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center shadow-lg">
+                  <svg className="w-5 h-5 text-primary-dark" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="10.5" y="2" width="3" height="20" rx="1.5"/>
+                    <rect x="2" y="8" width="20" height="3" rx="1.5"/>
+                  </svg>
+                </div>
+              )}
               <div>
                 <h3 className="text-white font-serif text-base font-bold leading-tight">Trinity Baptist Church, Ilora</h3>
                 <p className="text-accent text-[10px] uppercase tracking-widest">Sanctuary of Praise</p>
@@ -60,7 +72,7 @@ export default function Footer() {
                 className="w-9 h-9 rounded-full bg-white/8 border border-white/10 flex items-center justify-center hover:bg-accent hover:border-accent transition-all duration-300 hover:scale-110">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M22.54 6.42a2.78 2.78 0 00-1.95-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 11.75a29 29 0 00.46 5.33A2.78 2.78 0 003.4 19.13C5.12 19.56 12 19.56 12 19.56s6.88 0 8.6-.46a2.78 2.78 0 001.94-2 29 29 0 00.46-5.25 29 29 0 00-.46-5.43z"/>
-                  <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#0d1021"/>
+                  <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#06231d"/>
                 </svg>
               </a>
             </div>
@@ -122,7 +134,7 @@ export default function Footer() {
             <ul className="space-y-4">
               {[
                 { icon: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z", text: "Trinity Baptist Church, Ilora, Oyo State, Nigeria" },
-                { icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", text: "info@trinitybaptistchurchilora.org" },
+                { icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", text: "trinitybaptistchurchilora@gmail.com" },
               ].map((item, i) => (
                 <li key={i} className="flex gap-3">
                   <div className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center flex-shrink-0">

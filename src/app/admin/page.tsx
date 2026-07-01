@@ -2,6 +2,23 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+
+function friendlyAuthError(code: string): string {
+  switch (code) {
+    case "auth/invalid-email":
+      return "That doesn't look like a valid email address.";
+    case "auth/user-not-found":
+    case "auth/invalid-credential":
+    case "auth/wrong-password":
+      return "Invalid email or password.";
+    case "auth/too-many-requests":
+      return "Too many attempts. Please wait a moment and try again.";
+    default:
+      return "Couldn't sign in. Please check your details and try again.";
+  }
+}
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -14,13 +31,15 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    if (email === "admin@trinitychurch.ng" && password === "admin123") {
+    try {
+      await signInWithEmailAndPassword(auth, email.trim(), password);
       router.push("/admin/dashboard");
-    } else {
-      setError("Invalid credentials. Use admin@trinitychurch.ng / admin123");
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code ?? "";
+      setError(friendlyAuthError(code));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -28,7 +47,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md animate-scale-in">
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           </div>
@@ -47,16 +66,20 @@ export default function AdminLoginPage() {
               <label className="block text-sm font-medium text-white/70 mb-1">Email</label>
               <input
                 type="email"
+                required
+                autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
-                placeholder="admin@trinitychurch.ng"
+                placeholder="you@trinitybaptistchurchilora.org"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-white/70 mb-1">Password</label>
               <input
                 type="password"
+                required
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
@@ -66,7 +89,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-shine w-full py-4 bg-accent text-white font-medium rounded-xl hover:bg-accent-dark transition-colors disabled:opacity-50"
+              className="btn-shine w-full py-4 bg-accent text-primary-dark font-semibold rounded-xl hover:bg-accent-dark hover:text-white transition-colors disabled:opacity-50"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>
@@ -74,7 +97,7 @@ export default function AdminLoginPage() {
         </div>
 
         <p className="text-center text-white/30 text-xs mt-6">
-          Demo: admin@trinitychurch.ng / admin123
+          Access is restricted to authorized church staff. Contact the administrator if you need an account.
         </p>
       </div>
     </main>

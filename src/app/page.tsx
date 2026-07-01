@@ -98,13 +98,13 @@ function HeroSection() {
 
       {/* Rotating ring (decorative) */}
       <div className="absolute right-8 bottom-16 w-32 h-32 opacity-10 hidden lg:block">
-        <svg viewBox="0 0 100 100" className="w-full h-full animate-rotate-ring" fill="none" stroke="#c9a84c" strokeWidth="1">
+        <svg viewBox="0 0 100 100" className="w-full h-full animate-rotate-ring" fill="none" stroke="#e3ef26" strokeWidth="1">
           <circle cx="50" cy="50" r="45" strokeDasharray="8 4"/>
         </svg>
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
+      <div className="relative z-10 text-center px-4 max-w-5xl mx-auto pt-28 lg:pt-16">
         {/* Badge */}
         <div className="inline-flex items-center gap-2 glass-card rounded-full px-5 py-2.5 mb-8 animate-fade-in">
           <svg className="w-4 h-4 text-accent animate-cross-glow" viewBox="0 0 24 24" fill="currentColor">
@@ -127,10 +127,6 @@ function HeroSection() {
           <div className="h-px w-12 bg-accent/50"/>
         </div>
 
-        <p className="text-white/65 text-sm sm:text-base mb-10 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          Words of encouragement, teaching, and inspiration from Rev&apos;d Dr S. O. Mosebolatan
-        </p>
-
         {/* CTA buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
           <Link href="/live" className="btn-shine btn-gold px-8 py-4 rounded-2xl flex items-center justify-center gap-2.5 text-base font-semibold animate-pulse-glow shadow-2xl">
@@ -152,23 +148,6 @@ function HeroSection() {
             </svg>
             Book a Session
           </Link>
-        </div>
-
-        {/* Info pills */}
-        <div className="flex flex-wrap justify-center gap-6 text-white/60 text-sm animate-fade-in" style={{ animationDelay: '0.7s' }}>
-          <div className="flex items-center gap-2 glass-card rounded-full px-4 py-2">
-            <svg className="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-            Ilora, Oyo State
-          </div>
-          <div className="flex items-center gap-2 glass-card rounded-full px-4 py-2">
-            <svg className="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            Sundays at 7:30 AM &amp; 10:00 AM
-          </div>
         </div>
       </div>
 
@@ -250,7 +229,7 @@ function WelcomeSection() {
             {[
               { number: "50+", label: "Years of Ministry", icon: "M12 6v6m0 0v6m0-6h6m-6 0H6" },
               { number: "1000+", label: "Church Members", icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
-              { number: "200+", label: "Sermons Preached", icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" },
+              { number: "1000+", label: "Sermons Preached", icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" },
               { number: "10+", label: "Active Departments", icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" },
             ].map((stat, i) => (
               <div key={i} className="bg-white rounded-2xl p-6 border border-stone-100 shadow-sm card-hover text-center">
@@ -275,9 +254,6 @@ function PastorFeedSection() {
   const [posts] = useState<Post[]>(samplePosts.map((p, i) => ({ ...p, id: `post-${i}` })));
   const [amenCounts, setAmenCounts] = useState<Record<string, number>>({});
   const [amenClicked, setAmenClicked] = useState<Record<string, boolean>>({});
-  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
-  const [submittedComments, setSubmittedComments] = useState<Record<string, boolean>>({});
-  const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const savedAmens: Record<string, boolean> = {};
@@ -292,27 +268,6 @@ function PastorFeedSection() {
     setAmenCounts((prev) => ({ ...prev, [postId]: (prev[postId] || 0) + 1 }));
     setAmenClicked((prev) => ({ ...prev, [postId]: true }));
     if (typeof window !== "undefined") localStorage.setItem(`amen_${postId}`, "true");
-  };
-
-  const handleCommentSubmit = async (postId: string) => {
-    const text = commentInputs[postId]?.trim();
-    if (!text) return;
-    try {
-      const resp = await fetch("/api/comments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ postId, text }),
-      });
-      if (resp.ok) {
-        setSubmittedComments((prev) => ({ ...prev, [postId]: true }));
-        setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
-        setTimeout(() => setSubmittedComments((prev) => ({ ...prev, [postId]: false })), 3000);
-      }
-    } catch {
-      setSubmittedComments((prev) => ({ ...prev, [postId]: true }));
-      setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
-      setTimeout(() => setSubmittedComments((prev) => ({ ...prev, [postId]: false })), 3000);
-    }
   };
 
   return (
@@ -411,22 +366,12 @@ function PastorFeedSection() {
                         <svg className="w-4 h-4" fill={amenClicked[post.id] ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                         </svg>
-                        {amenClicked[post.id] ? "Amen!" : "Say Amen"}
+                        {amenClicked[post.id] ? "Amen!" : "Amen"}
                         {(amenCounts[post.id] || 0) > 0 && (
                           <span className="bg-accent text-primary-dark text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                             {amenCounts[post.id]}
                           </span>
                         )}
-                      </button>
-
-                      <button
-                        onClick={() => setExpandedComments((prev) => ({ ...prev, [post.id]: !prev[post.id] }))}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-stone-50 text-text-muted hover:bg-primary/8 hover:text-primary border border-stone-200 hover:border-primary/20 transition-all duration-300"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                        </svg>
-                        Comment
                       </button>
                     </div>
 
@@ -434,37 +379,6 @@ function PastorFeedSection() {
                       {post.mediaType}
                     </span>
                   </div>
-
-                  {/* Comment box */}
-                  {expandedComments[post.id] && (
-                    <div className="mt-5 animate-fade-in">
-                      {submittedComments[post.id] ? (
-                        <div className="flex items-center gap-2 text-green-600 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm font-medium">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
-                          </svg>
-                          Thank you! Your comment is pending review.
-                        </div>
-                      ) : (
-                        <div className="flex gap-3">
-                          <input
-                            type="text"
-                            placeholder="Share your thoughts..."
-                            value={commentInputs[post.id] || ""}
-                            onChange={(e) => setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))}
-                            onKeyDown={(e) => e.key === "Enter" && handleCommentSubmit(post.id)}
-                            className="input-field flex-1 text-sm"
-                          />
-                          <button
-                            onClick={() => handleCommentSubmit(post.id)}
-                            className="px-5 py-2.5 bg-accent text-primary-dark font-semibold rounded-xl text-sm hover:bg-accent-light transition-colors shadow-sm"
-                          >
-                            Send
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </div>
               </article>
             ))}

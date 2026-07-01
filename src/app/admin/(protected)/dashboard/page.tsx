@@ -6,17 +6,16 @@ import { samplePosts, sampleSermons, sampleAlbums } from "@/lib/seed-data";
 
 const stats = [
   { label: "Total Posts", value: String(samplePosts.length), icon: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z", href: "/admin/posts", color: "bg-blue-50 text-blue-600" },
-  { label: "Sermons", value: String(sampleSermons.length), icon: "M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3", href: "/admin/sermons", color: "bg-purple-50 text-purple-600" },
+  { label: "Sermons", value: String(sampleSermons.length), icon: "M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25", href: "/admin/sermons", color: "bg-purple-50 text-purple-600" },
   { label: "Gallery Albums", value: String(sampleAlbums.length), icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z", href: "/admin/gallery", color: "bg-green-50 text-green-600" },
   { label: "Pending Bookings", value: "3", icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", href: "/admin/bookings", color: "bg-amber-50 text-amber-600" },
 ];
 
 const quickLinks = [
   { label: "New Post", href: "/admin/posts", icon: "M12 4v16m8-8H4", desc: "Share a message or announcement" },
-  { label: "Upload Sermon", href: "/admin/sermons", icon: "M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3", desc: "Add audio or video sermon" },
+  { label: "Upload Sermon", href: "/admin/sermons", icon: "M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25", desc: "Add audio or video sermon" },
   { label: "Add Photos", href: "/admin/gallery", icon: "M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12", desc: "Upload gallery photos" },
   { label: "Manage Bookings", href: "/admin/bookings", icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", desc: "Review session requests" },
-  { label: "Moderate Comments", href: "/admin/comments", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z", desc: "Approve or hide comments" },
   { label: "Manage Users", href: "/admin/users", icon: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197", desc: "Add staff and set permissions" },
 ];
 

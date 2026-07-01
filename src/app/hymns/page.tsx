@@ -1,118 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const HYMNS = [
-  { number: 2, title: "Holy, Holy, Holy" },
-  { number: 4, title: "To God Be the Glory" },
-  { number: 7, title: "Joyful, Joyful We Adore Thee" },
-  { number: 8, title: "A Mighty Fortress Is Our God" },
-  { number: 15, title: "Come, Thou Fount of Every Blessing" },
-  { number: 16, title: "O Worship the King" },
-  { number: 23, title: "God Is So Good" },
-  { number: 43, title: "This Is My Father's World" },
-  { number: 44, title: "For the Beauty of the Earth" },
-  { number: 52, title: "He Leadeth Me! O Blessed Thought" },
-  { number: 56, title: "Guide Me, O Thou Great Jehovah" },
-  { number: 62, title: "All the Way My Savior Leads Me" },
-  { number: 63, title: "Abide With Me" },
-  { number: 64, title: "God Will Take Care of You" },
-  { number: 74, title: "O God, Our Help in Ages Past" },
-  { number: 76, title: "O Come, O Come, Emmanuel" },
-  { number: 87, title: "Joy to the World! The Lord Is Come" },
-  { number: 88, title: "Hark! The Herald Angels Sing" },
-  { number: 89, title: "O Come, All Ye Faithful" },
-  { number: 91, title: "Silent Night, Holy Night" },
-  { number: 103, title: "Away in a Manger" },
-  { number: 126, title: "All Glory, Laud, and Honor" },
-  { number: 132, title: "There Is Power in the Blood" },
-  { number: 134, title: "Jesus Paid It All" },
-  { number: 135, title: "Nothing but the Blood" },
-  { number: 139, title: "At the Cross" },
-  { number: 141, title: "The Old Rugged Cross" },
-  { number: 142, title: "There Is a Fountain" },
-  { number: 144, title: "When I Survey the Wondrous Cross" },
-  { number: 147, title: "And Can It Be" },
-  { number: 156, title: "Were You There" },
-  { number: 159, title: "Christ the Lord Is Risen Today" },
-  { number: 161, title: "Crown Him with Many Crowns" },
-  { number: 175, title: "Man of Sorrows, What a Name" },
-  { number: 176, title: "Fairest Lord Jesus" },
-  { number: 180, title: "Jesus, Lover of My Soul" },
-  { number: 181, title: "No, Not One" },
-  { number: 182, title: "What a Friend We Have in Jesus" },
-  { number: 187, title: "In the Garden" },
-  { number: 200, title: "All Hail the Power of Jesus' Name" },
-  { number: 208, title: "Love Divine, All Loves Excelling" },
-  { number: 210, title: "My Jesus, I Love Thee" },
-  { number: 216, title: "O for a Thousand Tongues to Sing" },
-  { number: 217, title: "Oh, How I Love Jesus" },
-  { number: 241, title: "Breathe on Me, Breath of God" },
-  { number: 247, title: "Come, Thou Almighty King" },
-  { number: 253, title: "Praise God, from Whom All Blessings Flow" },
-  { number: 261, title: "Wonderful Words of Life" },
-  { number: 263, title: "Break Thou the Bread of Life" },
-  { number: 267, title: "Dear Lord and Father of Mankind" },
-  { number: 275, title: "I Surrender All" },
-  { number: 277, title: "Take My Life, and Let It Be Consecrated" },
-  { number: 280, title: "Jesus, Keep Me Near the Cross" },
-  { number: 288, title: "Where He Leads Me" },
-  { number: 290, title: "I Am Thine, O Lord" },
-  { number: 291, title: "Beneath the Cross of Jesus" },
-  { number: 292, title: "O Love That Wilt Not Let Me Go" },
-  { number: 294, title: "Have Thine Own Way, Lord" },
-  { number: 295, title: "Near to the Heart of God" },
-  { number: 307, title: "Just As I Am" },
-  { number: 309, title: "Lord, I'm Coming Home" },
-  { number: 312, title: "Softly and Tenderly" },
-  { number: 317, title: "Only Trust Him" },
-  { number: 329, title: "Grace Greater than Our Sin" },
-  { number: 330, title: "Amazing Grace! How Sweet the Sound" },
-  { number: 333, title: "Leaning on the Everlasting Arms" },
-  { number: 334, title: "Blessed Assurance, Jesus Is Mine" },
-  { number: 335, title: "Standing on the Promises" },
-  { number: 337, title: "I Know Whom I Have Believed" },
-  { number: 338, title: "How Firm a Foundation" },
-  { number: 342, title: "Rock of Ages, Cleft for Me" },
-  { number: 344, title: "Jesus Loves Me" },
-  { number: 350, title: "The Church's One Foundation" },
-  { number: 352, title: "Faith of Our Fathers" },
-  { number: 354, title: "I Love Thy Kingdom, Lord" },
-  { number: 406, title: "The Solid Rock" },
-  { number: 410, title: "It Is Well with My Soul" },
-  { number: 411, title: "'Tis So Sweet to Trust in Jesus" },
-  { number: 413, title: "Faith Is the Victory" },
-  { number: 416, title: "My Faith Looks Up to Thee" },
-  { number: 447, title: "Trust and Obey" },
-  { number: 448, title: "Just a Closer Walk with Thee" },
-  { number: 450, title: "I Need Thee Every Hour" },
-  { number: 458, title: "Nearer, My God, to Thee" },
-  { number: 469, title: "Revive Us Again" },
-  { number: 473, title: "More Love to Thee, O Christ" },
-  { number: 484, title: "Higher Ground" },
-  { number: 485, title: "Stand Up, Stand Up for Jesus" },
-  { number: 493, title: "Onward, Christian Soldiers" },
-  { number: 502, title: "Open My Eyes That I May See" },
-  { number: 514, title: "When We All Get to Heaven" },
-  { number: 515, title: "There's a Land That Is Fairer Than Day" },
-  { number: 516, title: "When the Roll Is Called Up Yonder" },
-  { number: 518, title: "Shall We Gather at the River" },
-  { number: 524, title: "We're Marching to Zion" },
-  { number: 535, title: "I Will Sing the Wondrous Story" },
-  { number: 540, title: "Saved, Saved" },
-  { number: 544, title: "Redeemed, How I Love to Proclaim It" },
-  { number: 546, title: "Love Lifted Me" },
-  { number: 547, title: "I Stand Amazed in the Presence" },
-  { number: 559, title: "Rescue the Perishing" },
-  { number: 572, title: "I Love to Tell the Story" },
-  { number: 575, title: "I Will Sing of My Redeemer" },
-  { number: 576, title: "Take the Name of Jesus with You" },
-  { number: 581, title: "We Have Heard the Joyful Sound" },
-  { number: 587, title: "Jesus Shall Reign" },
-  { number: 600, title: "More About Jesus" },
-];
+import { Hymn } from "@/types";
+import { seedHymns } from "@/lib/hymns-data";
+import { listHymnsFromFirestore } from "@/lib/hymns";
 
 // Sign-up form component
 function SignUpModal({ dept, onClose }: { dept: string; onClose: () => void }) {
@@ -216,21 +109,45 @@ function SignUpModal({ dept, onClose }: { dept: string; onClose: () => void }) {
   );
 }
 
+const CATEGORIES: { key: "english" | "yoruba"; label: string }[] = [
+  { key: "english", label: "English Baptist Hymnal" },
+  { key: "yoruba", label: "Yoruba Baptist Hymnal" },
+];
+
 export default function HymnsPage() {
+  const [category, setCategory] = useState<"english" | "yoruba">("english");
   const [search, setSearch] = useState("");
   const [searchBy, setSearchBy] = useState<"title" | "number">("title");
-  const [selectedHymn, setSelectedHymn] = useState<typeof HYMNS[0] | null>(null);
+  const [openHymn, setOpenHymn] = useState<string | null>(null);
   const [showSignUp, setShowSignUp] = useState(false);
+  const [firestoreHymns, setFirestoreHymns] = useState<Hymn[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    listHymnsFromFirestore().then((h) => {
+      setFirestoreHymns(h);
+      setLoading(false);
+    });
+  }, []);
+
+  // Merge admin-added hymns (Firestore) with the seed library. Firestore
+  // entries with the same number+category override the seed version.
+  const allHymns: Hymn[] = useMemo(() => {
+    const seeded: Hymn[] = seedHymns.map((h, i) => ({ ...h, id: `seed-${i}` }));
+    const key = (h: { number: number; category: string }) => `${h.category}-${h.number}`;
+    const overridden = new Set(firestoreHymns.map(key));
+    const merged = [...seeded.filter((h) => !overridden.has(key(h))), ...firestoreHymns];
+    return merged.sort((a, b) => a.number - b.number);
+  }, [firestoreHymns]);
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return HYMNS;
+    const byCategory = allHymns.filter((h) => h.category === category);
+    if (!search.trim()) return byCategory;
     const q = search.trim().toLowerCase();
-    return HYMNS.filter(h =>
-      searchBy === "title"
-        ? h.title.toLowerCase().includes(q)
-        : h.number.toString().includes(q)
+    return byCategory.filter((h) =>
+      searchBy === "title" ? h.title.toLowerCase().includes(q) : h.number.toString().includes(q)
     );
-  }, [search, searchBy]);
+  }, [allHymns, category, search, searchBy]);
 
   return (
     <main className="min-h-screen bg-bg">
@@ -245,13 +162,14 @@ export default function HymnsPage() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
               </svg>
-              BAPTIST HYMNAL
+              HYMNALS
             </div>
             <h1 className="font-serif text-4xl lg:text-6xl text-white font-bold mb-5 animate-fade-in-up">
               Hymns of <span className="text-gradient-gold">Praise</span>
             </h1>
             <p className="text-white/60 text-lg mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              Search the Baptist Hymnal by title or number. Join us in lifting our voices in worship.
+              The full text of our hymns, right here on the website — search the English Baptist Hymnal
+              or the Yoruba Baptist Hymnal by title or number.
             </p>
             <button
               onClick={() => setShowSignUp(true)}
@@ -267,8 +185,23 @@ export default function HymnsPage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Hymnal tabs */}
+        <div className="flex flex-wrap gap-3 mb-8">
+          {CATEGORIES.map((c) => (
+            <button
+              key={c.key}
+              onClick={() => { setCategory(c.key); setOpenHymn(null); }}
+              className={`px-5 py-3 rounded-xl text-sm font-semibold transition-all ${
+                category === c.key ? "bg-primary text-white shadow-md" : "bg-white text-text-muted border border-stone-200 hover:border-primary/30"
+              }`}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+
         {/* Search bar */}
-        <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-4 mb-10">
+        <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-4 mb-8">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -295,62 +228,59 @@ export default function HymnsPage() {
           </div>
         </div>
 
-        <p className="text-text-muted text-sm mb-6">{filtered.length} hymn{filtered.length !== 1 ? "s" : ""} found</p>
+        <p className="text-text-muted text-sm mb-6">
+          {loading ? "Loading hymn library…" : `${filtered.length} hymn${filtered.length !== 1 ? "s" : ""} found`}
+        </p>
 
-        {/* Hymn grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((hymn, i) => (
-            <button
-              key={hymn.number}
-              onClick={() => setSelectedHymn(selectedHymn?.number === hymn.number ? null : hymn)}
-              className={`hymn-card rounded-2xl p-5 text-left transition-all shadow-sm animate-fade-in ${
-                selectedHymn?.number === hymn.number ? "border-accent bg-accent/5" : "border-stone-100"
-              }`}
-              style={{ animationDelay: `${(i % 12) * 0.04}s` }}
+        {/* Hymn list with full lyrics inline */}
+        <div className="space-y-4">
+          {filtered.map((hymn) => (
+            <div
+              key={hymn.id}
+              className={`hymn-card rounded-2xl overflow-hidden shadow-sm ${openHymn === hymn.id ? "border-accent" : "border-stone-100"}`}
             >
-              <div className="flex items-start gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 transition-colors ${
-                  selectedHymn?.number === hymn.number ? "bg-accent text-primary-dark" : "bg-accent/10 text-accent"
+              <button
+                onClick={() => setOpenHymn(openHymn === hymn.id ? null : hymn.id)}
+                className="w-full flex items-center gap-4 p-5 text-left"
+              >
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 transition-colors ${
+                  openHymn === hymn.id ? "bg-accent text-primary-dark" : "bg-accent/10 text-accent"
                 }`}>
                   {hymn.number}
                 </div>
-                <div>
-                  <p className="font-serif font-semibold text-primary text-sm leading-snug">{hymn.title}</p>
-                  <p className="text-text-muted text-xs mt-1">Baptist Hymnal</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-serif font-semibold text-primary leading-snug">{hymn.title}</p>
+                  {hymn.author && <p className="text-text-muted text-xs mt-0.5">{hymn.author}</p>}
                 </div>
-              </div>
-              {selectedHymn?.number === hymn.number && (
-                <div className="mt-4 pt-4 border-t border-accent/20 animate-fade-in">
-                  <div className="flex items-center gap-2 text-xs text-accent font-medium mb-2">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
-                    </svg>
-                    Hymn #{hymn.number}
-                  </div>
-                  <p className="text-text-muted text-xs">Full lyrics available in the Baptist Hymnal (1991 edition). Ask a church usher for a physical copy.</p>
-                  <a
-                    href={`https://hymnary.org/search?qu=${encodeURIComponent(hymn.title)}`}
-                    target="_blank" rel="noopener noreferrer"
-                    onClick={e => e.stopPropagation()}
-                    className="mt-3 inline-flex items-center gap-1.5 text-xs text-primary-light font-semibold hover:text-accent transition-colors"
-                  >
-                    View on Hymnary.org
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                    </svg>
-                  </a>
+                <svg className={`w-5 h-5 text-text-muted flex-shrink-0 transition-transform ${openHymn === hymn.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              {openHymn === hymn.id && (
+                <div className="px-5 pb-6 pt-1 border-t border-stone-100 animate-fade-in">
+                  {hymn.lyrics ? (
+                    <p className="whitespace-pre-line text-text leading-relaxed text-[15px]">{hymn.lyrics}</p>
+                  ) : (
+                    <p className="text-text-muted text-sm italic">Full lyrics coming soon.</p>
+                  )}
                 </div>
               )}
-            </button>
+            </div>
           ))}
         </div>
 
-        {filtered.length === 0 && (
+        {!loading && filtered.length === 0 && (
           <div className="text-center py-20">
             <svg className="w-16 h-16 text-stone-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
             </svg>
-            <p className="text-text-muted text-lg">No hymns found for &ldquo;{search}&rdquo;</p>
+            {category === "yoruba" && allHymns.filter(h => h.category === "yoruba").length === 0 ? (
+              <p className="text-text-muted text-lg max-w-md mx-auto">
+                The Yoruba Baptist Hymnal is being added. Church staff can add hymns from Admin → Hymns.
+              </p>
+            ) : (
+              <p className="text-text-muted text-lg">No hymns found for &ldquo;{search}&rdquo;</p>
+            )}
           </div>
         )}
 

@@ -180,7 +180,7 @@ export default function BookPage() {
                       <span>Available</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <div className="w-4 h-4 rounded-md" style={{ background: 'linear-gradient(135deg, #c9a84c, #e8c97a)' }}/>
+                      <div className="w-4 h-4 rounded-md" style={{ background: 'linear-gradient(135deg, #e3ef26, #eef77a)' }}/>
                       <span>Selected</span>
                     </div>
                     <div className="flex items-center gap-1.5">

@@ -7,9 +7,7 @@ import { PERMISSIONS, ROLE_DEFAULTS, Permission } from "@/types";
 interface AdminUser { id: string; email: string; displayName: string; roles: string[]; permissions: Permission[]; active: boolean; createdAt: string; }
 
 const SAMPLE_USERS: AdminUser[] = [
-  { id: "u1", email: "admin@trinitychurch.ng", displayName: "Master Admin", roles: ["master_admin"], permissions: [...ROLE_DEFAULTS.master_admin], active: true, createdAt: "2024-01-01" },
-  { id: "u2", email: "pastor@trinitychurch.ng", displayName: "Rev'd Dr S. O. Mosebolatan", roles: ["pastor"], permissions: [...ROLE_DEFAULTS.pastor], active: true, createdAt: "2024-01-01" },
-  { id: "u3", email: "media@trinitychurch.ng", displayName: "Media Team Lead", roles: ["media_team"], permissions: [...ROLE_DEFAULTS.media_team], active: true, createdAt: "2024-03-15" },
+  { id: "u1", email: "trinitybaptistchurchilora@gmail.com", displayName: "Master Admin", roles: ["master_admin"], permissions: [...ROLE_DEFAULTS.master_admin], active: true, createdAt: "2024-01-01" },
 ];
 
 const ROLE_OPTIONS = ["master_admin", "pastor", "media_team", "editor"];
@@ -71,7 +69,7 @@ export default function AdminUsersPage() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="font-serif text-2xl font-bold text-primary">Users & Permissions</h1>
-              <p className="text-text-muted text-sm mt-1">Manage staff accounts and access levels</p>
+              <p className="text-text-muted text-sm mt-1">Plan staff roles and access levels</p>
             </div>
             <button onClick={openNew}
               className="btn-shine btn-gold inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold">
@@ -80,6 +78,12 @@ export default function AdminUsersPage() {
               </svg>
               Add User
             </button>
+          </div>
+
+          <div className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 text-sm text-primary mb-6">
+            <strong>Note:</strong> Actual sign-in accounts (email &amp; password) are created and managed in the{" "}
+            <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="underline font-semibold hover:text-accent-dark">Firebase Console → Authentication</a>.
+            Use this page to plan the role and permissions a staff member should have once their account exists.
           </div>
 
           {/* User form modal */}

@@ -45,7 +45,7 @@ export default function ContactPage() {
               {[
                 { icon: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z", title: "Address", lines: ["Trinity Baptist Church, Ilora", "Oyo State, Nigeria"] },
                 { icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", title: "Service Times", lines: ["Sunday 7:30 AM — First Service", "Sunday 10:00 AM — Second Service", "Wednesday 5:00 PM — Midweek"] },
-                { icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", title: "Email", lines: ["info@trinitybaptistchurchilora.org"] },
+                { icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", title: "Email", lines: ["trinitybaptistchurchilora@gmail.com"] },
               ].map((item) => (
                 <div key={item.title} className="flex gap-4">
                   <div className="w-11 h-11 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { getSiteSettings } from "@/lib/settings";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -18,7 +19,12 @@ const navLinks = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    getSiteSettings().then((s) => setLogoUrl(s.logoUrl || null));
+  }, []);
 
   useEffect(() => {
     setIsOpen(false);
@@ -40,13 +46,17 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
             <div className="relative w-10 h-10 flex-shrink-0">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                {/* Cross icon */}
-                <svg className="w-5 h-5 text-primary-dark" viewBox="0 0 24 24" fill="currentColor">
-                  <rect x="10.5" y="2" width="3" height="20" rx="1.5"/>
-                  <rect x="2" y="8" width="20" height="3" rx="1.5"/>
-                </svg>
-              </div>
+              {logoUrl ? (
+                <img src={logoUrl} alt="Trinity Baptist Church, Ilora logo" className="w-10 h-10 rounded-full object-cover group-hover:scale-110 transition-transform shadow-lg" />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-accent-dark flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                  {/* Cross icon (fallback until a logo is uploaded) */}
+                  <svg className="w-5 h-5 text-primary-dark" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="10.5" y="2" width="3" height="20" rx="1.5"/>
+                    <rect x="2" y="8" width="20" height="3" rx="1.5"/>
+                  </svg>
+                </div>
+              )}
               <div className="absolute inset-0 rounded-full bg-accent/20 animate-pulse-glow -z-10"/>
             </div>
             <div>

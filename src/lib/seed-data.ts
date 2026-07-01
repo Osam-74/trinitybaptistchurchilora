@@ -4,7 +4,7 @@ export const defaultSettings: SiteSettings = {
   churchName: "Trinity Baptist Church",
   tagline: "A Place of Grace, Faith & Community",
   serviceTimes: "Sundays at 9:00 AM & 11:00 AM",
-  contactEmail: "trinitybaptistilora@gmail.com",
+  contactEmail: "trinitybaptistchurchilora@gmail.com",
   contactPhone: "+234 803 XXX XXXX",
   address: "Ilora, Oyo State, Nigeria",
   pastorName: "Rev'd Dr S. O. Mosebolatan",
@@ -12,8 +12,7 @@ export const defaultSettings: SiteSettings = {
     facebook: "https://facebook.com/trinitybaptistilora",
     youtube: "https://youtube.com/@trinitybaptistilora",
   },
-  commentsRequireApproval: false,
-  gmailSenderEmail: "trinitybaptistilora@gmail.com",
+  gmailSenderEmail: "trinitybaptistchurchilora@gmail.com",
 };
 
 export const samplePosts: Omit<Post, "id">[] = [

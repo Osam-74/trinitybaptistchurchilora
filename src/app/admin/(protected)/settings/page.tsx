@@ -1,25 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
+import R2Uploader from "@/components/R2Uploader";
 import { defaultSettings } from "@/lib/seed-data";
+import { getSiteSettings, updateSiteSettings } from "@/lib/settings";
 import { SiteSettings } from "@/types";
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  useEffect(() => {
+    getSiteSettings().then((s) => {
+      setSettings(s);
+      setLoading(false);
+    });
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await updateSiteSettings(settings);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <div className="flex min-h-screen bg-stone-50"><AdminSidebar /><main className="flex-1 p-6 lg:p-8 ml-0 lg:ml-64"><div className="max-w-5xl mx-auto">
       <div className="max-w-2xl">
         <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-8">
-          <h3 className="font-serif text-lg text-primary font-bold mb-6">Site Settings</h3>
+          <h3 className="font-serif text-lg text-primary font-bold mb-2">Site Settings</h3>
+          {loading && <p className="text-xs text-text-muted mb-4">Loading saved settings…</p>}
           <div className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-primary mb-1.5">Church Logo</label>
+              {settings.logoUrl && (
+                <img src={settings.logoUrl} alt="Current logo" className="w-20 h-20 object-contain rounded-xl border border-stone-200 bg-white p-2 mb-3" />
+              )}
+              <R2Uploader
+                folder="logos"
+                label="Upload Church Logo"
+                onUploaded={(url) => setSettings({ ...settings, logoUrl: url })}
+              />
+              <p className="text-xs text-text-muted mt-1">Appears in the navigation bar, footer, and admin sidebar. Remember to click Save Changes after uploading.</p>
+            </div>
             <div>
               <label className="block text-sm font-medium text-primary mb-1">Church Name</label>
               <input type="text" value={settings.churchName} onChange={(e) => setSettings({ ...settings, churchName: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-accent/30" />
@@ -64,26 +94,14 @@ export default function AdminSettingsPage() {
                 <input type="text" value={settings.socialLinks.youtube || ""} onChange={(e) => setSettings({ ...settings, socialLinks: { ...settings.socialLinks, youtube: e.target.value } })} className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-accent/30" placeholder="URL" />
               </div>
             </div>
-            <div className="flex items-center justify-between pt-4 border-t border-stone-100">
-              <div>
-                <label className="text-sm font-medium text-primary">Comments require approval</label>
-                <p className="text-xs text-text-muted">New comments will be held for moderation</p>
-              </div>
-              <button
-                onClick={() => setSettings({ ...settings, commentsRequireApproval: !settings.commentsRequireApproval })}
-                className={`relative w-12 h-7 rounded-full transition-colors ${settings.commentsRequireApproval ? "bg-accent" : "bg-stone-300"}`}
-              >
-                <span className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform ${settings.commentsRequireApproval ? "translate-x-6" : "translate-x-1"}`} />
-              </button>
-            </div>
             <div className="pt-4 border-t border-stone-100">
               <label className="block text-sm font-medium text-primary mb-1">Gmail Sender Email</label>
-              <input type="email" value={settings.gmailSenderEmail || ""} onChange={(e) => setSettings({ ...settings, gmailSenderEmail: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-accent/30" placeholder="trinitybaptistilora@gmail.com" />
+              <input type="email" value={settings.gmailSenderEmail || ""} onChange={(e) => setSettings({ ...settings, gmailSenderEmail: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-accent/30" placeholder="trinitybaptistchurchilora@gmail.com" />
               <p className="text-xs text-text-muted mt-1">The Gmail address used to send confirmation and reminder emails</p>
             </div>
           </div>
           <div className="mt-8 flex items-center gap-4">
-            <button onClick={handleSave} className="btn-shine px-8 py-3 bg-accent text-white font-medium rounded-xl hover:bg-accent-dark transition-colors">Save Changes</button>
+            <button onClick={handleSave} disabled={saving} className="btn-shine px-8 py-3 bg-accent text-primary-dark font-medium rounded-xl hover:bg-accent-dark hover:text-white transition-colors disabled:opacity-50">{saving ? "Saving..." : "Save Changes"}</button>
             {saved && (
               <span className="text-green-600 text-sm font-medium flex items-center gap-1 animate-fade-in">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
