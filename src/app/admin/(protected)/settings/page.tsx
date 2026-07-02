@@ -12,6 +12,7 @@ export default function AdminSettingsPage() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     getSiteSettings().then((s) => {
@@ -22,10 +23,18 @@ export default function AdminSettingsPage() {
 
   const handleSave = async () => {
     setSaving(true);
+    setError("");
     try {
       await updateSiteSettings(settings);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      const code = (err as { code?: string })?.code ?? "";
+      if (code === "permission-denied") {
+        setError("Permission denied by Firestore rules. Make sure the latest firestore.rules have been pasted into Firebase Console → Firestore Database → Rules → Publish.");
+      } else {
+        setError((err as Error)?.message || "Failed to save settings.");
+      }
     } finally {
       setSaving(false);
     }
@@ -100,6 +109,9 @@ export default function AdminSettingsPage() {
               <p className="text-xs text-text-muted mt-1">The Gmail address used to send confirmation and reminder emails</p>
             </div>
           </div>
+          {error && (
+            <div className="mt-6 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>
+          )}
           <div className="mt-8 flex items-center gap-4">
             <button onClick={handleSave} disabled={saving} className="btn-shine px-8 py-3 bg-accent text-primary-dark font-medium rounded-xl hover:bg-accent-dark hover:text-white transition-colors disabled:opacity-50">{saving ? "Saving..." : "Save Changes"}</button>
             {saved && (

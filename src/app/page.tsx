@@ -120,7 +120,7 @@ function HeroSection() {
         </h1>
 
         {/* Motto */}
-        <div className="flex items-center justify-center gap-3 mb-3 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+        <div className="flex items-center justify-center gap-3 mb-10 animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <div className="h-px w-12 bg-accent/50"/>
           <p className="text-accent text-2xl sm:text-3xl lg:text-4xl font-semibold italic font-serif">Sanctuary of Praise</p>
           <div className="h-px w-12 bg-accent/50"/>

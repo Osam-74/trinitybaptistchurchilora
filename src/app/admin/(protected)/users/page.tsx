@@ -131,6 +131,8 @@ export default function AdminUsersPage() {
         setError("Password is too weak. Use at least 6 characters.");
       } else if (code === "auth/invalid-email") {
         setError("Invalid email address.");
+      } else if (code === "permission-denied" || message.toLowerCase().includes("insufficient permissions") || message.toLowerCase().includes("missing or insufficient")) {
+        setError("Permission denied by Firestore rules. The updated firestore.rules (with the admin_users collection) need to be pasted into Firebase Console → Firestore Database → Rules → Publish before this will work.");
       } else {
         setError(message);
       }

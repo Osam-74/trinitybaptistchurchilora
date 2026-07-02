@@ -9,9 +9,19 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, o
 import { db } from "@/lib/firebase";
 import { ChoirMember } from "@/types";
 
+// Firestore rejects `undefined` field values outright (addDoc/setDoc throw
+// "Unsupported field value: undefined"). Strip any undefined keys before writing.
+function stripUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  const out: Partial<T> = {};
+  for (const key of Object.keys(obj) as (keyof T)[]) {
+    if (obj[key] !== undefined) out[key] = obj[key];
+  }
+  return out;
+}
+
 export async function createChoirMember(data: Omit<ChoirMember, "id" | "createdAt" | "status">): Promise<string> {
   if (!db) throw new Error("Firestore not configured");
-  const payload = { ...data, status: "pending" as const, createdAt: new Date().toISOString() };
+  const payload = stripUndefined({ ...data, status: "pending" as const, createdAt: new Date().toISOString() });
   const ref = await addDoc(collection(db, "choir_members"), payload);
   return ref.id;
 }
@@ -51,7 +61,7 @@ export async function listApprovedMembers(): Promise<ChoirMember[]> {
 
 export async function updateMember(id: string, data: Partial<ChoirMember>): Promise<void> {
   if (!db) throw new Error("Firestore not configured");
-  await updateDoc(doc(db, "choir_members", id), data as Record<string, unknown>);
+  await updateDoc(doc(db, "choir_members", id), stripUndefined(data as Record<string, unknown>));
 }
 
 export async function deleteMember(id: string): Promise<void> {

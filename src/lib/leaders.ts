@@ -7,6 +7,14 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy 
 import { db } from "@/lib/firebase";
 import { Leader } from "@/types";
 
+function stripUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  const out: Partial<T> = {};
+  for (const key of Object.keys(obj) as (keyof T)[]) {
+    if (obj[key] !== undefined) out[key] = obj[key];
+  }
+  return out;
+}
+
 export const defaultLeaders: Leader[] = [
   { id: "l1", name: "Rev'd Dr S. O. Mosebolatan", role: "Senior Pastor", bio: "A revered shepherd of the Trinity Baptist Church, Ilora flock, Rev'd Dr Mosebolatan has led the church with wisdom, grace, and unwavering faith for decades.", order: 1, active: true, photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face" },
   { id: "l2", name: "Pastor Mrs. Mosebolatan", role: "Co-Pastor / Women's Leader", bio: "A pillar of strength and encouragement, Pastor Mrs. Mosebolatan leads the women's ministry with passion and dedication to nurturing spiritual growth.", order: 2, active: true, photoUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&crop=face" },
@@ -40,13 +48,13 @@ export async function listAllLeaders(): Promise<Leader[]> {
 
 export async function createLeader(data: Omit<Leader, "id">): Promise<string> {
   if (!db) throw new Error("Firestore not configured");
-  const ref = await addDoc(collection(db, "leaders"), data);
+  const ref = await addDoc(collection(db, "leaders"), stripUndefined(data as Record<string, unknown>));
   return ref.id;
 }
 
 export async function updateLeader(id: string, data: Partial<Leader>): Promise<void> {
   if (!db) throw new Error("Firestore not configured");
-  await updateDoc(doc(db, "leaders", id), data as Record<string, unknown>);
+  await updateDoc(doc(db, "leaders", id), stripUndefined(data as Record<string, unknown>));
 }
 
 export async function deleteLeader(id: string): Promise<void> {
