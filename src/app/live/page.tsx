@@ -85,7 +85,7 @@ export default function LivePage() {
                       <p className="font-serif font-bold text-primary mb-1">{stream.title}</p>
                       <p className="text-text-muted text-sm">{formatDate(stream.scheduledAt)}</p>
                     </div>
-                    <span className="px-2.5 py-1 bg-accent/10 text-accent text-xs rounded-full font-semibold flex-shrink-0">Scheduled</span>
+                    <span className="px-2.5 py-1 bg-primary/10 text-primary text-xs rounded-full font-semibold flex-shrink-0">Scheduled</span>
                   </div>
                 </div>
               ))}

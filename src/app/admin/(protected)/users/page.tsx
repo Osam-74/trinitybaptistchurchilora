@@ -175,7 +175,7 @@ export default function AdminUsersPage() {
                       <td className="px-5 py-4">
                         <div className="flex flex-wrap gap-1 max-w-xs">
                           {user.permissions.slice(0, 3).map(p => (
-                            <span key={p} className="px-1.5 py-0.5 bg-accent/10 text-accent text-xs rounded-md">{p.replace("manage_", "").replace("moderate_", "")}</span>
+                            <span key={p} className="px-1.5 py-0.5 bg-primary/10 text-primary text-xs rounded-md">{p.replace("manage_", "").replace("moderate_", "")}</span>
                           ))}
                           {user.permissions.length > 3 && (
                             <span className="px-1.5 py-0.5 bg-stone-100 text-text-muted text-xs rounded-md">+{user.permissions.length - 3}</span>

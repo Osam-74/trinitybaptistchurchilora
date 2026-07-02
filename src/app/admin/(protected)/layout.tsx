@@ -2,33 +2,30 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { auth, isFirebaseConfigured } from "@/lib/firebase";
 
 export default function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [checking, setChecking] = useState(true);
-  const [authed, setAuthed] = useState(false);
+  const [status, setStatus] = useState<"checking" | "authed" | "unauthed" | "not-configured">("checking");
 
   useEffect(() => {
-    if (!isFirebaseConfigured) {
-      setChecking(false);
+    if (!isFirebaseConfigured || !auth) {
+      setStatus("not-configured");
       return;
     }
-    const unsub = onAuthStateChanged(auth, (user) => {
+    const unsub = onAuthStateChanged(auth, (user: User | null) => {
       if (user) {
-        setAuthed(true);
-        setChecking(false);
+        setStatus("authed");
       } else {
-        setAuthed(false);
-        setChecking(false);
+        setStatus("unauthed");
         router.replace("/admin");
       }
     });
     return () => unsub();
   }, [router]);
 
-  if (!isFirebaseConfigured) {
+  if (status === "not-configured") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
         <div className="max-w-md text-center">
@@ -42,11 +39,11 @@ export default function ProtectedAdminLayout({ children }: { children: React.Rea
     );
   }
 
-  if (checking || !authed) {
+  if (status === "checking" || status === "unauthed") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-stone-50">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-accent/30 border-t-accent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
           <p className="text-text-muted text-sm">Checking access…</p>
         </div>
       </div>

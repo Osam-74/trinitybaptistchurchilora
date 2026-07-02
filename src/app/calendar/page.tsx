@@ -9,7 +9,7 @@ import { getDaysInMonth, getFirstDayOfMonth, getMonthName, formatDate } from "@/
 
 const EVENT_TYPE_STYLES: Record<string, string> = {
   service: "bg-primary text-white",
-  special: "bg-accent text-white",
+  special: "bg-primary text-white",
   meeting: "bg-blue-600 text-white",
   fellowship: "bg-green-600 text-white",
   other: "bg-stone-500 text-white",
@@ -113,13 +113,13 @@ export default function CalendarPage() {
                         onClick={() => dayEvents.length > 0 && setSelectedEvent(dayEvents[0])}
                         className={`aspect-square rounded-xl p-1 flex flex-col items-center justify-start transition-all ${
                           isToday
-                            ? "bg-accent/10 ring-2 ring-accent font-bold"
+                            ? "bg-primary/10 ring-2 ring-primary font-bold"
                             : dayEvents.length > 0
                             ? "bg-stone-50 hover:bg-stone-100"
                             : "hover:bg-stone-50"
                         }`}
                       >
-                        <span className={`text-sm ${isToday ? "text-accent" : "text-primary"}`}>{day}</span>
+                        <span className={`text-sm ${isToday ? "text-primary-light" : "text-primary"}`}>{day}</span>
                         {dayEvents.length > 0 && (
                           <div className="flex flex-wrap gap-0.5 mt-1 justify-center">
                             {dayEvents.slice(0, 3).map((e, ei) => (
@@ -147,7 +147,7 @@ export default function CalendarPage() {
             <div>
               <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 animate-fade-in" style={{ animationDelay: "0.1s" }}>
                 <h3 className="font-serif text-lg text-primary font-bold mb-4 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   Upcoming Events
@@ -194,7 +194,7 @@ export default function CalendarPage() {
             <p className="text-text-muted text-sm mb-4">{formatDate(selectedEvent.date)}</p>
             {selectedEvent.startTime && (
               <p className="text-sm text-text mb-1 flex items-center gap-2">
-                <svg className="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 {selectedEvent.startTime}{selectedEvent.endTime ? ` - ${selectedEvent.endTime}` : ""}
@@ -202,7 +202,7 @@ export default function CalendarPage() {
             )}
             {selectedEvent.location && (
               <p className="text-sm text-text mb-3 flex items-center gap-2">
-                <svg className="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>

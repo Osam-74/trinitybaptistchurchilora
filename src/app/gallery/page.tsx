@@ -110,7 +110,7 @@ export default function GalleryPage() {
         {/* Section header */}
         <div className="flex items-end justify-between mb-10">
           <div>
-            <p className="text-accent text-sm font-semibold mb-2 uppercase tracking-wider">ALL PHOTOS</p>
+            <p className="text-primary text-sm font-semibold mb-2 uppercase tracking-wider">ALL PHOTOS</p>
             <h2 className="font-serif text-3xl text-primary font-bold">Full Gallery</h2>
           </div>
           {/* Upload button (public facing - would need auth in real app) */}
@@ -144,7 +144,7 @@ export default function GalleryPage() {
                     href={photo}
                     download={`trinity-church-photo-${i + 1}.jpg`}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-7 h-7 rounded-full bg-accent/90 backdrop-blur flex items-center justify-center hover:bg-accent transition-colors"
+                    className="w-7 h-7 rounded-full bg-primary backdrop-blur flex items-center justify-center hover:bg-primary-light transition-colors"
                     title="Download photo"
                   >
                     <svg className="w-3.5 h-3.5 text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,7 +186,7 @@ export default function GalleryPage() {
               <a
                 href={allDisplayPhotos[currentPhoto]}
                 download={`trinity-church-photo-${currentPhoto + 1}.jpg`}
-                className="flex items-center gap-2 px-4 py-2 bg-accent text-primary-dark font-semibold rounded-xl text-sm hover:bg-accent-light transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-white font-semibold rounded-xl text-sm hover:bg-primary-light transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>

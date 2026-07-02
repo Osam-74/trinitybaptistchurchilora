@@ -1,7 +1,8 @@
 /**
  * Hymn library — backed by Firestore ("hymns" collection) so admins can add,
- * edit, or bulk-import songs from Admin → Hymns. The public Hymns page merges
- * these with the built-in seed set (seedHymns) as a starting library.
+ * edit, or bulk-import songs from Admin → Hymns. The public Hymns page loads
+ * the full library from /public/hymns-library.json and merges Firestore entries
+ * on top.
  */
 
 import {
@@ -21,16 +22,17 @@ const HYMNS_COLLECTION = "hymns";
 
 export async function listHymnsFromFirestore(): Promise<Hymn[]> {
   try {
+    if (!db) return [];
     const q = query(collection(db, HYMNS_COLLECTION), orderBy("number", "asc"));
     const snap = await getDocs(q);
     return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Hymn, "id">) }));
   } catch {
-    // Firestore not reachable/configured — the seed library still works.
     return [];
   }
 }
 
 export async function addHymn(hymn: Omit<Hymn, "id">): Promise<string> {
+  if (!db) throw new Error("Firestore not configured");
   const ref = await addDoc(collection(db, HYMNS_COLLECTION), {
     ...hymn,
     createdAt: new Date().toISOString(),
@@ -39,10 +41,12 @@ export async function addHymn(hymn: Omit<Hymn, "id">): Promise<string> {
 }
 
 export async function updateHymn(id: string, data: Partial<Hymn>): Promise<void> {
+  if (!db) throw new Error("Firestore not configured");
   await updateDoc(doc(db, HYMNS_COLLECTION, id), data);
 }
 
 export async function deleteHymn(id: string): Promise<void> {
+  if (!db) throw new Error("Firestore not configured");
   await deleteDoc(doc(db, HYMNS_COLLECTION, id));
 }
 

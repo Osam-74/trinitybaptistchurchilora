@@ -30,6 +30,10 @@ export default function AdminLoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (!auth || !isFirebaseConfigured) {
+      setError("Firebase isn\'t configured yet. Add your Firebase env vars in Vercel to enable login.");
+      return;
+    }
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);

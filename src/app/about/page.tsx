@@ -64,8 +64,8 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="reveal-left">
-              <div className="inline-flex items-center gap-2 text-accent text-sm font-semibold mb-4">
-                <div className="w-8 h-px bg-accent"/>
+              <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4">
+                <div className="w-8 h-px bg-primary-light/40"/>
                 OUR MISSION
               </div>
               <h2 className="font-serif text-4xl font-bold text-primary mb-6">
@@ -89,12 +89,12 @@ export default function AboutPage() {
             <div className="flex items-center justify-center reveal-right">
               <div className="relative">
                 <div className="w-64 h-64 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                  <svg viewBox="0 0 80 100" className="w-24 h-32 text-accent animate-cross-glow" fill="currentColor">
+                  <svg viewBox="0 0 80 100" className="w-24 h-32 text-accent-dark animate-cross-glow" fill="currentColor">
                     <rect x="34" y="0" width="12" height="100" rx="6"/>
                     <rect x="0" y="28" width="80" height="12" rx="6"/>
                   </svg>
                 </div>
-                <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-accent/10 animate-float-slow"/>
+                <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-primary/10 animate-float-slow"/>
                 <div className="absolute -bottom-4 -left-4 w-16 h-16 rounded-full bg-primary/10 animate-float-slow" style={{ animationDelay: '2s' }}/>
                 <div className="absolute inset-0 rounded-full border-2 border-accent/20 animate-rotate-ring"/>
               </div>
@@ -107,10 +107,10 @@ export default function AboutPage() {
       <section className="py-20 bg-bg-alt">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14 reveal">
-            <div className="inline-flex items-center gap-2 text-accent text-sm font-semibold mb-4">
-              <div className="w-8 h-px bg-accent"/>
+            <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4">
+              <div className="w-8 h-px bg-primary-light/40"/>
               WHAT WE BELIEVE
-              <div className="w-8 h-px bg-accent"/>
+              <div className="w-8 h-px bg-primary-light/40"/>
             </div>
             <h2 className="font-serif text-4xl font-bold text-primary">Our Core <span className="text-gradient-gold">Values</span></h2>
           </div>
@@ -118,7 +118,7 @@ export default function AboutPage() {
             {values.map((v) => (
               <div key={v.title} className="bg-white rounded-2xl p-7 border border-stone-100 shadow-sm card-hover">
                 <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-5">
-                  <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={v.icon}/>
                   </svg>
                 </div>
@@ -134,10 +134,10 @@ export default function AboutPage() {
       <section className="py-20 bg-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14 reveal">
-            <div className="inline-flex items-center gap-2 text-accent text-sm font-semibold mb-4">
-              <div className="w-8 h-px bg-accent"/>
+            <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4">
+              <div className="w-8 h-px bg-primary-light/40"/>
               MEET THE TEAM
-              <div className="w-8 h-px bg-accent"/>
+              <div className="w-8 h-px bg-primary-light/40"/>
             </div>
             <h2 className="font-serif text-4xl font-bold text-primary">Church <span className="text-gradient-gold">Leadership</span></h2>
             <p className="text-text-muted mt-3 max-w-xl mx-auto">Godly leaders dedicated to shepherding the flock of Trinity Baptist Church, Ilora</p>
@@ -155,7 +155,7 @@ export default function AboutPage() {
                 </div>
                 <div className="p-5">
                   <h3 className="font-serif text-base font-bold text-primary mb-1">{leader.name}</h3>
-                  <p className="text-accent text-sm font-semibold mb-3">{leader.role}</p>
+                  <p className="text-primary-light text-sm font-semibold mb-3">{leader.role}</p>
                   <p className="text-text-muted text-xs leading-relaxed">{leader.bio}</p>
                 </div>
               </div>

@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import { Hymn } from "@/types";
-import { seedHymns } from "@/lib/hymns-data";
 import { listHymnsFromFirestore, addHymn, updateHymn, deleteHymn, parseBulkHymns } from "@/lib/hymns";
 
 const emptyForm = { number: "", category: "english" as "english" | "yoruba", title: "", author: "", lyrics: "" };
@@ -30,13 +29,7 @@ export default function AdminHymnsPage() {
 
   useEffect(() => { load(); }, []);
 
-  const seedCount = useMemo(
-    () => ({
-      english: seedHymns.filter((h) => h.category === "english").length,
-      yoruba: seedHymns.filter((h) => h.category === "yoruba").length,
-    }),
-    []
-  );
+  const seedCount = { english: 333, yoruba: 595 }; // From /public/hymns-library.json
 
   const filtered = hymns.filter((h) => h.category === tab);
 
@@ -115,9 +108,11 @@ export default function AdminHymnsPage() {
             </div>
           </div>
 
-          <div className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 text-sm text-primary mb-6">
-            The site also ships with {seedCount.english} built-in English hymns (public-domain classics). Anything you add
-            or edit here is layered on top and shown on the public Hymns page automatically.
+          <div className="bg-primary/8 border border-primary/20 rounded-xl px-4 py-3 text-sm text-primary mb-6">
+            The website loads a full hymn library ({seedCount.english} English + {seedCount.yoruba} Yoruba hymns)
+            from a static JSON file. Hymns you add or edit here in Firestore are layered on top of that library
+            and shown on the public Hymns page automatically. Use this page for corrections, additions, or
+            songs not in the standard hymnal.
           </div>
 
           <div className="flex gap-3 mb-6">
@@ -139,7 +134,7 @@ export default function AdminHymnsPage() {
             <div className="space-y-2">
               {filtered.map((h) => (
                 <div key={h.id} className="bg-white rounded-xl p-4 border border-stone-100 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-accent/10 text-accent flex items-center justify-center text-xs font-bold flex-shrink-0">{h.number}</div>
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0">{h.number}</div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-primary text-sm truncate">{h.title}</p>
                     {h.author && <p className="text-text-muted text-xs">{h.author}</p>}

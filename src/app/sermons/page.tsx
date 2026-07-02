@@ -76,8 +76,8 @@ export default function SermonsPage() {
                 onClick={() => setFilter(f)}
                 className={`px-5 py-3 rounded-xl text-sm font-semibold capitalize transition-all duration-300 ${
                   filter === f
-                    ? "bg-accent text-primary-dark shadow-md shadow-accent/20"
-                    : "bg-stone-50 text-text border border-stone-200 hover:border-accent/40 hover:text-accent"
+                    ? "bg-primary text-white shadow-md shadow-primary/20"
+                    : "bg-stone-50 text-text border border-stone-200 hover:border-primary/40 hover:text-primary"
                 }`}
               >
                 {f === "all" ? "All" : f === "video" ? "🎥 Video" : "🎵 Audio"}
@@ -108,7 +108,7 @@ export default function SermonsPage() {
                       <img src={getYouTubeThumbnail(sermon.youtubeId)} alt={sermon.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <a href={`https://youtube.com/watch?v=${sermon.youtubeId}`} target="_blank" rel="noopener noreferrer"
-                          className="w-14 h-14 rounded-full bg-accent/90 flex items-center justify-center hover:bg-accent transition-colors shadow-2xl">
+                          className="w-14 h-14 rounded-full bg-primary flex items-center justify-center hover:bg-primary-light transition-colors shadow-2xl">
                           <svg className="w-6 h-6 text-primary-dark ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                         </a>
                       </div>
@@ -122,7 +122,7 @@ export default function SermonsPage() {
                         {sermon.audioUrl && (
                           <button
                             onClick={() => setPlayingAudio(playingAudio === sermon.id ? null : sermon.id)}
-                            className="w-12 h-12 rounded-full bg-accent/90 flex items-center justify-center hover:bg-accent transition-colors shadow-xl mx-auto">
+                            className="w-12 h-12 rounded-full bg-primary flex items-center justify-center hover:bg-primary-light transition-colors shadow-xl mx-auto">
                             {playingAudio === sermon.id ? (
                               <svg className="w-5 h-5 text-primary-dark" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
@@ -161,25 +161,25 @@ export default function SermonsPage() {
                 {/* Content */}
                 <div className="p-6">
                   {sermon.series && (
-                    <p className="text-accent text-xs font-semibold uppercase tracking-wider mb-2">{sermon.series}</p>
+                    <p className="text-primary text-xs font-semibold uppercase tracking-wider mb-2">{sermon.series}</p>
                   )}
-                  <h3 className="font-serif text-xl font-bold text-primary mb-2 group-hover:text-accent transition-colors">{sermon.title}</h3>
+                  <h3 className="font-serif text-xl font-bold text-primary mb-2 group-hover:text-primary-light transition-colors">{sermon.title}</h3>
 
                   <div className="flex flex-wrap gap-4 text-sm text-text-muted mb-3">
                     <div className="flex items-center gap-1.5">
-                      <svg className="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                       </svg>
                       {sermon.preacher}
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <svg className="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                       </svg>
                       {formatDate(sermon.date)}
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <svg className="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                       </svg>
                       {sermon.scripture}
@@ -221,7 +221,7 @@ export default function SermonsPage() {
                         download={sermon.audioUrl ? true : undefined}
                         target={!sermon.audioUrl ? "_blank" : undefined}
                         rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-accent/10 text-accent text-sm font-semibold rounded-xl hover:bg-accent/20 border border-accent/20 transition-all"
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-light transition-all"
                         title="Download"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

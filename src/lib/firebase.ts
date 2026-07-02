@@ -8,17 +8,10 @@ import { getFirestore } from "firebase/firestore";
  * Real project config comes from Vercel environment variables (Project
  * Settings → Environment Variables), all prefixed NEXT_PUBLIC_FIREBASE_*.
  *
- * If those aren't set yet (e.g. before the church has connected Firebase),
- * we fall back to a syntactically-valid placeholder config instead of
- * throwing. This is what actually matters here: with a real invalid/missing
- * key, `getAuth()` throws immediately at import time — and because this file
- * is imported by Navbar/Footer/the auth guard (used on nearly every page),
- * that exception used to crash the ENTIRE production build, taking the whole
- * site down instead of just leaving login/admin features inactive.
- *
- * With the fallback below, the site builds and runs normally; only actual
- * sign-in attempts will fail (with a clear message) until real credentials
- * are added.
+ * If those aren't set yet, we fall back to a syntactically-valid placeholder
+ * config instead of throwing. This prevents build crashes while keeping
+ * the site functional; only sign-in attempts will fail until real
+ * credentials are added.
  */
 
 const requiredEnvKeys = [
@@ -42,8 +35,7 @@ const firebaseConfig = isFirebaseConfigured
       appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
     }
   : {
-      // Placeholder only — never used for real auth/data. Prevents build
-      // crashes when real env vars aren't configured yet.
+      // Placeholder only — never used for real auth/data
       apiKey: "AIzaSyDPLACEHOLDER00000000000000000000",
       authDomain: "placeholder-not-configured.firebaseapp.com",
       projectId: "placeholder-not-configured",
@@ -52,14 +44,16 @@ const firebaseConfig = isFirebaseConfigured
       appId: "1:000000000000:web:0000000000000000000000",
     };
 
-if (!isFirebaseConfigured && typeof window !== "undefined") {
-  console.warn(
-    "[firebase] NEXT_PUBLIC_FIREBASE_* environment variables are not set. " +
-      "Admin login and Firestore-backed content (hymns, settings) won't work " +
-      "until they're added in Vercel → Project Settings → Environment Variables."
-  );
+// Only initialize on the client to avoid SSR hydration issues
+let app: ReturnType<typeof initializeApp> | null = null;
+let _auth: ReturnType<typeof getAuth> | null = null;
+let _db: ReturnType<typeof getFirestore> | null = null;
+
+if (typeof window !== "undefined") {
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+  _auth = getAuth(app);
+  _db = getFirestore(app);
 }
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const auth = _auth as ReturnType<typeof getAuth>;
+export const db = _db as ReturnType<typeof getFirestore>;

@@ -130,7 +130,7 @@ export default function BookPage() {
                     </svg>
                   </button>
                   <div className="text-center">
-                    <p className="text-accent text-xs font-semibold uppercase tracking-wider">{viewYear}</p>
+                    <p className="text-primary text-xs font-semibold uppercase tracking-wider">{viewYear}</p>
                     <h3 className="text-white font-serif text-2xl font-bold">{MONTHS[viewMonth]}</h3>
                   </div>
                   <button onClick={nextMonth} className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors">
@@ -176,7 +176,7 @@ export default function BookPage() {
                   {/* Legend */}
                   <div className="flex items-center gap-4 mt-4 pt-4 border-t border-stone-100 text-xs text-text-muted">
                     <div className="flex items-center gap-1.5">
-                      <div className="w-4 h-4 rounded-md bg-accent/15 border border-accent/40"/>
+                      <div className="w-4 h-4 rounded-md bg-primary/15 border border-primary/40"/>
                       <span>Available</span>
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -196,7 +196,7 @@ export default function BookPage() {
                 <div className="mt-6 bg-white rounded-3xl shadow-sm border border-stone-100 p-6 animate-fade-in-up">
                   <h3 className="font-serif text-lg font-bold text-primary mb-4">
                     Available Times —{" "}
-                    <span className="text-accent">{selectedDate.toLocaleDateString("en-NG", { weekday: "long", month: "long", day: "numeric" })}</span>
+                    <span className="text-primary-light">{selectedDate.toLocaleDateString("en-NG", { weekday: "long", month: "long", day: "numeric" })}</span>
                   </h3>
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
                     {TIME_SLOTS.map(time => (
@@ -205,8 +205,8 @@ export default function BookPage() {
                         onClick={() => { setSelectedTime(time); setShowForm(true); }}
                         className={`py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 border ${
                           selectedTime === time
-                            ? "bg-accent text-primary-dark border-accent shadow-md"
-                            : "border-stone-200 text-text-muted hover:border-accent hover:text-accent hover:bg-accent/5"
+                            ? "bg-primary text-white border-primary shadow-md"
+                            : "border-stone-200 text-text-muted hover:border-primary hover:text-primary hover:bg-primary/5"
                         }`}
                       >
                         {time}
@@ -227,7 +227,7 @@ export default function BookPage() {
                   </div>
                   <div>
                     <h3 className="font-serif text-base font-bold text-primary">Rev&apos;d Dr S. O. Mosebolatan</h3>
-                    <p className="text-accent text-sm font-medium">Senior Pastor</p>
+                    <p className="text-primary text-sm font-medium">Senior Pastor</p>
                     <p className="text-text-muted text-xs">Trinity Baptist Church, Ilora</p>
                   </div>
                 </div>
@@ -239,7 +239,7 @@ export default function BookPage() {
                     { icon: "M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z", text: "In-person or video call" },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-primary-light flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon}/>
                       </svg>
                       {item.text}
@@ -251,11 +251,11 @@ export default function BookPage() {
               {/* Booking form */}
               {showForm && selectedDate && selectedTime && (
                 <div className="bg-white rounded-3xl shadow-sm border border-stone-100 p-6 animate-fade-in-up">
-                  <div className="flex items-center gap-2 bg-accent/10 rounded-xl px-4 py-2.5 mb-5 border border-accent/20">
-                    <svg className="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center gap-2 bg-primary/8 rounded-xl px-4 py-2.5 mb-5 border border-primary/20">
+                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
-                    <span className="text-sm font-semibold text-accent">
+                    <span className="text-sm font-semibold text-primary">
                       {selectedDate.toLocaleDateString("en-NG", { month: "short", day: "numeric" })} at {selectedTime}
                     </span>
                   </div>
@@ -283,9 +283,9 @@ export default function BookPage() {
                         {([["in_person", "In Person", "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z"], ["video", "Video Call", "M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"]] as [string, string, string][]).map(([value, label, icon]) => (
                           <button type="button" key={value} onClick={() => setFormData(prev => ({ ...prev, meetingType: value as "video" | "in_person" }))}
                             className={`flex flex-col items-center gap-2 p-3.5 rounded-xl border-2 transition-all text-sm font-medium ${
-                              formData.meetingType === value ? "border-accent bg-accent/8 text-primary" : "border-stone-200 text-text-muted hover:border-accent/40"
+                              formData.meetingType === value ? "border-primary bg-primary/8 text-primary" : "border-stone-200 text-text-muted hover:border-primary/40"
                             }`}>
-                            <svg className={`w-5 h-5 ${formData.meetingType === value ? "text-accent" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className={`w-5 h-5 ${formData.meetingType === value ? "text-primary" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon}/>
                             </svg>
                             {label}
@@ -301,8 +301,8 @@ export default function BookPage() {
               )}
 
               {!showForm && (
-                <div className="bg-accent/5 border-2 border-dashed border-accent/30 rounded-3xl p-6 text-center">
-                  <svg className="w-10 h-10 text-accent/50 mx-auto mb-3 animate-bounce-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-primary/5 border-2 border-dashed border-primary/30 rounded-3xl p-6 text-center">
+                  <svg className="w-10 h-10 text-primary/40 mx-auto mb-3 animate-bounce-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                   </svg>
                   <p className="text-text-muted text-sm">{selectedDate ? "Select a time slot to continue" : "Select an available date on the calendar"}</p>

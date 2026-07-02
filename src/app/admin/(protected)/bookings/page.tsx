@@ -64,7 +64,7 @@ export default function AdminBookingsPage() {
               <div className="flex gap-2 mb-5">
                 {(["all","requested","confirmed","cancelled"] as const).map(f => (
                   <button key={f} onClick={() => setFilter(f)}
-                    className={`px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all ${filter===f ? "bg-accent text-primary-dark" : "bg-white text-text-muted border border-stone-200 hover:border-accent/40"}`}>
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all ${filter===f ? "bg-primary text-white" : "bg-white text-text-muted border border-stone-200 hover:border-primary/40"}`}>
                     {f}
                   </button>
                 ))}
@@ -131,8 +131,8 @@ export default function AdminBookingsPage() {
           {activeTab === "availability" && (
             <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6">
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                   </svg>
                 </div>
@@ -148,10 +148,10 @@ export default function AdminBookingsPage() {
                 <div className="grid grid-cols-7 gap-2">
                   {WEEKDAY_NAMES.map((day, i) => (
                     <button key={i} onClick={() => setAvailableDays(prev => { const n=[...prev]; n[i]=!n[i]; return n; })}
-                      className={`flex flex-col items-center py-3 rounded-xl border-2 transition-all text-xs font-semibold ${availableDays[i] ? "border-accent bg-accent/10 text-primary" : "border-stone-200 text-stone-400 bg-stone-50"}`}>
+                      className={`flex flex-col items-center py-3 rounded-xl border-2 transition-all text-xs font-semibold ${availableDays[i] ? "border-primary bg-primary/10 text-primary" : "border-stone-200 text-stone-400 bg-stone-50"}`}>
                       <span>{day.slice(0,3)}</span>
                       {availableDays[i] && (
-                        <svg className="w-3.5 h-3.5 text-accent mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3.5 h-3.5 text-primary mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7"/>
                         </svg>
                       )}

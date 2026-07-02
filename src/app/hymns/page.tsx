@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Hymn } from "@/types";
-import { seedHymns } from "@/lib/hymns-data";
 import { listHymnsFromFirestore } from "@/lib/hymns";
 
 // Sign-up form component
@@ -42,9 +41,8 @@ function SignUpModal({ dept, onClose }: { dept: string; onClose: () => void }) {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            {/* Photo upload */}
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 rounded-2xl bg-stone-100 border-2 border-dashed border-stone-300 flex items-center justify-center overflow-hidden cursor-pointer hover:border-accent transition-colors"
+              <div className="w-20 h-20 rounded-2xl bg-stone-100 border-2 border-dashed border-stone-300 flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary-light transition-colors"
                 onClick={() => document.getElementById('chorister-photo')?.click()}>
                 {photo ? <img src={photo} alt="Preview" className="w-full h-full object-cover"/> : (
                   <svg className="w-7 h-7 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,6 +107,94 @@ function SignUpModal({ dept, onClose }: { dept: string; onClose: () => void }) {
   );
 }
 
+// ============ Presentation Mode ============
+function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }) {
+  const verses = useMemo(() => {
+    if (!hymn.lyrics) return [];
+    // Split by double newline to get verse blocks
+    return hymn.lyrics.split(/\n\s*\n/).map(v => v.trim()).filter(Boolean);
+  }, [hymn]);
+
+  const [verseIndex, setVerseIndex] = useState(0);
+
+  const next = useCallback(() => setVerseIndex(i => Math.min(i + 1, verses.length - 1)), [verses.length]);
+  const prev = useCallback(() => setVerseIndex(i => Math.max(i - 1, 0)), []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " ") {
+        e.preventDefault();
+        if (verseIndex < verses.length - 1) next();
+        else onClose();
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        prev();
+      } else if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [next, prev, onClose, verseIndex, verses.length]);
+
+  if (verses.length === 0) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-primary-dark flex flex-col items-center justify-center p-6 select-none">
+      {/* Top bar */}
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 z-10">
+        <div className="text-white/60 text-sm">
+          <span className="font-serif text-white font-bold text-lg">{hymn.title}</span>
+          {hymn.author && <span className="ml-3 text-white/40">— {hymn.author}</span>}
+        </div>
+        <button onClick={onClose} className="text-white/60 hover:text-white transition-colors flex items-center gap-1.5 text-sm">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+          Exit (Esc)
+        </button>
+      </div>
+
+      {/* Verse content */}
+      <div className="max-w-4xl w-full text-center flex-1 flex flex-col items-center justify-center">
+        <p className="text-accent/60 text-sm font-semibold uppercase tracking-widest mb-6">
+          Verse {verseIndex + 1} of {verses.length}
+        </p>
+        <p className="whitespace-pre-line text-white font-serif text-2xl md:text-4xl lg:text-5xl leading-relaxed max-w-3xl">
+          {verses[verseIndex]}
+        </p>
+      </div>
+
+      {/* Bottom controls */}
+      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-6 p-6 z-10">
+        <button onClick={prev} disabled={verseIndex === 0}
+          className="text-white/60 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
+          </svg>
+          <span className="text-sm hidden sm:inline">Prev</span>
+        </button>
+
+        {/* Dots indicator */}
+        <div className="flex gap-1.5">
+          {verses.map((_, i) => (
+            <button key={i} onClick={() => setVerseIndex(i)}
+              className={`w-2 h-2 rounded-full transition-all ${i === verseIndex ? 'bg-accent w-6' : 'bg-white/20 hover:bg-white/40'}`} />
+          ))}
+        </div>
+
+        <button onClick={() => verseIndex < verses.length - 1 ? next() : onClose()}
+          className="text-white/60 hover:text-white transition-colors flex items-center gap-2">
+          <span className="text-sm hidden sm:inline">{verseIndex < verses.length - 1 ? 'Next' : 'Done'}</span>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 const CATEGORIES: { key: "english" | "yoruba"; label: string }[] = [
   { key: "english", label: "English Baptist Hymnal" },
   { key: "yoruba", label: "Yoruba Baptist Hymnal" },
@@ -120,9 +206,22 @@ export default function HymnsPage() {
   const [searchBy, setSearchBy] = useState<"title" | "number">("title");
   const [openHymn, setOpenHymn] = useState<string | null>(null);
   const [showSignUp, setShowSignUp] = useState(false);
+  const [presenting, setPresenting] = useState<Hymn | null>(null);
   const [firestoreHymns, setFirestoreHymns] = useState<Hymn[]>([]);
+  const [libraryHymns, setLibraryHymns] = useState<Hymn[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Load the full hymn library from /public/hymns-library.json
+  useEffect(() => {
+    fetch("/hymns-library.json")
+      .then((r) => r.json())
+      .then((data: Omit<Hymn, "id">[]) => {
+        setLibraryHymns(data.map((h, i) => ({ ...h, id: `lib-${i}` })));
+      })
+      .catch(() => setLibraryHymns([]));
+  }, []);
+
+  // Load admin-added hymns from Firestore (these override library entries)
   useEffect(() => {
     listHymnsFromFirestore().then((h) => {
       setFirestoreHymns(h);
@@ -130,15 +229,13 @@ export default function HymnsPage() {
     });
   }, []);
 
-  // Merge admin-added hymns (Firestore) with the seed library. Firestore
-  // entries with the same number+category override the seed version.
+  // Merge: Firestore overrides library by number+category
   const allHymns: Hymn[] = useMemo(() => {
-    const seeded: Hymn[] = seedHymns.map((h, i) => ({ ...h, id: `seed-${i}` }));
     const key = (h: { number: number; category: string }) => `${h.category}-${h.number}`;
     const overridden = new Set(firestoreHymns.map(key));
-    const merged = [...seeded.filter((h) => !overridden.has(key(h))), ...firestoreHymns];
+    const merged = [...libraryHymns.filter((h) => !overridden.has(key(h))), ...firestoreHymns];
     return merged.sort((a, b) => a.number - b.number);
-  }, [firestoreHymns]);
+  }, [libraryHymns, firestoreHymns]);
 
   const filtered = useMemo(() => {
     const byCategory = allHymns.filter((h) => h.category === category);
@@ -149,10 +246,16 @@ export default function HymnsPage() {
     );
   }, [allHymns, category, search, searchBy]);
 
+  const counts = useMemo(() => ({
+    english: allHymns.filter(h => h.category === "english").length,
+    yoruba: allHymns.filter(h => h.category === "yoruba").length,
+  }), [allHymns]);
+
   return (
     <main className="min-h-screen bg-bg">
       <Navbar />
       {showSignUp && <SignUpModal dept="Choir" onClose={() => setShowSignUp(false)}/>}
+      {presenting && <PresentationMode hymn={presenting} onClose={() => setPresenting(null)} />}
 
       {/* Hero */}
       <div className="page-hero pt-20">
@@ -169,7 +272,7 @@ export default function HymnsPage() {
             </h1>
             <p className="text-white/60 text-lg mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
               The full text of our hymns, right here on the website — search the English Baptist Hymnal
-              or the Yoruba Baptist Hymnal by title or number.
+              ({counts.english} hymns) or the Yoruba Baptist Hymnal ({counts.yoruba} hymns) by title or number.
             </p>
             <button
               onClick={() => setShowSignUp(true)}
@@ -195,7 +298,7 @@ export default function HymnsPage() {
                 category === c.key ? "bg-primary text-white shadow-md" : "bg-white text-text-muted border border-stone-200 hover:border-primary/30"
               }`}
             >
-              {c.label}
+              {c.label} ({counts[c.key]})
             </button>
           ))}
         </div>
@@ -212,14 +315,14 @@ export default function HymnsPage() {
                 placeholder={searchBy === "title" ? "Search hymn by title..." : "Search by hymn number..."}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
+                className="w-full pl-11 pr-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary-light transition-all"
               />
             </div>
             <div className="flex gap-2">
               {(["title", "number"] as const).map(mode => (
                 <button key={mode} onClick={() => setSearchBy(mode)}
                   className={`px-5 py-3 rounded-xl text-sm font-semibold capitalize transition-all ${
-                    searchBy === mode ? "bg-accent text-primary-dark" : "bg-stone-50 text-text-muted border border-stone-200 hover:border-accent/40"
+                    searchBy === mode ? "bg-primary text-white" : "bg-stone-50 text-text-muted border border-stone-200 hover:border-primary/30"
                   }`}>
                   By {mode}
                 </button>
@@ -234,32 +337,55 @@ export default function HymnsPage() {
 
         {/* Hymn list with full lyrics inline */}
         <div className="space-y-4">
-          {filtered.map((hymn) => (
+          {filtered.slice(0, 200).map((hymn) => (
             <div
               key={hymn.id}
-              className={`hymn-card rounded-2xl overflow-hidden shadow-sm ${openHymn === hymn.id ? "border-accent" : "border-stone-100"}`}
+              className={`hymn-card rounded-2xl overflow-hidden shadow-sm ${openHymn === hymn.id ? "border-primary-light" : "border-stone-100"}`}
             >
-              <button
-                onClick={() => setOpenHymn(openHymn === hymn.id ? null : hymn.id)}
-                className="w-full flex items-center gap-4 p-5 text-left"
-              >
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 transition-colors ${
-                  openHymn === hymn.id ? "bg-accent text-primary-dark" : "bg-accent/10 text-accent"
-                }`}>
-                  {hymn.number}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-serif font-semibold text-primary leading-snug">{hymn.title}</p>
-                  {hymn.author && <p className="text-text-muted text-xs mt-0.5">{hymn.author}</p>}
-                </div>
-                <svg className={`w-5 h-5 text-text-muted flex-shrink-0 transition-transform ${openHymn === hymn.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
-                </svg>
-              </button>
+              <div className="flex items-stretch">
+                <button
+                  onClick={() => setOpenHymn(openHymn === hymn.id ? null : hymn.id)}
+                  className="flex-1 flex items-center gap-4 p-5 text-left"
+                >
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 transition-colors ${
+                    openHymn === hymn.id ? "bg-primary text-white" : "bg-primary/10 text-primary"
+                  }`}>
+                    {hymn.number}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-serif font-semibold text-primary leading-snug">{hymn.title}</p>
+                    {hymn.author && <p className="text-text-muted text-xs mt-0.5">{hymn.author}</p>}
+                  </div>
+                  <svg className={`w-5 h-5 text-text-muted flex-shrink-0 transition-transform ${openHymn === hymn.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </button>
+                {/* Present button */}
+                <button
+                  onClick={() => setPresenting(hymn)}
+                  className="px-4 flex items-center justify-center border-l border-stone-100 text-primary-light hover:bg-primary/5 transition-colors"
+                  title="Present this hymn fullscreen"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                  </svg>
+                </button>
+              </div>
               {openHymn === hymn.id && (
                 <div className="px-5 pb-6 pt-1 border-t border-stone-100 animate-fade-in">
                   {hymn.lyrics ? (
-                    <p className="whitespace-pre-line text-text leading-relaxed text-[15px]">{hymn.lyrics}</p>
+                    <>
+                      <p className="whitespace-pre-line text-text leading-relaxed text-[15px]">{hymn.lyrics}</p>
+                      <button
+                        onClick={() => setPresenting(hymn)}
+                        className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-light transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                        </svg>
+                        Present Fullscreen
+                      </button>
+                    </>
                   ) : (
                     <p className="text-text-muted text-sm italic">Full lyrics coming soon.</p>
                   )}
@@ -269,18 +395,18 @@ export default function HymnsPage() {
           ))}
         </div>
 
+        {filtered.length > 200 && (
+          <p className="text-center text-text-muted text-sm mt-6">
+            Showing first 200 results. Refine your search to see more.
+          </p>
+        )}
+
         {!loading && filtered.length === 0 && (
           <div className="text-center py-20">
             <svg className="w-16 h-16 text-stone-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
             </svg>
-            {category === "yoruba" && allHymns.filter(h => h.category === "yoruba").length === 0 ? (
-              <p className="text-text-muted text-lg max-w-md mx-auto">
-                The Yoruba Baptist Hymnal is being added. Church staff can add hymns from Admin → Hymns.
-              </p>
-            ) : (
-              <p className="text-text-muted text-lg">No hymns found for &ldquo;{search}&rdquo;</p>
-            )}
+            <p className="text-text-muted text-lg">No hymns found for &ldquo;{search}&rdquo;</p>
           </div>
         )}
 

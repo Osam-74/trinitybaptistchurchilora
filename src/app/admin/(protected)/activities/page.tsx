@@ -51,7 +51,7 @@ export default function AdminActivitiesPage() {
         {activities.map((a, i) => (
           <div key={a.id} className="bg-white rounded-xl p-5 shadow-sm border border-stone-200 flex items-center justify-between card-hover animate-fade-in-up" style={{ animationDelay: `${i * 0.05}s` }}>
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent font-bold text-sm">{getWeekdayName(a.weekday).slice(0, 3)}</div>
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">{getWeekdayName(a.weekday).slice(0, 3)}</div>
               <div>
                 <h4 className="font-medium text-primary">{a.title}</h4>
                 <p className="text-text-muted text-sm">{formatTime(a.startTime)} - {formatTime(a.endTime)} &middot; {a.location}</p>

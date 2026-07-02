@@ -121,7 +121,7 @@ export default function R2Uploader({
               <span className="text-sm font-semibold">Uploaded!</span>
             </div>
             <p className="text-xs text-text-muted">{fileName}</p>
-            <p className="text-xs text-accent mt-1">Click to replace</p>
+            <p className="text-xs text-primary mt-1">Click to replace</p>
           </div>
         ) : (
           <>

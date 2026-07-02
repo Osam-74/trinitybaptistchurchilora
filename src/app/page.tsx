@@ -123,7 +123,7 @@ function HeroSection() {
         {/* Motto */}
         <div className="flex items-center justify-center gap-3 mb-3 animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <div className="h-px w-12 bg-accent/50"/>
-          <p className="text-accent text-lg sm:text-xl font-medium italic font-serif">Sanctuary of Praise</p>
+          <p className="text-primary-light text-lg sm:text-xl font-medium italic font-serif">Sanctuary of Praise</p>
           <div className="h-px w-12 bg-accent/50"/>
         </div>
 
@@ -184,7 +184,7 @@ function ServiceBanner() {
             { icon: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z", text: "Ilora, Oyo State, Nigeria" },
           ].map((item, i) => (
             <div key={i} className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon}/>
               </svg>
               <span className="text-white/80">{item.text}</span>
@@ -203,8 +203,8 @@ function WelcomeSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 text-accent text-sm font-semibold mb-4 reveal-left">
-              <div className="w-8 h-px bg-accent"/>
+            <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4 reveal-left">
+              <div className="w-8 h-px bg-primary-light/40"/>
               ABOUT OUR CHURCH
             </div>
             <h2 className="font-serif text-4xl lg:text-5xl text-primary font-bold mb-6 leading-tight reveal-left">
@@ -233,8 +233,8 @@ function WelcomeSection() {
               { number: "10+", label: "Active Departments", icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" },
             ].map((stat, i) => (
               <div key={i} className="bg-white rounded-2xl p-6 border border-stone-100 shadow-sm card-hover text-center">
-                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={stat.icon}/>
                   </svg>
                 </div>
@@ -274,7 +274,7 @@ function PastorFeedSection() {
     <section className="py-20 lg:py-28 bg-bg-alt">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16 reveal">
-          <div className="inline-flex items-center gap-2 text-accent text-sm font-semibold mb-4">
+          <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
             </svg>
@@ -302,10 +302,10 @@ function PastorFeedSection() {
               >
                 {post.pinned && (
                   <div className="bg-gradient-to-r from-accent/15 to-accent/5 px-6 py-2.5 border-b border-accent/20 flex items-center gap-2">
-                    <svg className="w-4 h-4 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-4 h-4 text-primary-light" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                     </svg>
-                    <span className="text-accent text-xs font-semibold uppercase tracking-wider">Featured Message</span>
+                    <span className="text-primary text-xs font-semibold uppercase tracking-wider">Featured Message</span>
                   </div>
                 )}
 
@@ -341,11 +341,11 @@ function PastorFeedSection() {
                   </div>
 
                   {post.scripture && (
-                    <div className="flex items-start gap-2 bg-accent/8 rounded-xl px-4 py-2.5 mb-4 border-l-4 border-accent">
-                      <svg className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="flex items-start gap-2 bg-primary/8 rounded-xl px-4 py-2.5 mb-4 border-l-4 border-primary-light">
+                      <svg className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                       </svg>
-                      <span className="text-accent text-sm font-medium italic">{post.scripture}</span>
+                      <span className="text-primary text-sm font-medium italic">{post.scripture}</span>
                     </div>
                   )}
 
@@ -359,8 +359,8 @@ function PastorFeedSection() {
                         onClick={() => handleAmen(post.id)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                           amenClicked[post.id]
-                            ? "bg-accent/15 text-accent cursor-default"
-                            : "bg-stone-50 text-text-muted hover:bg-accent/10 hover:text-accent border border-stone-200 hover:border-accent/30"
+                            ? "bg-primary/10 text-primary cursor-default"
+                            : "bg-stone-50 text-text-muted hover:bg-primary/10 hover:text-primary border border-stone-200 hover:border-primary/30"
                         }`}
                       >
                         <svg className="w-4 h-4" fill={amenClicked[post.id] ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
@@ -404,15 +404,15 @@ function RecentGallerySection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between mb-12 reveal">
           <div>
-            <div className="inline-flex items-center gap-2 text-accent text-sm font-semibold mb-3">
-              <div className="w-8 h-px bg-accent"/>
+            <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-3">
+              <div className="w-8 h-px bg-primary-light/40"/>
               GALLERY
             </div>
             <h2 className="font-serif text-4xl lg:text-5xl text-primary font-bold">
               Moments of <span className="text-gradient-gold">Worship</span>
             </h2>
           </div>
-          <Link href="/gallery" className="hidden sm:flex items-center gap-2 text-accent font-semibold hover:gap-3 transition-all text-sm">
+          <Link href="/gallery" className="hidden sm:flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all text-sm">
             View All Photos
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/>
@@ -466,10 +466,10 @@ function SermonsPreview() {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14 reveal">
-          <div className="inline-flex items-center gap-2 text-accent text-sm font-semibold mb-4">
-            <div className="w-8 h-px bg-accent"/>
+          <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4">
+            <div className="w-8 h-px bg-primary-light/40"/>
             SERMON LIBRARY
-            <div className="w-8 h-px bg-accent"/>
+            <div className="w-8 h-px bg-primary-light/40"/>
           </div>
           <h2 className="font-serif text-4xl lg:text-5xl text-white font-bold">
             Recent <span className="text-gradient-gold">Sermons</span>
@@ -492,7 +492,7 @@ function SermonsPreview() {
                 <span className="absolute top-3 right-3 bg-accent text-primary-dark text-xs font-bold px-3 py-1 rounded-full uppercase">{sermon.type}</span>
               </div>
               <div className="p-5">
-                <p className="text-accent text-xs font-semibold mb-2 uppercase tracking-wider">{formatDate(sermon.date)}</p>
+                <p className="text-primary text-xs font-semibold mb-2 uppercase tracking-wider">{formatDate(sermon.date)}</p>
                 <h3 className="font-serif text-white font-bold text-base mb-1 line-clamp-2">{sermon.title}</h3>
                 <p className="text-white/50 text-sm">{sermon.scripture}</p>
               </div>

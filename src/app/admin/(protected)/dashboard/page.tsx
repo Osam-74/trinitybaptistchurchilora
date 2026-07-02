@@ -66,12 +66,12 @@ export default function AdminDashboardPage() {
                 <Link key={link.label} href={link.href}
                   className="flex items-start gap-3 p-4 rounded-xl border border-stone-100 hover:border-accent/40 hover:bg-accent/3 transition-all group">
                   <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0 group-hover:bg-accent/20 transition-colors">
-                    <svg className="w-4.5 h-4.5 text-accent" style={{width:18,height:18}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4.5 h-4.5 text-primary" style={{width:18,height:18}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon}/>
                     </svg>
                   </div>
                   <div>
-                    <p className="font-semibold text-primary text-sm group-hover:text-accent transition-colors">{link.label}</p>
+                    <p className="font-semibold text-primary text-sm group-hover:text-primary-light transition-colors">{link.label}</p>
                     <p className="text-text-muted text-xs mt-0.5">{link.desc}</p>
                   </div>
                 </Link>
@@ -83,13 +83,13 @@ export default function AdminDashboardPage() {
           <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-serif text-lg font-bold text-primary">Recent Posts</h2>
-              <Link href="/admin/posts" className="text-accent text-sm font-semibold hover:text-accent-dark transition-colors">View all →</Link>
+              <Link href="/admin/posts" className="text-primary text-sm font-semibold hover:text-primary-light transition-colors">View all →</Link>
             </div>
             <div className="space-y-3">
               {samplePosts.slice(0, 4).map((post, i) => (
                 <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-stone-50 transition-colors">
                   <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${post.pinned ? "bg-accent/15" : "bg-stone-100"}`}>
-                    <svg className={`w-4 h-4 ${post.pinned ? "text-accent" : "text-text-muted"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-4 h-4 ${post.pinned ? "text-primary" : "text-text-muted"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
                   </div>
@@ -97,7 +97,7 @@ export default function AdminDashboardPage() {
                     <p className="font-medium text-primary text-sm truncate">{post.title}</p>
                     <p className="text-text-muted text-xs">{post.mediaType} • {post.status}</p>
                   </div>
-                  {post.pinned && <span className="text-xs bg-accent/10 text-accent px-2 py-0.5 rounded-full font-medium flex-shrink-0">Pinned</span>}
+                  {post.pinned && <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium flex-shrink-0">Pinned</span>}
                 </div>
               ))}
             </div>
