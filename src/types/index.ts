@@ -156,6 +156,31 @@ export interface CalendarEvent {
   createdBy: string;
 }
 
+
+export interface Leader {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  photoUrl?: string;
+  order: number;
+  active: boolean;
+}
+
+export interface ChoirMember {
+  id: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  department: string; // e.g. "Choir", "Media Team", "Instrumentalist"
+  section?: string;   // e.g. "Soprano", "Alto", "Tenor", "Bass", or instrument
+  photoUrl?: string;
+  bio?: string;
+  dateJoined?: string;
+  status: "pending" | "approved" | "rejected";
+  createdAt: string;
+}
+
 export const PERMISSIONS = [
   "manage_users",
   "manage_posts",

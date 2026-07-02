@@ -11,6 +11,7 @@ const quickLinks = [
   { href: "/hymns", label: "Hymns" },
   { href: "/book", label: "Book a Session" },
   { href: "/activities", label: "Activities" },
+  { href: "/team", label: "Our Team" },
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
 ];

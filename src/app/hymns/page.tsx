@@ -5,16 +5,39 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Hymn } from "@/types";
 import { listHymnsFromFirestore } from "@/lib/hymns";
+import { createChoirMember } from "@/lib/choir";
+import R2Uploader from "@/components/R2Uploader";
 
 // Sign-up form component
 function SignUpModal({ dept, onClose }: { dept: string; onClose: () => void }) {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", dateJoined: "", bio: "", section: dept });
-  const [photo, setPhoto] = useState<string | null>(null);
+  const [form, setForm] = useState({ name: "", email: "", phone: "", dateJoined: "", bio: "", section: dept, department: dept });
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setError("");
+    if (!form.name.trim() || !form.email.trim()) { setError("Name and email are required."); return; }
+    setSubmitting(true);
+    try {
+      await createChoirMember({
+        fullName: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone || undefined,
+        department: form.department,
+        section: form.section || undefined,
+        photoUrl: photoUrl || undefined,
+        bio: form.bio || undefined,
+        dateJoined: form.dateJoined || undefined,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -41,22 +64,11 @@ function SignUpModal({ dept, onClose }: { dept: string; onClose: () => void }) {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="w-20 h-20 rounded-2xl bg-stone-100 border-2 border-dashed border-stone-300 flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary-light transition-colors"
-                onClick={() => document.getElementById('chorister-photo')?.click()}>
-                {photo ? <img src={photo} alt="Preview" className="w-full h-full object-cover"/> : (
-                  <svg className="w-7 h-7 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
-                )}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-primary">Upload your headshot</p>
-                <p className="text-xs text-text-muted">JPG or PNG, max 5MB</p>
-                <input id="chorister-photo" type="file" accept="image/*" className="hidden"
-                  onChange={e => { const f = e.target.files?.[0]; if (f) setPhoto(URL.createObjectURL(f)); }}/>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-primary mb-1.5">Upload your headshot</label>
+              {photoUrl && <img src={photoUrl} alt="Preview" className="w-20 h-20 rounded-2xl object-cover border border-stone-200 mb-2"/>}
+              <R2Uploader folder="choir" label="Choose Photo" onUploaded={(url) => setPhotoUrl(url)} />
+              <p className="text-xs text-text-muted mt-1">JPG or PNG, max 5MB</p>
             </div>
 
             {[
@@ -72,6 +84,16 @@ function SignUpModal({ dept, onClose }: { dept: string; onClose: () => void }) {
                   className="input-field"/>
               </div>
             ))}
+
+            <div>
+              <label className="block text-sm font-medium text-primary mb-1.5">Department</label>
+              <select value={form.department} onChange={e => setForm(prev => ({ ...prev, department: e.target.value }))}
+                className="input-field bg-white">
+                <option value="Choir">Choir</option>
+                <option value="Media Team">Media Team</option>
+                <option value="Instrumentalist">Instrumentalist</option>
+              </select>
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-primary mb-1.5">Section / Voice Part</label>
@@ -97,8 +119,11 @@ function SignUpModal({ dept, onClose }: { dept: string; onClose: () => void }) {
               <strong>Note:</strong> Your registration will be pending approval from the Music Director before activation.
             </div>
 
-            <button type="submit" className="w-full btn-gold py-3.5 rounded-xl font-semibold text-base">
-              Submit Registration
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>
+            )}
+            <button type="submit" disabled={submitting} className="w-full btn-gold py-3.5 rounded-xl font-semibold text-base disabled:opacity-50">
+              {submitting ? "Submitting…" : "Submit Registration"}
             </button>
           </form>
         )}
@@ -270,10 +295,6 @@ export default function HymnsPage() {
             <h1 className="font-serif text-4xl lg:text-6xl text-white font-bold mb-5 animate-fade-in-up">
               Hymns of <span className="text-gradient-gold">Praise</span>
             </h1>
-            <p className="text-white/60 text-lg mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              The full text of our hymns, right here on the website — search the English Baptist Hymnal
-              ({counts.english} hymns) or the Yoruba Baptist Hymnal ({counts.yoruba} hymns) by title or number.
-            </p>
             <button
               onClick={() => setShowSignUp(true)}
               className="btn-shine btn-gold inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl font-semibold animate-fade-in" style={{ animationDelay: '0.3s' }}

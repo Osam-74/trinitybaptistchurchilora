@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { listLeaders } from "@/lib/leaders";
+import { Leader } from "@/types";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -16,13 +18,6 @@ function useScrollReveal() {
   }, []);
 }
 
-const leaders = [
-  { name: "Rev'd Dr S. O. Mosebolatan", role: "Senior Pastor", bio: "A revered shepherd of the Trinity Baptist Church, Ilora flock, Rev'd Dr Mosebolatan has led the church with wisdom, grace, and unwavering faith for decades.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face", active: true },
-  { name: "Pastor Mrs. Mosebolatan", role: "Co-Pastor / Women's Leader", bio: "A pillar of strength and encouragement, Pastor Mrs. Mosebolatan leads the women's ministry with passion and dedication to nurturing spiritual growth.", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&crop=face", active: true },
-  { name: "Deacon J. Adeyemi", role: "Church Secretary", bio: "Serving with diligence and integrity, Deacon Adeyemi ensures the smooth administrative operation of the church&apos;s affairs.", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face", active: true },
-  { name: "Deaconess F. Ogunleye", role: "Treasurer", bio: "Faithful steward of the church&apos;s resources, ensuring transparent and godly management of all financial matters.", image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=400&fit=crop&crop=face", active: true },
-];
-
 const values = [
   { title: "Faith", desc: "Rooted in the Word of God, we walk by faith and not by sight.", icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" },
   { title: "Community", desc: "A welcoming family where everyone belongs and is loved.", icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
@@ -34,6 +29,11 @@ const values = [
 
 export default function AboutPage() {
   useScrollReveal();
+  const [leaders, setLeaders] = useState<Leader[]>([]);
+
+  useEffect(() => {
+    listLeaders().then(setLeaders);
+  }, []);
 
   return (
     <main className="min-h-screen bg-bg">
@@ -145,13 +145,10 @@ export default function AboutPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {leaders.filter(l => l.active).map((leader, i) => (
-              <div key={leader.name} className="bg-white rounded-3xl overflow-hidden border border-stone-100 shadow-sm card-hover reveal text-center" style={{ animationDelay: `${i * 0.1}s` }}>
+              <div key={leader.id} className="bg-white rounded-3xl overflow-hidden border border-stone-100 shadow-sm card-hover reveal text-center" style={{ animationDelay: `${i * 0.1}s` }}>
                 <div className="relative h-52 overflow-hidden">
-                  <img src={leader.image} alt={leader.name} className="w-full h-full object-cover"/>
+                  <img src={leader.photoUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face"} alt={leader.name} className="w-full h-full object-cover"/>
                   <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/50 to-transparent"/>
-                  {leader.active && (
-                    <div className="absolute top-3 right-3 bg-green-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">Active</div>
-                  )}
                 </div>
                 <div className="p-5">
                   <h3 className="font-serif text-base font-bold text-primary mb-1">{leader.name}</h3>

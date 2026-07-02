@@ -115,15 +115,14 @@ function HeroSection() {
         </div>
 
         {/* Main title */}
-        <h1 className="font-serif text-4xl sm:text-5xl lg:text-7xl xl:text-8xl text-white font-bold mb-4 leading-tight animate-fade-in-up">
-          Trinity Baptist{" "}
-          <span className="block text-gradient-gold">Church, Ilora</span>
+        <h1 className="font-serif text-2xl xs:text-3xl sm:text-4xl lg:text-6xl xl:text-7xl text-white font-bold mb-5 leading-tight animate-fade-in-up whitespace-nowrap">
+          Trinity Baptist Church
         </h1>
 
         {/* Motto */}
         <div className="flex items-center justify-center gap-3 mb-3 animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <div className="h-px w-12 bg-accent/50"/>
-          <p className="text-primary-light text-lg sm:text-xl font-medium italic font-serif">Sanctuary of Praise</p>
+          <p className="text-accent text-2xl sm:text-3xl lg:text-4xl font-semibold italic font-serif">Sanctuary of Praise</p>
           <div className="h-px w-12 bg-accent/50"/>
         </div>
 

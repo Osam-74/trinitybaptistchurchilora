@@ -17,13 +17,14 @@ function friendlyAuthError(code: string, message: string): string {
       return "Too many attempts. Please wait a moment and try again.";
     case "auth/api-key-not-valid":
     case "auth/api-key-not-valid.-please-pass-a-valid-api-key.":
-      return "Firebase API key is invalid. Check NEXT_PUBLIC_FIREBASE_API_KEY in Vercel env vars.";
+      return "Sign-in is temporarily unavailable. Please contact the site administrator.";
     case "auth/network-request-failed":
       return "Network error. Check your internet connection and try again.";
     default:
-      // Include the raw Firebase message for unhandled error codes —
-      // much more helpful than a generic "couldn't sign in"
-      return message || `Couldn't sign in (${code}). Please check your details and try again.`;
+      if (process.env.NODE_ENV === "development") {
+        return message || `Couldn't sign in (${code}). Please check your details and try again.`;
+      }
+      return "Couldn't sign in. Please check your details and try again.";
   }
 }
 
@@ -38,7 +39,7 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setError("");
     if (!auth) {
-      setError("Firebase failed to initialize. Open your browser console (F12) for details on which env vars are missing.");
+      setError("Sign-in is temporarily unavailable. Please try again shortly or contact the site administrator.");
       return;
     }
     setLoading(true);
@@ -69,16 +70,8 @@ export default function AdminLoginPage() {
 
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
           {!isFirebaseConfigured && (
-            <div className="bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm px-4 py-3 rounded-xl mb-5 space-y-2">
-              <p className="font-semibold">⚠️ Firebase env vars not detected in the browser.</p>
-              <p>This usually means one of:</p>
-              <ol className="list-decimal list-inside space-y-0.5 text-xs">
-                <li>Env vars in Vercel aren&apos;t prefixed with <code className="bg-white/10 px-1 rounded">NEXT_PUBLIC_</code> (required for client-side access)</li>
-                <li>Env var names don&apos;t match exactly (case-sensitive): <code className="bg-white/10 px-1 rounded">NEXT_PUBLIC_FIREBASE_API_KEY</code>, <code className="bg-white/10 px-1 rounded">NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN</code>, etc.</li>
-                <li>Env vars were added after the last build — <strong>trigger a Redeploy in Vercel</strong></li>
-                <li>Vars are set for &ldquo;Preview&rdquo; only — set them for <strong>all environments</strong></li>
-              </ol>
-              <p className="text-xs pt-1">Open browser console (F12 → Console) to see exactly which vars are missing.</p>
+            <div className="bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm px-4 py-3 rounded-xl mb-5">
+              Sign-in is temporarily unavailable. Please contact the site administrator.
             </div>
           )}
           <form onSubmit={handleLogin} className="space-y-5">

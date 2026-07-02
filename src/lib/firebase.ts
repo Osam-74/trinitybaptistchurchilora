@@ -41,7 +41,8 @@ export const isFirebaseConfigured =
   !!firebaseConfig.appId;
 
 // Debug: log which vars are visible so the user can check browser console
-if (typeof window !== "undefined" && !isFirebaseConfigured) {
+// (development only — kept quiet in production)
+if (typeof window !== "undefined" && !isFirebaseConfigured && process.env.NODE_ENV === "development") {
   console.warn("[Firebase] Missing env vars. Check Vercel Project Settings → Environment Variables.");
   console.warn("[Firebase] Required (all must be prefixed NEXT_PUBLIC_):");
   console.warn("  NEXT_PUBLIC_FIREBASE_API_KEY:", firebaseConfig.apiKey ? "✅ set" : "❌ MISSING");

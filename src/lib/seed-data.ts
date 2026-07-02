@@ -1,6 +1,7 @@
 import { Post, Sermon, Album, Activity, LiveStream, SiteSettings, CalendarEvent } from "@/types";
 
 export const defaultSettings: SiteSettings = {
+  logoUrl: "/logo/trinity-logo.png",
   churchName: "Trinity Baptist Church",
   tagline: "A Place of Grace, Faith & Community",
   serviceTimes: "Sundays at 9:00 AM & 11:00 AM",
