@@ -3,15 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { auth, isFirebaseConfigured } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 
 export default function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [status, setStatus] = useState<"checking" | "authed" | "unauthed" | "not-configured">("checking");
+  const [status, setStatus] = useState<"checking" | "authed" | "unauthed">("checking");
 
   useEffect(() => {
-    if (!isFirebaseConfigured || !auth) {
-      setStatus("not-configured");
+    if (!auth) {
+      // Firebase didn't initialize — treat as unauthed so user sees login page
+      setStatus("unauthed");
+      router.replace("/admin");
       return;
     }
     const unsub = onAuthStateChanged(auth, (user: User | null) => {
@@ -24,20 +26,6 @@ export default function ProtectedAdminLayout({ children }: { children: React.Rea
     });
     return () => unsub();
   }, [router]);
-
-  if (status === "not-configured") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
-        <div className="max-w-md text-center">
-          <h1 className="font-serif text-xl font-bold text-primary mb-2">Firebase not connected yet</h1>
-          <p className="text-text-muted text-sm">
-            Add your Firebase project&apos;s environment variables in Vercel (Project Settings → Environment
-            Variables), then redeploy — admin login and this page will become available.
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   if (status === "checking" || status === "unauthed") {
     return (

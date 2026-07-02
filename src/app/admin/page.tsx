@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, isFirebaseConfigured } from "@/lib/firebase";
 
-function friendlyAuthError(code: string): string {
+function friendlyAuthError(code: string, message: string): string {
   switch (code) {
     case "auth/invalid-email":
       return "That doesn't look like a valid email address.";
@@ -15,8 +15,15 @@ function friendlyAuthError(code: string): string {
       return "Invalid email or password.";
     case "auth/too-many-requests":
       return "Too many attempts. Please wait a moment and try again.";
+    case "auth/api-key-not-valid":
+    case "auth/api-key-not-valid.-please-pass-a-valid-api-key.":
+      return "Firebase API key is invalid. Check NEXT_PUBLIC_FIREBASE_API_KEY in Vercel env vars.";
+    case "auth/network-request-failed":
+      return "Network error. Check your internet connection and try again.";
     default:
-      return "Couldn't sign in. Please check your details and try again.";
+      // Include the raw Firebase message for unhandled error codes —
+      // much more helpful than a generic "couldn't sign in"
+      return message || `Couldn't sign in (${code}). Please check your details and try again.`;
   }
 }
 
@@ -30,8 +37,8 @@ export default function AdminLoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!auth || !isFirebaseConfigured) {
-      setError("Firebase isn\'t configured yet. Add your Firebase env vars in Vercel to enable login.");
+    if (!auth) {
+      setError("Firebase failed to initialize. Open your browser console (F12) for details on which env vars are missing.");
       return;
     }
     setLoading(true);
@@ -40,7 +47,8 @@ export default function AdminLoginPage() {
       router.push("/admin/dashboard");
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code ?? "";
-      setError(friendlyAuthError(code));
+      const message = (err as { message?: string })?.message ?? "";
+      setError(friendlyAuthError(code, message));
     } finally {
       setLoading(false);
     }
@@ -61,9 +69,16 @@ export default function AdminLoginPage() {
 
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
           {!isFirebaseConfigured && (
-            <div className="bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm px-4 py-3 rounded-xl mb-5">
-              Firebase isn&apos;t connected yet. Add your Firebase project&apos;s environment variables in Vercel
-              (Project Settings → Environment Variables) to enable admin sign-in.
+            <div className="bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm px-4 py-3 rounded-xl mb-5 space-y-2">
+              <p className="font-semibold">⚠️ Firebase env vars not detected in the browser.</p>
+              <p>This usually means one of:</p>
+              <ol className="list-decimal list-inside space-y-0.5 text-xs">
+                <li>Env vars in Vercel aren&apos;t prefixed with <code className="bg-white/10 px-1 rounded">NEXT_PUBLIC_</code> (required for client-side access)</li>
+                <li>Env var names don&apos;t match exactly (case-sensitive): <code className="bg-white/10 px-1 rounded">NEXT_PUBLIC_FIREBASE_API_KEY</code>, <code className="bg-white/10 px-1 rounded">NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN</code>, etc.</li>
+                <li>Env vars were added after the last build — <strong>trigger a Redeploy in Vercel</strong></li>
+                <li>Vars are set for &ldquo;Preview&rdquo; only — set them for <strong>all environments</strong></li>
+              </ol>
+              <p className="text-xs pt-1">Open browser console (F12 → Console) to see exactly which vars are missing.</p>
             </div>
           )}
           <form onSubmit={handleLogin} className="space-y-5">
