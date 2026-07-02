@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth, isFirebaseConfigured } from "@/lib/firebase";
 
 function friendlyAuthError(code: string): string {
   switch (code) {
@@ -56,6 +56,12 @@ export default function AdminLoginPage() {
         </div>
 
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
+          {!isFirebaseConfigured && (
+            <div className="bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm px-4 py-3 rounded-xl mb-5">
+              Firebase isn&apos;t connected yet. Add your Firebase project&apos;s environment variables in Vercel
+              (Project Settings → Environment Variables) to enable admin sign-in.
+            </div>
+          )}
           <form onSubmit={handleLogin} className="space-y-5">
             {error && (
               <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 rounded-xl">
