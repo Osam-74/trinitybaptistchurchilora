@@ -30,13 +30,19 @@ const values = [
 export default function AboutPage() {
   useScrollReveal();
   const [leaders, setLeaders] = useState<Leader[]>([]);
+  const [debug, setDebug] = useState<string>("loading...");
 
   useEffect(() => {
-    listLeaders().then(data => {
-      // If Firestore returned nothing useful, fall back to defaults
-      const active = data.filter(l => l.active);
-      setLeaders(active.length > 0 ? data : defaultLeaders);
-    });
+    listLeaders()
+      .then(data => {
+        const active = data.filter(l => l.active);
+        setLeaders(active.length > 0 ? data : defaultLeaders);
+        setDebug(`fetched ${data.length} docs, ${active.length} active${active.length === 0 ? " (using 4 defaults)" : ""}`);
+      })
+      .catch(err => {
+        setLeaders(defaultLeaders);
+        setDebug(`ERROR: ${err instanceof Error ? err.message : String(err)}`);
+      });
   }, []);
 
   return (
@@ -133,6 +139,13 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {/* TEMP DEBUG — remove once leadership display is confirmed working */}
+      <div className="max-w-3xl mx-auto px-4 pt-4">
+        <p className="text-xs font-mono bg-accent/10 text-primary border border-accent/30 rounded-lg px-3 py-2 text-center">
+          [debug] leaders: {debug} — build 2026-07-03
+        </p>
+      </div>
 
       {/* Leadership */}
       <section className="py-20 bg-bg">

@@ -21,9 +21,19 @@ export default function TeamDirectoryPage() {
   useScrollReveal();
   const [members, setMembers] = useState<ChoirMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [debug, setDebug] = useState<string>("loading...");
 
   useEffect(() => {
-    listApprovedMembers().then(data => { setMembers(data); setLoading(false); });
+    listApprovedMembers()
+      .then(data => {
+        setMembers(data);
+        setLoading(false);
+        setDebug(`fetched ${data.length} approved members`);
+      })
+      .catch(err => {
+        setLoading(false);
+        setDebug(`ERROR: ${err instanceof Error ? err.message : String(err)}`);
+      });
   }, []);
 
   // Group by department
@@ -62,6 +72,13 @@ export default function TeamDirectoryPage() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* TEMP DEBUG — remove once directory display is confirmed working */}
+      <div className="max-w-3xl mx-auto px-4 pt-4">
+        <p className="text-xs font-mono bg-accent/10 text-primary border border-accent/30 rounded-lg px-3 py-2 text-center">
+          [debug] {debug} — build 2026-07-03
+        </p>
       </div>
 
       {/* Directory */}
