@@ -162,7 +162,7 @@ export default function AboutPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {leaders.filter(l => l.active).map((leader, i) => (
-              <div key={leader.id} className="bg-white rounded-3xl overflow-hidden border border-stone-100 shadow-sm card-hover reveal text-center" style={{ animationDelay: `${i * 0.1}s` }}>
+              <div key={leader.id} className="bg-white rounded-3xl overflow-hidden border border-stone-100 shadow-sm card-hover text-center" style={{ animationDelay: `${i * 0.1}s` }}>
                 <div className="relative h-52 overflow-hidden">
                   <img src={leader.photoUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face"} alt={leader.name} className="w-full h-full object-cover"/>
                   <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/50 to-transparent"/>

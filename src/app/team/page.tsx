@@ -97,7 +97,7 @@ export default function TeamDirectoryPage() {
           )}
 
           {sortedDepts.map((dept, di) => (
-            <div key={dept} className="mb-12 reveal" style={{ animationDelay: `${di * 0.1}s` }}>
+            <div key={dept} className="mb-12" style={{ animationDelay: `${di * 0.1}s` }}>
               <h2 className="font-serif text-2xl font-bold text-primary mb-8 flex items-center gap-3">
                 <span className="w-1 h-7 bg-accent rounded-full"/>
                 {dept}
