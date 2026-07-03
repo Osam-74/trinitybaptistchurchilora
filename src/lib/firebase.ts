@@ -5,49 +5,39 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 /**
- * Firebase initialization.
- *
- * NEXT_PUBLIC_FIREBASE_* env vars are inlined by Next.js at BUILD TIME.
- * If they're not set (e.g., local dev, build env without secrets), we
- * fall back to a syntactically-valid placeholder config so the build
- * doesn't crash. Real auth/data calls will simply fail until proper
- * credentials are added.
- *
- * Only initialize on the client to avoid SSR issues — Firebase Auth
- * and Firestore are client-side SDKs here.
+ * Firebase initialization — uses real env vars directly, no placeholder.
+ * If vars are missing, init still succeeds (Firebase accepts any config
+ * object); actual API calls will fail with a clear error.
  */
 
-const requiredEnvKeys = [
-  "NEXT_PUBLIC_FIREBASE_API_KEY",
-  "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
-  "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
-  "NEXT_PUBLIC_FIREBASE_APP_ID",
-] as const;
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
 
-export const isFirebaseConfigured = requiredEnvKeys.every(
-  (key) => !!process.env[key] && process.env[key] !== ""
-);
+export const isFirebaseConfigured =
+  !!firebaseConfig.apiKey &&
+  !!firebaseConfig.authDomain &&
+  !!firebaseConfig.projectId &&
+  !!firebaseConfig.appId;
 
-const firebaseConfig = isFirebaseConfigured
-  ? {
-      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-      appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-    }
-  : {
-      // Placeholder — prevents build crashes, never used for real auth/data
-      apiKey: "AIzaSyDPLACEHOLDER00000000000000000000",
-      authDomain: "placeholder-not-configured.firebaseapp.com",
-      projectId: "placeholder-not-configured",
-      storageBucket: "placeholder-not-configured.firebasestorage.app",
-      messagingSenderId: "000000000000",
-      appId: "1:000000000000:web:0000000000000000000000",
-    };
+// Debug: log config status on client so we can see what's happening
+if (typeof window !== "undefined") {
+  const c = firebaseConfig;
+  console.log("[Firebase] Config check:", {
+    apiKey: c.apiKey ? `${c.apiKey.slice(0, 8)}...` : "❌ MISSING",
+    authDomain: c.authDomain || "❌ MISSING",
+    projectId: c.projectId || "❌ MISSING",
+    appId: c.appId ? `${c.appId.slice(0, 8)}...` : "❌ MISSING",
+    configured: isFirebaseConfigured,
+  });
+}
 
-// Initialize on the client only
+// Initialize on client only
 let _app: ReturnType<typeof initializeApp> | null = null;
 let _auth: ReturnType<typeof getAuth> | null = null;
 let _db: ReturnType<typeof getFirestore> | null = null;
