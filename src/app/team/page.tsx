@@ -23,7 +23,9 @@ export default function TeamDirectoryPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    listApprovedMembers().then(data => { setMembers(data); setLoading(false); });
+    listApprovedMembers()
+      .then(data => { setMembers(data); setLoading(false); })
+      .catch(err => { console.error("[team] Failed to load approved members:", err); setLoading(false); });
   }, []);
 
   // Group by department
@@ -94,8 +96,10 @@ export default function TeamDirectoryPage() {
                         {m.photoUrl ? (
                           <img src={m.photoUrl} alt={m.fullName} className="w-full h-full object-cover"/>
                         ) : (
-                          <div className="w-full h-full bg-primary/8 flex items-center justify-center">
-                            <span className="text-2xl font-serif font-bold text-primary/40">{m.fullName.charAt(0)}</span>
+                          <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                            <svg className="w-14 h-14 text-primary/30" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
                           </div>
                         )}
                       </div>

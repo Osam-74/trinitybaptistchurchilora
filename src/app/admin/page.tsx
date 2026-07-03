@@ -89,7 +89,7 @@ export default function AdminLoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
-                placeholder="you@trinitybaptistchurchilora.org"
+                placeholder="Enter your email"
               />
             </div>
             <div>

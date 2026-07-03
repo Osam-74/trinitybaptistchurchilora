@@ -5,7 +5,7 @@
  * Only "approved" members show on the public directory page.
  */
 
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, orderBy } from "firebase/firestore";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { ChoirMember } from "@/types";
 
@@ -29,13 +29,12 @@ export async function createChoirMember(data: Omit<ChoirMember, "id" | "createdA
 export async function listPendingMembers(): Promise<ChoirMember[]> {
   try {
     if (!db) return [];
-    // Use only where() — no orderBy() to avoid needing a composite index
     const q = query(collection(db, "choir_members"), where("status", "==", "pending"));
     const snap = await getDocs(q);
     const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<ChoirMember, "id">) })) as ChoirMember[];
-    // Sort client-side by createdAt desc
     return items.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
-  } catch {
+  } catch (err) {
+    console.error("[choir] listPendingMembers failed:", err);
     return [];
   }
 }
@@ -43,27 +42,37 @@ export async function listPendingMembers(): Promise<ChoirMember[]> {
 export async function listAllMembers(): Promise<ChoirMember[]> {
   try {
     if (!db) return [];
-    // No orderBy to avoid index requirements — sort client-side
     const snap = await getDocs(collection(db, "choir_members"));
     const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<ChoirMember, "id">) })) as ChoirMember[];
     return items.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
-  } catch {
+  } catch (err) {
+    console.error("[choir] listAllMembers failed:", err);
     return [];
   }
 }
 
 export async function listApprovedMembers(): Promise<ChoirMember[]> {
   try {
-    if (!db) return [];
+    if (!db) {
+      console.error("[choir] listApprovedMembers: db is null — Firebase not initialized");
+      return [];
+    }
     // Use only where() — no orderBy() to avoid needing a composite index.
-    // Composite where+orderBy queries require a manually-created index in
-    // the Firebase Console, which silently fails if missing.
     const q = query(collection(db, "choir_members"), where("status", "==", "approved"));
     const snap = await getDocs(q);
     const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<ChoirMember, "id">) })) as ChoirMember[];
     // Sort client-side alphabetically by fullName
     return items.sort((a, b) => (a.fullName || "").localeCompare(b.fullName || ""));
-  } catch {
+  } catch (err) {
+    const code = (err as { code?: string })?.code ?? "";
+    console.error("[choir] listApprovedMembers failed:", code, err);
+    if (code === "permission-denied") {
+      console.error(
+        "[choir] PERMISSION-DENIED: The Firestore rules do not allow public reads of 'choir_members'.\n" +
+        "Fix: Go to Firebase Console → Firestore Database → Rules → paste the updated firestore.rules → Publish.\n" +
+        "The rule for choir_members must be: allow read: if true;"
+      );
+    }
     return [];
   }
 }
