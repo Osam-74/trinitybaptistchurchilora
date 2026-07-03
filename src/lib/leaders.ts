@@ -1,9 +1,12 @@
 /**
  * Leaders — persisted in Firestore at leaders/{id}.
  * Falls back to the hardcoded defaults when Firestore isn't available.
+ *
+ * Uses the same pattern as choir.ts: fetch all docs (no orderBy/where),
+ * sort client-side, catch errors and return defaults.
  */
 
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Leader } from "@/types";
 
@@ -22,25 +25,29 @@ export const defaultLeaders: Leader[] = [
   { id: "l4", name: "Deaconess F. Ogunleye", role: "Treasurer", bio: "Faithful steward of the church's resources, ensuring transparent and godly management of all financial matters.", order: 4, active: true, photoUrl: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=400&fit=crop&crop=face" },
 ];
 
+const activeDefaults = () => defaultLeaders.filter(l => l.active).sort((a, b) => a.order - b.order);
+
 export async function listLeaders(): Promise<Leader[]> {
   try {
-    if (!db) return defaultLeaders.filter(l => l.active).sort((a, b) => a.order - b.order);
-    const q = query(collection(db, "leaders"), orderBy("order"));
-    const snap = await getDocs(q);
-    if (snap.empty) return defaultLeaders.filter(l => l.active).sort((a, b) => a.order - b.order);
-    return snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<Leader, "id">) })) as Leader[];
+    if (!db) return activeDefaults();
+    // No orderBy — just get all docs and sort client-side
+    const snap = await getDocs(collection(db, "leaders"));
+    if (snap.empty) return activeDefaults();
+    const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<Leader, "id">) })) as Leader[];
+    if (items.length === 0) return activeDefaults();
+    return items.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
   } catch {
-    return defaultLeaders.filter(l => l.active).sort((a, b) => a.order - b.order);
+    return activeDefaults();
   }
 }
 
 export async function listAllLeaders(): Promise<Leader[]> {
   try {
     if (!db) return [...defaultLeaders].sort((a, b) => a.order - b.order);
-    const q = query(collection(db, "leaders"), orderBy("order"));
-    const snap = await getDocs(q);
+    const snap = await getDocs(collection(db, "leaders"));
     if (snap.empty) return [...defaultLeaders].sort((a, b) => a.order - b.order);
-    return snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<Leader, "id">) })) as Leader[];
+    const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<Leader, "id">) })) as Leader[];
+    return items.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
   } catch {
     return [...defaultLeaders].sort((a, b) => a.order - b.order);
   }

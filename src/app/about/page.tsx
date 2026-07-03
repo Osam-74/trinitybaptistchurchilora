@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { listLeaders } from "@/lib/leaders";
+import { listLeaders, defaultLeaders } from "@/lib/leaders";
 import { Leader } from "@/types";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -32,7 +32,11 @@ export default function AboutPage() {
   const [leaders, setLeaders] = useState<Leader[]>([]);
 
   useEffect(() => {
-    listLeaders().then(setLeaders);
+    listLeaders().then(data => {
+      // If Firestore returned nothing useful, fall back to defaults
+      const active = data.filter(l => l.active);
+      setLeaders(active.length > 0 ? data : defaultLeaders);
+    });
   }, []);
 
   return (
