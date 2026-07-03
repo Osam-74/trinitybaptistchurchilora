@@ -235,6 +235,8 @@ export default function HymnsPage() {
   const [firestoreHymns, setFirestoreHymns] = useState<Hymn[]>([]);
   const [libraryHymns, setLibraryHymns] = useState<Hymn[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 20;
 
   // Load the full hymn library from /public/hymns-library.json
   useEffect(() => {
@@ -270,6 +272,13 @@ export default function HymnsPage() {
       searchBy === "title" ? h.title.toLowerCase().includes(q) : h.number.toString().includes(q)
     );
   }, [allHymns, category, search, searchBy]);
+
+  // Reset to page 1 whenever the filter changes
+  useEffect(() => { setCurrentPage(1); }, [category, search, searchBy]);
+
+  // Pagination
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginatedHymns = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const counts = useMemo(() => ({
     english: allHymns.filter(h => h.category === "english").length,
@@ -358,7 +367,7 @@ export default function HymnsPage() {
 
         {/* Hymn list with full lyrics inline */}
         <div className="space-y-4">
-          {filtered.slice(0, 200).map((hymn) => (
+          {paginatedHymns.map((hymn) => (
             <div
               key={hymn.id}
               className={`hymn-card rounded-2xl overflow-hidden shadow-sm ${openHymn === hymn.id ? "border-primary-light" : "border-stone-100"}`}
@@ -416,9 +425,55 @@ export default function HymnsPage() {
           ))}
         </div>
 
-        {filtered.length > 200 && (
-          <p className="text-center text-text-muted text-sm mt-6">
-            Showing first 200 results. Refine your search to see more.
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-white border border-stone-200 text-primary hover:border-primary/30 hover:bg-primary/5"
+            >
+              ← Previous
+            </button>
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                let page: number;
+                if (totalPages <= 7) {
+                  page = i + 1;
+                } else if (currentPage <= 4) {
+                  page = i + 1;
+                } else if (currentPage >= totalPages - 3) {
+                  page = totalPages - 6 + i;
+                } else {
+                  page = currentPage - 3 + i;
+                }
+                return (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all ${
+                      currentPage === page
+                        ? "bg-primary text-white shadow-md"
+                        : "bg-white border border-stone-200 text-text-muted hover:border-primary/30 hover:text-primary"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-white border border-stone-200 text-primary hover:border-primary/30 hover:bg-primary/5"
+            >
+              Next →
+            </button>
+          </div>
+        )}
+        {totalPages > 1 && (
+          <p className="text-center text-text-muted text-xs mt-4">
+            Page {currentPage} of {totalPages} · Showing {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} of {filtered.length}
           </p>
         )}
 

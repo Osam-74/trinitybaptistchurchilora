@@ -29,9 +29,12 @@ export async function createChoirMember(data: Omit<ChoirMember, "id" | "createdA
 export async function listPendingMembers(): Promise<ChoirMember[]> {
   try {
     if (!db) return [];
-    const q = query(collection(db, "choir_members"), where("status", "==", "pending"), orderBy("createdAt", "desc"));
+    // Use only where() — no orderBy() to avoid needing a composite index
+    const q = query(collection(db, "choir_members"), where("status", "==", "pending"));
     const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<ChoirMember, "id">) })) as ChoirMember[];
+    const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<ChoirMember, "id">) })) as ChoirMember[];
+    // Sort client-side by createdAt desc
+    return items.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
   } catch {
     return [];
   }
@@ -40,9 +43,10 @@ export async function listPendingMembers(): Promise<ChoirMember[]> {
 export async function listAllMembers(): Promise<ChoirMember[]> {
   try {
     if (!db) return [];
-    const q = query(collection(db, "choir_members"), orderBy("createdAt", "desc"));
-    const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<ChoirMember, "id">) })) as ChoirMember[];
+    // No orderBy to avoid index requirements — sort client-side
+    const snap = await getDocs(collection(db, "choir_members"));
+    const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<ChoirMember, "id">) })) as ChoirMember[];
+    return items.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
   } catch {
     return [];
   }
@@ -51,9 +55,14 @@ export async function listAllMembers(): Promise<ChoirMember[]> {
 export async function listApprovedMembers(): Promise<ChoirMember[]> {
   try {
     if (!db) return [];
-    const q = query(collection(db, "choir_members"), where("status", "==", "approved"), orderBy("fullName"));
+    // Use only where() — no orderBy() to avoid needing a composite index.
+    // Composite where+orderBy queries require a manually-created index in
+    // the Firebase Console, which silently fails if missing.
+    const q = query(collection(db, "choir_members"), where("status", "==", "approved"));
     const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<ChoirMember, "id">) })) as ChoirMember[];
+    const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<ChoirMember, "id">) })) as ChoirMember[];
+    // Sort client-side alphabetically by fullName
+    return items.sort((a, b) => (a.fullName || "").localeCompare(b.fullName || ""));
   } catch {
     return [];
   }

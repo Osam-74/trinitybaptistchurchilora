@@ -334,7 +334,7 @@ function PastorFeedSection() {
                       TBC
                     </div>
                     <div>
-                      <p className="font-semibold text-primary text-sm">Rev&apos;d Dr S. O. Mosebolatan</p>
+                      <p className="font-semibold text-primary text-sm whitespace-nowrap">Rev&apos;d Dr S. O. Mosebolatan</p>
                       <p className="text-text-muted text-xs">{formatDate(post.createdAt)}</p>
                     </div>
                   </div>

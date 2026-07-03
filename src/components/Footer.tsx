@@ -108,8 +108,9 @@ export default function Footer() {
             <ul className="space-y-4">
               {[
                 { day: "Sunday Morning", times: ["7:30 AM — First Service", "10:00 AM — Second Service"], icon: "M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" },
-                { day: "Midweek Service", times: ["Wednesdays, 5:00 PM"], icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
-                { day: "Prayer Meeting", times: ["Fridays, 6:00 AM"], icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" },
+                { day: "Midweek (Wednesday)", times: ["5:00 PM — Prayer Meeting", "6:00 PM — Bible Study"], icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
+                { day: "Covenant Service", times: ["Every 1st Saturday of the month"], icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" },
+                { day: "Monthly Revival", times: ["Last Friday of the month", "6:00 PM — 8:00 PM"], icon: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" },
               ].map((svc) => (
                 <li key={svc.day} className="flex gap-3">
                   <div className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center flex-shrink-0 mt-0.5">
