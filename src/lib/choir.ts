@@ -3,14 +3,16 @@
  * Registrations from the public sign-up form land here with status "pending".
  * Admins approve / reject / edit / delete from the backend.
  * Only "approved" members show on the public directory page.
+ *
+ * Uses the same pattern as leaders.ts: fetch all docs, filter client-side,
+ * catch errors and return [] (never throw to the caller).
  */
 
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where } from "firebase/firestore";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { ChoirMember } from "@/types";
 
-// Firestore rejects `undefined` field values outright (addDoc/setDoc throw
-// "Unsupported field value: undefined"). Strip any undefined keys before writing.
+// Firestore rejects `undefined` field values outright.
 function stripUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
   const out: Partial<T> = {};
   for (const key of Object.keys(obj) as (keyof T)[]) {
@@ -29,10 +31,11 @@ export async function createChoirMember(data: Omit<ChoirMember, "id" | "createdA
 export async function listPendingMembers(): Promise<ChoirMember[]> {
   try {
     if (!db) return [];
-    const q = query(collection(db, "choir_members"), where("status", "==", "pending"));
-    const snap = await getDocs(q);
+    const snap = await getDocs(collection(db, "choir_members"));
     const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<ChoirMember, "id">) })) as ChoirMember[];
-    return items.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+    return items
+      .filter(m => m.status === "pending")
+      .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
   } catch (err) {
     console.error("[choir] listPendingMembers failed:", err);
     return [];
@@ -52,17 +55,23 @@ export async function listAllMembers(): Promise<ChoirMember[]> {
 }
 
 /**
- * Public directory — fetches approved members for the /team page.
- * IMPORTANT: This function THROWS on error (does NOT swallow) so the
- * caller can display a proper diagnostic message to the user.
+ * Public directory — fetches ALL choir_members and filters for approved
+ * client-side. Same pattern as listLeaders(): get all docs, no where clause,
+ * catch errors and return [] silently.
  */
 export async function listApprovedMembers(): Promise<ChoirMember[]> {
-  if (!db) throw new Error("Firebase not initialized — check env vars");
-
-  const q = query(collection(db, "choir_members"), where("status", "==", "approved"));
-  const snap = await getDocs(q);
-  const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<ChoirMember, "id">) })) as ChoirMember[];
-  return items.sort((a, b) => (a.fullName || "").localeCompare(b.fullName || ""));
+  try {
+    if (!db) return [];
+    const snap = await getDocs(collection(db, "choir_members"));
+    if (snap.empty) return [];
+    const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<ChoirMember, "id">) })) as ChoirMember[];
+    return items
+      .filter(m => m.status === "approved")
+      .sort((a, b) => (a.fullName || "").localeCompare(b.fullName || ""));
+  } catch (err) {
+    console.error("[choir] listApprovedMembers failed:", err);
+    return [];
+  }
 }
 
 export async function updateMember(id: string, data: Partial<ChoirMember>): Promise<void> {

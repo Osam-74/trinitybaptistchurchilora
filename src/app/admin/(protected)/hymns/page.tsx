@@ -91,7 +91,7 @@ export default function AdminHymnsPage() {
   return (
     <div className="flex min-h-screen bg-stone-50">
       <AdminSidebar />
-      <main className="flex-1 p-6 lg:p-8 ml-0 lg:ml-64">
+      <main className="flex-1 p-6 lg:p-8 ml-0 lg:ml-64 pr-16 lg:pr-8">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div>

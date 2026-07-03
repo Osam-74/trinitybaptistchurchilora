@@ -21,27 +21,9 @@ export default function TeamDirectoryPage() {
   useScrollReveal();
   const [members, setMembers] = useState<ChoirMember[]>([]);
   const [loading, setLoading] = useState(true);
-  const [errorInfo, setErrorInfo] = useState<{ message: string; code: string } | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const data = await listApprovedMembers();
-        if (!cancelled) {
-          setMembers(data);
-          setLoading(false);
-        }
-      } catch (err: unknown) {
-        if (cancelled) return;
-        const code = (err as { code?: string })?.code ?? "unknown";
-        const message = (err as { message?: string })?.message ?? "Unknown error";
-        console.error("[team] listApprovedMembers error:", code, message, err);
-        setErrorInfo({ message, code });
-        setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
+    listApprovedMembers().then(data => { setMembers(data); setLoading(false); });
   }, []);
 
   // Group by department
@@ -91,42 +73,9 @@ export default function TeamDirectoryPage() {
             </div>
           )}
 
-          {/* Error banner — shows the EXACT error on the page */}
-          {!loading && errorInfo && (
-            <div className="max-w-2xl mx-auto mb-10 bg-red-50 border border-red-200 rounded-2xl p-6 text-left">
-              <p className="font-semibold text-red-700 mb-2">
-                Directory couldn&apos;t load
-              </p>
-              <p className="text-red-600 text-sm mb-3">
-                <strong>Error:</strong> {errorInfo.code} — {errorInfo.message}
-              </p>
-              {errorInfo.code === "permission-denied" && (
-                <div className="text-red-600 text-sm leading-relaxed bg-red-100/60 rounded-lg p-3">
-                  <p className="font-semibold mb-1">How to fix:</p>
-                  <ol className="list-decimal list-inside space-y-1">
-                    <li>Go to <strong>Firebase Console</strong> → Firestore Database → Rules</li>
-                    <li>Find the <code className="bg-red-200/50 px-1 rounded">choir_members</code> rule</li>
-                    <li>Change <code className="bg-red-200/50 px-1 rounded">allow read: if request.auth != null;</code> to <code className="bg-red-200/50 px-1 rounded">allow read: if true;</code></li>
-                    <li>Click <strong>Publish</strong> (top-right) and refresh this page</li>
-                  </ol>
-                </div>
-              )}
-              {errorInfo.code !== "permission-denied" && (
-                <p className="text-red-600 text-sm">
-                  If this persists, contact the site administrator.
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* No error but 0 members — help distinguish "nothing approved yet" from a silent failure */}
-          {!loading && !errorInfo && members.length === 0 && (
+          {!loading && members.length === 0 && (
             <div className="text-center py-16">
               <p className="text-text-muted text-lg">Team directory will be displayed here once members are approved.</p>
-              <p className="text-text-muted/60 text-sm mt-2">
-                If you&apos;ve already approved members in the admin panel and they&apos;re not showing here,
-                check the browser console (F12) for error details.
-              </p>
             </div>
           )}
 
