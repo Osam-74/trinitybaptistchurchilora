@@ -2,7 +2,6 @@
 
 /**
  * Reusable R2 file uploader component.
- * Calls the consultdrfat Cloudflare Worker /upload endpoint.
  * Drop-in for any page that needs file uploads.
  */
 
@@ -103,7 +102,7 @@ export default function R2Uploader({
 
         {uploading ? (
           <div className="space-y-2">
-            <p className="text-sm font-medium text-primary">Uploading to R2…</p>
+            <p className="text-sm font-medium text-primary">Uploading…</p>
             <div className="w-full bg-stone-200 rounded-full h-2 overflow-hidden">
               <div
                 className="h-2 bg-accent rounded-full transition-all duration-300"
@@ -128,9 +127,6 @@ export default function R2Uploader({
             <p className="text-sm font-semibold text-primary">{label}</p>
             <p className="text-xs text-text-muted mt-1">
               Drag & drop or click — max {maxMB} MB
-            </p>
-            <p className="text-xs text-text-muted/60 mt-0.5">
-              Stored on Cloudflare R2
             </p>
           </>
         )}

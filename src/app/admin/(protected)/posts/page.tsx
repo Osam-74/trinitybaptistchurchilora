@@ -109,7 +109,7 @@ export default function AdminPostsPage() {
                   </div>
                   {form.mediaType !== "text" && (
                     <div>
-                      <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Media URL / Cloudflare Link</label>
+                      <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Media URL</label>
                       <input value={form.mediaUrl} onChange={e => setForm(p => ({ ...p, mediaUrl: e.target.value }))} className="input-field" placeholder="https://..."/>
                     </div>
                   )}

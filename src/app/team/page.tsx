@@ -21,17 +21,27 @@ export default function TeamDirectoryPage() {
   useScrollReveal();
   const [members, setMembers] = useState<ChoirMember[]>([]);
   const [loading, setLoading] = useState(true);
-  const [debugError, setDebugError] = useState<string | null>(null);
+  const [errorInfo, setErrorInfo] = useState<{ message: string; code: string } | null>(null);
 
   useEffect(() => {
-    listApprovedMembers()
-      .then(data => { setMembers(data); setLoading(false); })
-      .catch(err => {
-        console.error("[team] Failed to load approved members:", err);
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await listApprovedMembers();
+        if (!cancelled) {
+          setMembers(data);
+          setLoading(false);
+        }
+      } catch (err: unknown) {
+        if (cancelled) return;
         const code = (err as { code?: string })?.code ?? "unknown";
-        setDebugError(code);
+        const message = (err as { message?: string })?.message ?? "Unknown error";
+        console.error("[team] listApprovedMembers error:", code, message, err);
+        setErrorInfo({ message, code });
         setLoading(false);
-      });
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   // Group by department
@@ -81,27 +91,42 @@ export default function TeamDirectoryPage() {
             </div>
           )}
 
-          {/* Visible diagnostic banner — only shows when something is actually wrong */}
-          {!loading && debugError && (
+          {/* Error banner — shows the EXACT error on the page */}
+          {!loading && errorInfo && (
             <div className="max-w-2xl mx-auto mb-10 bg-red-50 border border-red-200 rounded-2xl p-6 text-left">
-              <p className="font-semibold text-red-700 mb-2">Directory couldn&apos;t load (error: {debugError})</p>
-              {debugError === "permission-denied" ? (
-                <p className="text-red-600 text-sm leading-relaxed">
-                  Firestore is blocking public access to team member data. In the Firebase Console, go to
-                  Firestore Database → Rules, and make sure the rule for <code className="bg-red-100 px-1 rounded">choir_members</code> reads
-                  <code className="bg-red-100 px-1 rounded ml-1">allow read: if true;</code> — then click <strong>Publish</strong> (top-right of the rules editor) and refresh this page.
-                </p>
-              ) : (
-                <p className="text-red-600 text-sm leading-relaxed">
-                  Something went wrong connecting to the database. Please try refreshing, or contact the site administrator.
+              <p className="font-semibold text-red-700 mb-2">
+                Directory couldn&apos;t load
+              </p>
+              <p className="text-red-600 text-sm mb-3">
+                <strong>Error:</strong> {errorInfo.code} — {errorInfo.message}
+              </p>
+              {errorInfo.code === "permission-denied" && (
+                <div className="text-red-600 text-sm leading-relaxed bg-red-100/60 rounded-lg p-3">
+                  <p className="font-semibold mb-1">How to fix:</p>
+                  <ol className="list-decimal list-inside space-y-1">
+                    <li>Go to <strong>Firebase Console</strong> → Firestore Database → Rules</li>
+                    <li>Find the <code className="bg-red-200/50 px-1 rounded">choir_members</code> rule</li>
+                    <li>Change <code className="bg-red-200/50 px-1 rounded">allow read: if request.auth != null;</code> to <code className="bg-red-200/50 px-1 rounded">allow read: if true;</code></li>
+                    <li>Click <strong>Publish</strong> (top-right) and refresh this page</li>
+                  </ol>
+                </div>
+              )}
+              {errorInfo.code !== "permission-denied" && (
+                <p className="text-red-600 text-sm">
+                  If this persists, contact the site administrator.
                 </p>
               )}
             </div>
           )}
 
-          {!loading && !debugError && members.length === 0 && (
+          {/* No error but 0 members — help distinguish "nothing approved yet" from a silent failure */}
+          {!loading && !errorInfo && members.length === 0 && (
             <div className="text-center py-16">
               <p className="text-text-muted text-lg">Team directory will be displayed here once members are approved.</p>
+              <p className="text-text-muted/60 text-sm mt-2">
+                If you&apos;ve already approved members in the admin panel and they&apos;re not showing here,
+                check the browser console (F12) for error details.
+              </p>
             </div>
           )}
 

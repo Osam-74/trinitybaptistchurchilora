@@ -51,30 +51,18 @@ export async function listAllMembers(): Promise<ChoirMember[]> {
   }
 }
 
+/**
+ * Public directory — fetches approved members for the /team page.
+ * IMPORTANT: This function THROWS on error (does NOT swallow) so the
+ * caller can display a proper diagnostic message to the user.
+ */
 export async function listApprovedMembers(): Promise<ChoirMember[]> {
-  try {
-    if (!db) {
-      console.error("[choir] listApprovedMembers: db is null — Firebase not initialized");
-      return [];
-    }
-    // Use only where() — no orderBy() to avoid needing a composite index.
-    const q = query(collection(db, "choir_members"), where("status", "==", "approved"));
-    const snap = await getDocs(q);
-    const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<ChoirMember, "id">) })) as ChoirMember[];
-    // Sort client-side alphabetically by fullName
-    return items.sort((a, b) => (a.fullName || "").localeCompare(b.fullName || ""));
-  } catch (err) {
-    const code = (err as { code?: string })?.code ?? "";
-    console.error("[choir] listApprovedMembers failed:", code, err);
-    if (code === "permission-denied") {
-      console.error(
-        "[choir] PERMISSION-DENIED: The Firestore rules do not allow public reads of 'choir_members'.\n" +
-        "Fix: Go to Firebase Console → Firestore Database → Rules → paste the updated firestore.rules → Publish.\n" +
-        "The rule for choir_members must be: allow read: if true;"
-      );
-    }
-    return [];
-  }
+  if (!db) throw new Error("Firebase not initialized — check env vars");
+
+  const q = query(collection(db, "choir_members"), where("status", "==", "approved"));
+  const snap = await getDocs(q);
+  const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<ChoirMember, "id">) })) as ChoirMember[];
+  return items.sort((a, b) => (a.fullName || "").localeCompare(b.fullName || ""));
 }
 
 export async function updateMember(id: string, data: Partial<ChoirMember>): Promise<void> {
