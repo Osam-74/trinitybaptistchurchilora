@@ -10,6 +10,7 @@ export default function AdminMembersPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
   const [editing, setEditing] = useState<ChoirMember | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -19,21 +20,43 @@ export default function AdminMembersPage() {
   useEffect(() => { load(); }, []);
 
   const handleApprove = async (m: ChoirMember) => {
-    try { await updateMember(m.id, { status: "approved" }); load(); } catch { /* ignore */ }
+    setActionError(null);
+    try {
+      await updateMember(m.id, { status: "approved" });
+      load();
+    } catch (err) {
+      console.error("[members] Approve failed:", err);
+      setActionError(`Couldn't approve ${m.fullName}: ${(err as { message?: string })?.message || "unknown error"}`);
+    }
   };
 
   const handleReject = async (m: ChoirMember) => {
-    try { await updateMember(m.id, { status: "rejected" }); load(); } catch { /* ignore */ }
+    setActionError(null);
+    try {
+      await updateMember(m.id, { status: "rejected" });
+      load();
+    } catch (err) {
+      console.error("[members] Reject failed:", err);
+      setActionError(`Couldn't reject ${m.fullName}: ${(err as { message?: string })?.message || "unknown error"}`);
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Permanently delete this registration?")) return;
-    try { await deleteMember(id); load(); } catch { /* ignore */ }
+    setActionError(null);
+    try {
+      await deleteMember(id);
+      load();
+    } catch (err) {
+      console.error("[members] Delete failed:", err);
+      setActionError(`Couldn't delete: ${(err as { message?: string })?.message || "unknown error"}`);
+    }
   };
 
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
+    setActionError(null);
     try {
       await updateMember(editing.id, {
         fullName: editing.fullName,
@@ -44,7 +67,10 @@ export default function AdminMembersPage() {
       });
       setEditing(null);
       load();
-    } catch { /* ignore */ }
+    } catch (err) {
+      console.error("[members] Save edit failed:", err);
+      setActionError(`Couldn't save changes: ${(err as { message?: string })?.message || "unknown error"}`);
+    }
   };
 
   const filtered = filter === "all" ? members : members.filter(m => m.status === filter);
@@ -69,6 +95,12 @@ export default function AdminMembersPage() {
               <p className="text-text-muted text-sm mt-1">Review registrations and manage the team directory</p>
             </div>
           </div>
+
+          {actionError && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 text-sm text-red-700">
+              {actionError}
+            </div>
+          )}
 
           {/* Filter tabs */}
           <div className="flex gap-2 mb-6">

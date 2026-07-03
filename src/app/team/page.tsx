@@ -21,11 +21,17 @@ export default function TeamDirectoryPage() {
   useScrollReveal();
   const [members, setMembers] = useState<ChoirMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [debugError, setDebugError] = useState<string | null>(null);
 
   useEffect(() => {
     listApprovedMembers()
       .then(data => { setMembers(data); setLoading(false); })
-      .catch(err => { console.error("[team] Failed to load approved members:", err); setLoading(false); });
+      .catch(err => {
+        console.error("[team] Failed to load approved members:", err);
+        const code = (err as { code?: string })?.code ?? "unknown";
+        setDebugError(code);
+        setLoading(false);
+      });
   }, []);
 
   // Group by department
@@ -75,7 +81,25 @@ export default function TeamDirectoryPage() {
             </div>
           )}
 
-          {!loading && members.length === 0 && (
+          {/* Visible diagnostic banner — only shows when something is actually wrong */}
+          {!loading && debugError && (
+            <div className="max-w-2xl mx-auto mb-10 bg-red-50 border border-red-200 rounded-2xl p-6 text-left">
+              <p className="font-semibold text-red-700 mb-2">Directory couldn&apos;t load (error: {debugError})</p>
+              {debugError === "permission-denied" ? (
+                <p className="text-red-600 text-sm leading-relaxed">
+                  Firestore is blocking public access to team member data. In the Firebase Console, go to
+                  Firestore Database → Rules, and make sure the rule for <code className="bg-red-100 px-1 rounded">choir_members</code> reads
+                  <code className="bg-red-100 px-1 rounded ml-1">allow read: if true;</code> — then click <strong>Publish</strong> (top-right of the rules editor) and refresh this page.
+                </p>
+              ) : (
+                <p className="text-red-600 text-sm leading-relaxed">
+                  Something went wrong connecting to the database. Please try refreshing, or contact the site administrator.
+                </p>
+              )}
+            </div>
+          )}
+
+          {!loading && !debugError && members.length === 0 && (
             <div className="text-center py-16">
               <p className="text-text-muted text-lg">Team directory will be displayed here once members are approved.</p>
             </div>
