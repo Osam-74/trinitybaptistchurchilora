@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Hymn } from "@/types";
@@ -141,9 +141,41 @@ function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }
   }, [hymn]);
 
   const [verseIndex, setVerseIndex] = useState(0);
+  const verseRef = useRef<HTMLDivElement>(null);
+  const [fontSize, setFontSize] = useState(3.5); // rem — auto-adjusted
 
   const next = useCallback(() => setVerseIndex(i => Math.min(i + 1, verses.length - 1)), [verses.length]);
   const prev = useCallback(() => setVerseIndex(i => Math.max(i - 1, 0)), []);
+
+  // Auto-fit: measure the verse text against the viewport and scale so it
+  // fills the available height. More text = smaller font, less text = bigger.
+  useEffect(() => {
+    if (!verseRef.current) return;
+    const el = verseRef.current;
+
+    // Available space: viewport minus top bar (~80px) minus bottom bar (~80px) minus padding
+    const availHeight = window.innerHeight - 200;
+    const availWidth = window.innerWidth - 120; // wider — less side padding
+
+    // Start large and shrink until it fits
+    let size = 6; // rem — start big
+    const minSize = 1.2; // rem — floor
+
+    el.style.fontSize = size + "rem";
+    // Force reflow to measure
+    void el.offsetHeight;
+
+    while (size > minSize) {
+      const fitsHeight = el.scrollHeight <= availHeight;
+      const fitsWidth = el.scrollWidth <= availWidth;
+      if (fitsHeight && fitsWidth) break;
+      size -= 0.15;
+      el.style.fontSize = size + "rem";
+      void el.offsetHeight;
+    }
+
+    setFontSize(size);
+  }, [verseIndex, verses]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -165,12 +197,12 @@ function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }
   if (verses.length === 0) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-primary-dark flex flex-col items-center justify-center p-6 select-none">
+    <div className="fixed inset-0 z-[100] bg-primary-dark flex flex-col items-center justify-center select-none">
       {/* Top bar */}
-      <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 z-10">
-        <div className="text-white/60 text-sm">
-          <span className="font-serif text-white font-bold text-lg">{hymn.title}</span>
-          {hymn.author && <span className="ml-3 text-white/40">— {hymn.author}</span>}
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-8 py-5 z-10">
+        <div className="text-white/60 text-sm flex items-center gap-3">
+          <span className="font-serif text-white font-bold text-xl">{hymn.title}</span>
+          {hymn.author && <span className="text-white/40 hidden sm:inline">— {hymn.author}</span>}
         </div>
         <button onClick={onClose} className="text-white/60 hover:text-white transition-colors flex items-center gap-1.5 text-sm">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,38 +212,42 @@ function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }
         </button>
       </div>
 
-      {/* Verse content */}
-      <div className="max-w-4xl w-full text-center flex-1 flex flex-col items-center justify-center">
-        <p className="text-accent/60 text-sm font-semibold uppercase tracking-widest mb-6">
+      {/* Verse content — fills available space, auto-sizes text */}
+      <div className="flex-1 flex flex-col items-center justify-center px-16 w-full">
+        <p className="text-accent/50 text-xs font-bold uppercase tracking-[0.3em] mb-4">
           Verse {verseIndex + 1} of {verses.length}
         </p>
-        <p className="whitespace-pre-line text-white font-serif text-2xl md:text-4xl lg:text-5xl leading-relaxed max-w-3xl">
+        <div
+          ref={verseRef}
+          className="text-center text-white font-serif font-bold whitespace-pre-line leading-tight"
+          style={{ fontSize: fontSize + "rem", lineHeight: 1.15, maxWidth: "100%" }}
+        >
           {verses[verseIndex]}
-        </p>
+        </div>
       </div>
 
       {/* Bottom controls */}
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-6 p-6 z-10">
+      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-8 px-8 py-6 z-10">
         <button onClick={prev} disabled={verseIndex === 0}
-          className="text-white/60 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          className="text-white/50 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
           </svg>
           <span className="text-sm hidden sm:inline">Prev</span>
         </button>
 
         {/* Dots indicator */}
-        <div className="flex gap-1.5">
+        <div className="flex gap-2">
           {verses.map((_, i) => (
             <button key={i} onClick={() => setVerseIndex(i)}
-              className={`w-2 h-2 rounded-full transition-all ${i === verseIndex ? 'bg-accent w-6' : 'bg-white/20 hover:bg-white/40'}`} />
+              className={`h-2.5 rounded-full transition-all ${i === verseIndex ? 'bg-accent w-8' : 'bg-white/20 hover:bg-white/40 w-2.5'}`} />
           ))}
         </div>
 
         <button onClick={() => verseIndex < verses.length - 1 ? next() : onClose()}
-          className="text-white/60 hover:text-white transition-colors flex items-center gap-2">
+          className="text-white/50 hover:text-white transition-colors flex items-center gap-2">
           <span className="text-sm hidden sm:inline">{verseIndex < verses.length - 1 ? 'Next' : 'Done'}</span>
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
           </svg>
         </button>
@@ -361,11 +397,13 @@ export default function HymnsPage() {
           </div>
         </div>
 
-        <p className="text-text-muted text-sm mb-6">
-          {loading ? "Loading hymn library…" : `${filtered.length} hymn${filtered.length !== 1 ? "s" : ""} found`}
-        </p>
+        {loading && <p className="text-text-muted text-sm mb-6">Loading hymn library…</p>}
+        {!loading && search.trim() && (
+          <p className="text-text-muted text-sm mb-6">{filtered.length} hymn{filtered.length !== 1 ? "s" : ""} found</p>
+        )}
 
-        {/* Hymn list with full lyrics inline */}
+        {/* Hymn list — only shown after a search */}
+        {search.trim() && !loading && (
         <div className="space-y-4">
           {paginatedHymns.map((hymn) => (
             <div
@@ -425,8 +463,10 @@ export default function HymnsPage() {
           ))}
         </div>
 
+        )}
+
         {/* Pagination */}
-        {totalPages > 1 && (
+        {search.trim() && totalPages > 1 && (
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -471,18 +511,29 @@ export default function HymnsPage() {
             </button>
           </div>
         )}
-        {totalPages > 1 && (
+        {search.trim() && totalPages > 1 && (
           <p className="text-center text-text-muted text-xs mt-4">
             Page {currentPage} of {totalPages} · Showing {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} of {filtered.length}
           </p>
         )}
 
-        {!loading && filtered.length === 0 && (
+        {!loading && search.trim() && filtered.length === 0 && (
           <div className="text-center py-20">
             <svg className="w-16 h-16 text-stone-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
             </svg>
             <p className="text-text-muted text-lg">No hymns found for &ldquo;{search}&rdquo;</p>
+          </div>
+        )}
+
+        {/* Prompt to search */}
+        {!loading && !search.trim() && (
+          <div className="text-center py-16">
+            <svg className="w-16 h-16 text-stone-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <p className="text-text-muted text-lg font-medium">Search for a hymn above</p>
+            <p className="text-text-muted text-sm mt-1">Enter a title or hymn number to browse the hymnal</p>
           </div>
         )}
 

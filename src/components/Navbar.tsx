@@ -19,11 +19,11 @@ const navLinks = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string>("/logo/trinity-logo.png");
   const pathname = usePathname();
 
   useEffect(() => {
-    getSiteSettings().then((s) => setLogoUrl(s.logoUrl || null));
+    getSiteSettings().then((s) => { if (s.logoUrl) setLogoUrl(s.logoUrl); });
   }, []);
 
   useEffect(() => {

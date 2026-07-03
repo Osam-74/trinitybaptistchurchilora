@@ -17,10 +17,10 @@ const quickLinks = [
 ];
 
 export default function Footer() {
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string>("/logo/trinity-logo.png");
 
   useEffect(() => {
-    getSiteSettings().then((s) => setLogoUrl(s.logoUrl || null));
+    getSiteSettings().then((s) => { if (s.logoUrl) setLogoUrl(s.logoUrl); });
   }, []);
 
   return (

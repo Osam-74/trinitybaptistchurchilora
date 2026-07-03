@@ -283,7 +283,8 @@ function PastorFeedSection() {
             Pastor&apos;s Messages
           </h2>
           <p className="text-text-muted text-lg max-w-xl mx-auto">
-            Words of encouragement, teaching, and inspiration from Rev&apos;d Dr S. O. Mosebolatan
+            Words of encouragement, teaching, and inspiration from<br/>
+            <span className="block mt-1 font-semibold text-primary">Rev&apos;d Dr S. O. Mosebolatan</span>
           </p>
           <div className="gold-divider mt-6 max-w-xs mx-auto"/>
         </div>

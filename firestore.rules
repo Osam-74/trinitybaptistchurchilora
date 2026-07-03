@@ -22,10 +22,11 @@ service cloud.firestore {
       allow write: if request.auth != null;
     }
 
-    // Choir & Media Team registrations
-    // Public can create (sign-up form), only admins can read/update/delete
+    // Choir & Media Team members
+    // Public can read (the /team page shows approved members to visitors)
+    // and create (sign-up form). Only admins can update/delete.
     match /choir_members/{memberId} {
-      allow read: if request.auth != null;
+      allow read: if true;
       allow create: if true;
       allow update, delete: if request.auth != null;
     }
