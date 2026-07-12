@@ -11,7 +11,6 @@ export default function ProtectedAdminLayout({ children }: { children: React.Rea
 
   useEffect(() => {
     if (!auth) {
-      // Firebase didn't initialize — treat as unauthed so user sees login page
       setStatus("unauthed");
       router.replace("/admin");
       return;
@@ -29,10 +28,10 @@ export default function ProtectedAdminLayout({ children }: { children: React.Rea
 
   if (status === "checking" || status === "unauthed") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-          <p className="text-text-muted text-sm">Checking access…</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0B2C22' }}>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-[#C8E63A]/30 border-t-[#C8E63A] rounded-full animate-spin" />
+          <p className="text-[#C8E63A]/60 text-sm font-medium tracking-wide">Verifying access…</p>
         </div>
       </div>
     );

@@ -4,64 +4,105 @@ import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-const ALL_PHOTOS = [
-  "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=800&q=80",
-  "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80",
-  "https://images.unsplash.com/photo-1507692049790-de58290a4334?w=800&q=80",
-  "https://images.unsplash.com/photo-1478147427282-58a87a120781?w=800&q=80",
-  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80",
-  "https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=800&q=80",
-  "https://images.unsplash.com/photo-1438032005730-c779502df39b?w=800&q=80",
-  "https://images.unsplash.com/photo-1490633874645-1a651f43e4b6?w=800&q=80",
-  "https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=800&q=80",
-  "https://images.unsplash.com/photo-1460574283810-2aab119d8511?w=800&q=80",
-  "https://images.unsplash.com/photo-1519997943534-a9d08c94a4d8?w=800&q=80",
-  "https://images.unsplash.com/photo-1485871800524-4516490e7529?w=800&q=80",
+const GALLERIES = [
+  {
+    category: "Worship",
+    title: "Sunday Glorious Service",
+    photo: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80",
+    desc: "Lifting holy hands in the presence of the King."
+  },
+  {
+    category: "Events",
+    title: "Youth Anniversary",
+    photo: "https://images.unsplash.com/photo-1507692049790-de58290a4334?w=800&q=80",
+    desc: "A generation burning with zeal for the gospel."
+  },
+  {
+    category: "Community",
+    title: "Community Welfare Drive",
+    photo: "https://images.unsplash.com/photo-1478147427282-58a87a120781?w=800&q=80",
+    desc: "Spreading the practical love of Christ across Ilora."
+  },
+  {
+    category: "Choir",
+    title: "Christmas Carol Festival",
+    photo: "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=800&q=80",
+    desc: "Melodious choristers singing of Christ's nativity."
+  },
+  {
+    category: "Worship",
+    title: "Praise and Miracles Night",
+    photo: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80",
+    desc: "Supernatural breakthroughs during fervent praise."
+  },
+  {
+    category: "Events",
+    title: "Annual Church Convention",
+    photo: "https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=800&q=80",
+    desc: "A gathering of believers receiving unceasing fire."
+  },
+  {
+    category: "Community",
+    title: "Sunday School Outreach",
+    photo: "https://images.unsplash.com/photo-1490633874645-1a651f43e4b6?w=800&q=80",
+    desc: "Planting God's Word early in the young ones."
+  },
+  {
+    category: "Choir",
+    title: "Music Ministry Workshop",
+    photo: "https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=800&q=80",
+    desc: "Equipping vocalists and musicians for high service."
+  },
+  {
+    category: "Worship",
+    title: "Communion Service",
+    photo: "https://images.unsplash.com/photo-1460574283810-2aab119d8511?w=800&q=80",
+    desc: "Taking the breaking of bread in profound holiness."
+  },
+  {
+    category: "Events",
+    title: "Revival and Deliverance",
+    photo: "https://images.unsplash.com/photo-1519997943534-a9d08c94a4d8?w=800&q=80",
+    desc: "Souls saved and chains broken in Jesus name."
+  },
+  {
+    category: "Community",
+    title: "Health & Welfare Day",
+    photo: "https://images.unsplash.com/photo-1485871800524-4516490e7529?w=800&q=80",
+    desc: "Providing basic healthcare checkups for the town."
+  }
 ];
 
-// Tripple the photos for seamless infinite scroll
-const makeRow = (photos: string[]) => [...photos, ...photos, ...photos];
-
-const ROW1 = makeRow(ALL_PHOTOS.slice(0, 6));
-const ROW2 = makeRow(ALL_PHOTOS.slice(4, 10));
-const ROW3 = makeRow(ALL_PHOTOS.slice(2, 8));
-
-function ScrollRow({ photos, direction, speed = "35s" }: { photos: string[]; direction: "left" | "right"; speed?: string }) {
-  return (
-    <div className="overflow-hidden relative">
-      {/* fade edges */}
-      <div className="absolute left-0 top-0 bottom-0 w-20 z-10 pointer-events-none" style={{ background: 'linear-gradient(to right, var(--color-bg-alt), transparent)' }}/>
-      <div className="absolute right-0 top-0 bottom-0 w-20 z-10 pointer-events-none" style={{ background: 'linear-gradient(to left, var(--color-bg-alt), transparent)' }}/>
-      <div className={direction === "left" ? "scroll-row-left" : "scroll-row-right"} style={{ animationDuration: speed }}>
-        {photos.map((photo, i) => (
-          <div key={i} className="flex-shrink-0 w-60 h-44 mx-1.5 rounded-2xl overflow-hidden cursor-pointer group">
-            <img src={photo} alt={`Gallery photo ${i}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+const VIDEO_GALLERY = [
+  { youtubeId: "Sc6C6q9T2QY", title: "Sunday Worship Highlights", date: "July 2026" },
+  { youtubeId: "Sc6C6q9T2QY", title: "Rev'd Dr S. O. Mosebolatan Sermon Clip", date: "June 2026" },
+  { youtubeId: "Sc6C6q9T2QY", title: "Choir Melodious Ministration", date: "May 2026" },
+];
 
 export default function GalleryPage() {
+  const [selectedCategory, setSelectedCategory] = useState<"All" | "Worship" | "Events" | "Community" | "Choir">("All");
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [currentPhoto, setCurrentPhoto] = useState(0);
-  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
 
-  const openLightbox = (index: number) => {
-    setCurrentPhoto(index);
-    setLightboxOpen(true);
+  const filteredPhotos = GALLERIES.filter(p => selectedCategory === "All" || p.category === selectedCategory);
+
+  const openLightbox = (photoUrl: string) => {
+    const idx = GALLERIES.findIndex(p => p.photo === photoUrl);
+    if (idx !== -1) {
+      setSelectedPhotoIndex(idx);
+      setLightboxOpen(true);
+    }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    files.forEach(file => {
-      const url = URL.createObjectURL(file);
-      setUploadedFiles(prev => [...prev, url]);
-    });
+  const nextPhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedPhotoIndex((prev) => (prev + 1) % GALLERIES.length);
   };
 
-  const allDisplayPhotos = [...ALL_PHOTOS, ...uploadedFiles];
+  const prevPhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedPhotoIndex((prev) => (prev - 1 + GALLERIES.length) % GALLERIES.length);
+  };
 
   return (
     <main className="min-h-screen bg-bg">
@@ -70,131 +111,162 @@ export default function GalleryPage() {
       {/* Hero */}
       <div className="page-hero pt-20">
         <div className="py-20 lg:py-28 relative">
-          {/* Decorative cross */}
-          <div className="absolute right-16 top-8 opacity-8 hidden lg:block">
-            <svg viewBox="0 0 48 60" className="w-12 h-16 text-accent floating-cross" fill="currentColor">
-              <rect x="20" y="0" width="8" height="60" rx="4"/>
-              <rect x="0" y="16" width="48" height="8" rx="4"/>
+          <div className="absolute right-16 top-8 opacity-10 hidden lg:block">
+            <svg viewBox="0 0 48 60" className="w-12 h-16 text-accent animate-pulse" fill="currentColor">
+              <rect x="20" y="0" width="8" height="60" rx="4" />
+              <rect x="0" y="16" width="48" height="8" rx="4" />
             </svg>
           </div>
           <div className="max-w-4xl mx-auto px-4 text-center">
             <div className="inline-flex items-center gap-2 glass-card rounded-full px-5 py-2 mb-6 text-accent text-sm font-semibold animate-fade-in">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              MEDIA GALLERY
+              GALLERY
             </div>
             <h1 className="font-serif text-4xl lg:text-6xl text-white font-bold mb-5 animate-fade-in-up">
-              Moments of <span className="text-gradient-gold">Grace</span>
+              Church Life in <span className="text-gradient-gold">Pictures</span>
             </h1>
-            <p className="text-white/60 text-lg animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              Capturing beautiful moments of worship, fellowship, and community life at Trinity Baptist Church, Ilora
+            <p className="text-white/60 text-lg animate-fade-in" style={{ animationDelay: "0.2s" }}>
+              Capturing moments of spiritual ecstasy, sincere fellowship, and grace at Trinity Baptist Church, Ilora.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Auto-scroll section */}
-      <div className="bg-bg-alt py-14">
-        <div className="mb-4 text-center">
-          <p className="text-text-muted text-xs uppercase tracking-widest">Hover to pause — scroll continuously</p>
-        </div>
-        <div className="space-y-3">
-          <ScrollRow photos={ROW1} direction="left" speed="40s"/>
-          <ScrollRow photos={ROW2} direction="right" speed="45s"/>
-          <ScrollRow photos={ROW3} direction="left" speed="38s"/>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Section header */}
-        <div className="flex items-end justify-between mb-10">
-          <div>
-            <p className="text-primary text-sm font-semibold mb-2 uppercase tracking-wider">ALL PHOTOS</p>
-            <h2 className="font-serif text-3xl text-primary font-bold">Full Gallery</h2>
-          </div>
-          {/* Upload button (public facing - would need auth in real app) */}
-          <label className="btn-shine btn-gold inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-pointer">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-            </svg>
-            Upload Photo
-            <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileUpload}/>
-          </label>
-        </div>
-
-        {/* Masonry grid */}
-        <div className="columns-2 sm:columns-3 lg:columns-4 gap-3 space-y-3">
-          {allDisplayPhotos.map((photo, i) => (
-            <div
-              key={i}
-              className="break-inside-avoid overflow-hidden rounded-2xl cursor-pointer group card-hover relative"
-              onClick={() => openLightbox(i)}
+      {/* Album Filter Tabs */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="flex flex-wrap justify-center gap-2.5 mb-12">
+          {(["All", "Worship", "Events", "Community", "Choir"] as const).map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
+                selectedCategory === cat
+                  ? "bg-primary text-white shadow-lg shadow-primary/20"
+                  : "bg-white text-stone-600 hover:text-primary border border-stone-200/50"
+              }`}
             >
-              <img src={photo} alt={`Church photo ${i + 1}`} className="w-full group-hover:scale-105 transition-transform duration-500 block"/>
-              <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
-                    <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                  </div>
-                  {/* Download button */}
-                  <a
-                    href={photo}
-                    download={`trinity-church-photo-${i + 1}.jpg`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-7 h-7 rounded-full bg-primary backdrop-blur flex items-center justify-center hover:bg-primary-light transition-colors"
-                    title="Download photo"
-                  >
-                    <svg className="w-3.5 h-3.5 text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                  </a>
-                </div>
-              </div>
-            </div>
+              {cat}
+            </button>
           ))}
         </div>
+
+        {/* Masonry-style Grid with Varying Span heights */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[220px]">
+          {filteredPhotos.map((item, idx) => {
+            // Apply varied row-spans for a dynamic masonry-style flow
+            let rowSpan = "row-span-1";
+            if (idx % 3 === 0) rowSpan = "row-span-2";
+            else if (idx % 4 === 1) rowSpan = "row-span-2";
+
+            return (
+              <div
+                key={idx}
+                className={`${rowSpan} relative rounded-3xl overflow-hidden cursor-pointer group shadow-sm border border-stone-200/50 flex flex-col justify-end`}
+                onClick={() => openLightbox(item.photo)}
+              >
+                <img
+                  src={item.photo}
+                  alt={item.title}
+                  className="absolute inset-0 w-full h-full object-cover img-zoom transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/85 via-primary-dark/30 to-transparent opacity-85 group-hover:opacity-95 transition-opacity" />
+                <div className="relative p-6 z-10 text-white transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300">
+                  <span className="bg-accent text-primary-dark text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    {item.category}
+                  </span>
+                  <h3 className="font-serif text-lg font-bold text-white mt-2 leading-tight">{item.title}</h3>
+                  <p className="text-white/70 text-xs mt-1.5 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Video Gallery Section */}
+        <div className="mt-24 pt-16 border-t border-stone-200">
+          <div className="text-center mb-12">
+            <span className="text-accent-dark text-xs font-bold uppercase tracking-widest">DIGITAL MEDIA</span>
+            <h2 className="font-serif text-3xl font-bold text-primary mt-2">Video Gallery</h2>
+            <p className="text-stone-600 text-sm mt-2">Watch highlights and sermons from our streaming ministry</p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {VIDEO_GALLERY.map((video, idx) => (
+              <div key={idx} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-stone-100 group">
+                <div className="relative h-48 bg-primary-dark overflow-hidden">
+                  <img
+                    src={`https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`}
+                    alt={video.title}
+                    className="w-full h-full object-cover img-zoom"
+                  />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <a
+                      href={`https://youtube.com/watch?v=${video.youtubeId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-12 h-12 rounded-full bg-accent text-primary-dark flex items-center justify-center hover:bg-accent-light transition-all shadow-lg hover:scale-105"
+                    >
+                      <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+                <div className="p-5">
+                  <span className="text-[10px] text-stone-500 font-bold uppercase">{video.date}</span>
+                  <h4 className="font-serif text-base font-bold text-primary mt-1">{video.title}</h4>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Lightbox */}
+      {/* Lightbox Overlay */}
       {lightboxOpen && (
         <div className="lightbox-overlay" onClick={() => setLightboxOpen(false)}>
-          <button className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors z-10"
-            onClick={() => setLightboxOpen(false)}>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-          <button className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors z-10"
-            onClick={(e) => { e.stopPropagation(); setCurrentPhoto((p) => (p - 1 + allDisplayPhotos.length) % allDisplayPhotos.length); }}>
+          <button
+            className="absolute top-5 right-5 w-12 h-12 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80 transition-colors z-20"
+            onClick={() => setLightboxOpen(false)}
+          >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <button className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors z-10"
-            onClick={(e) => { e.stopPropagation(); setCurrentPhoto((p) => (p + 1) % allDisplayPhotos.length); }}>
+
+          <button
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80 transition-colors z-20"
+            onClick={prevPhoto}
+          >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <div className="flex flex-col items-center gap-4" onClick={(e) => e.stopPropagation()}>
-            <img src={allDisplayPhotos[currentPhoto]} alt="Gallery" className="max-w-[88vw] max-h-[80vh] object-contain rounded-2xl animate-scale-in shadow-2xl"/>
-            <div className="flex items-center gap-4">
-              <span className="text-white/50 text-sm">{currentPhoto + 1} / {allDisplayPhotos.length}</span>
-              <a
-                href={allDisplayPhotos[currentPhoto]}
-                download={`trinity-church-photo-${currentPhoto + 1}.jpg`}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-white font-semibold rounded-xl text-sm hover:bg-primary-light transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
-                Download
-              </a>
+
+          <div className="max-w-4xl max-h-[80vh] px-4 flex flex-col items-center justify-center" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={GALLERIES[selectedPhotoIndex].photo}
+              alt={GALLERIES[selectedPhotoIndex].title}
+              className="max-h-[70vh] max-w-full object-contain rounded-2xl shadow-2xl border border-white/10"
+            />
+            <div className="mt-4 text-center text-white max-w-xl">
+              <h3 className="font-serif text-xl font-bold">{GALLERIES[selectedPhotoIndex].title}</h3>
+              <p className="text-white/70 text-xs mt-1">{GALLERIES[selectedPhotoIndex].desc}</p>
             </div>
           </div>
+
+          <button
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80 transition-colors z-20"
+            onClick={nextPhoto}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
       )}
 

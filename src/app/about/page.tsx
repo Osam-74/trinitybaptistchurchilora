@@ -27,22 +27,21 @@ const values = [
   { title: "Prayer", desc: "A house of prayer — we believe in the transforming power of intercession.", icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" },
 ];
 
+const timeline = [
+  { year: "Founded", title: "Established in Faith", desc: "Trinity Baptist Church, Ilora was established as part of the Nigerian Baptist Convention's visionary expansion — beginning as a small, fervent house fellowship dedicated to the pure gospel of Jesus Christ." },
+  { year: "Growth", title: "Vibrant Congregation", desc: "Experiencing the favour of God, the church grew rapidly in membership. The physical sanctuary was expanded to welcome hundreds of families seeking spiritual nourishment and genuine community." },
+  { year: "Outreach", title: "Community Impact", desc: "Launch of deep community outreach initiatives, evangelical crusades, local welfare schemes, and structured social impact programs reaching across Ilora and Oyo State." },
+  { year: "Today", title: "Sanctuary of Praise", desc: "Now a thriving, spiritually vibrant congregation under the anointed leadership of Rev'd Dr S. O. Mosebolatan — shepherding souls into everlasting grace and transforming lives through God's Word." },
+];
+
 export default function AboutPage() {
   useScrollReveal();
   const [leaders, setLeaders] = useState<Leader[]>([]);
-  const [debug, setDebug] = useState<string>("loading...");
 
   useEffect(() => {
     listLeaders()
-      .then(data => {
-        const active = data.filter(l => l.active);
-        setLeaders(active.length > 0 ? data : defaultLeaders);
-        setDebug(`fetched ${data.length} docs, ${active.length} active${active.length === 0 ? " (using 4 defaults)" : ""}`);
-      })
-      .catch(err => {
-        setLeaders(defaultLeaders);
-        setDebug(`ERROR: ${err instanceof Error ? err.message : String(err)}`);
-      });
+      .then((data) => { const active = data.filter((l) => l.active); setLeaders(active.length > 0 ? data : defaultLeaders); })
+      .catch(() => setLeaders(defaultLeaders));
   }, []);
 
   return (
@@ -51,126 +50,129 @@ export default function AboutPage() {
 
       {/* Hero */}
       <div className="page-hero pt-20">
-        <div className="py-20 lg:py-28">
+        <div className="py-24 lg:py-32">
           <div className="max-w-4xl mx-auto px-4 text-center">
             <div className="inline-flex items-center gap-2 glass-card rounded-full px-5 py-2 mb-6 text-accent text-sm font-semibold animate-fade-in">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               ABOUT US
             </div>
-            <h1 className="font-serif text-4xl lg:text-6xl text-white font-bold mb-5 animate-fade-in-up">
-              Our <span className="text-gradient-gold">Story</span>
+            <h1 className="font-serif text-5xl lg:text-7xl text-white font-bold mb-5 animate-fade-in-up leading-tight">
+              Our Story &<br/><span className="text-gradient-gold">Mission</span>
             </h1>
-            <p className="text-white/60 text-lg animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              Decades of faith, fellowship, and fruitful service to God and community
+            <p className="text-white/60 text-lg lg:text-xl animate-fade-in max-w-2xl mx-auto" style={{ animationDelay: '0.2s' }}>
+              Decades of faith, fellowship, and fruitful service to God and community in Oyo State, Nigeria.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Mission section */}
-      <section className="py-20 bg-bg">
+      {/* Mission */}
+      <section className="py-24 bg-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="reveal-left">
-              <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4">
-                <div className="w-8 h-px bg-primary-light/40"/>
-                OUR MISSION
-              </div>
-              <h2 className="font-serif text-4xl font-bold text-primary mb-6">
-                Built on the <span className="text-gradient-gold">Rock</span> of Christ
-              </h2>
-              <p className="text-text-muted text-lg leading-relaxed mb-5">
-                Trinity Baptist Church, Ilora was founded with a singular vision: to be a <em className="text-primary font-medium">Sanctuary of Praise</em> — a place where lives are transformed by the power of God&apos;s Word and the love of a genuine community.
+              <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>OUR MISSION</div>
+              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-primary mb-6 leading-tight">Built on the <span className="text-gradient-gold">Rock</span> of Christ</h2>
+              <p className="text-stone-700 text-lg leading-relaxed mb-5">
+                Trinity Baptist Church, Ilora is a sanctified community founded with a singular, glorious vision: to be a <strong>Sanctuary of Praise</strong> — a place where lives are transformed, hearts are healed, and souls are drawn into the fullness of God's love.
               </p>
-              <p className="text-text-muted leading-relaxed mb-8">
-                Through decades of faithful ministry under the leadership of Rev&apos;d Dr S. O. Mosebolatan, we have grown into a vibrant congregation committed to evangelism, discipleship, and community impact across Ilora and beyond.
+              <p className="text-stone-600 leading-relaxed mb-8">
+                Through intentional worship, fervent prayer, practical discipleship, and local outreach under the anointed guidance of Rev&apos;d Dr S. O. Mosebolatan, we actively fulfill the Great Commission across Ilora and beyond.
               </p>
               <Link href="/contact" className="btn-shine btn-gold inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold">
                 Get In Touch
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                </svg>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
               </Link>
             </div>
-
-            {/* Cross graphic */}
-            <div className="flex items-center justify-center reveal-right">
-              <div className="relative">
-                <div className="w-64 h-64 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                  <svg viewBox="0 0 80 100" className="w-24 h-32 text-accent-dark animate-cross-glow" fill="currentColor">
-                    <rect x="34" y="0" width="12" height="100" rx="6"/>
-                    <rect x="0" y="28" width="80" height="12" rx="6"/>
-                  </svg>
+            <div className="reveal-right">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl img-zoom group">
+                <img src="https://images.unsplash.com/photo-1438032005730-c779502df39b?w=800&auto=format&fit=crop&q=80" alt="Church community" className="w-full h-[420px] object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/60 to-transparent pointer-events-none" />
+                <div className="absolute bottom-6 left-6 right-6">
+                  <div className="glass-card p-4 rounded-2xl text-white">
+                    <p className="text-accent font-bold text-sm">TRINITY BAPTIST CHURCH</p>
+                    <p className="text-xs text-white/80">Ilora, Oyo State, Nigeria</p>
+                  </div>
                 </div>
-                <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-primary/10 animate-float-slow"/>
-                <div className="absolute -bottom-4 -left-4 w-16 h-16 rounded-full bg-primary/10 animate-float-slow" style={{ animationDelay: '2s' }}/>
-                <div className="absolute inset-0 rounded-full border-2 border-accent/20 animate-rotate-ring"/>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Core values */}
-      <section className="py-20 bg-bg-alt">
+      {/* Timeline */}
+      <section className="py-24 bg-bg-alt relative overflow-hidden">
+        <div className="absolute inset-0 pattern-overlay opacity-10"/>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16 reveal">
+            <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>OUR JOURNEY<div className="w-8 h-px bg-primary-light/40"/></div>
+            <h2 className="font-serif text-4xl font-bold text-primary">Our <span className="text-gradient-gold">Timeline</span></h2>
+            <p className="text-stone-600 mt-3 max-w-xl mx-auto">How God has faithfully guided and built His church across generations.</p>
+          </div>
+          <div className="relative space-y-12">
+            <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-primary/15 transform md:-translate-x-1/2"/>
+            {timeline.map((entry, idx) => {
+              const isEven = idx % 2 === 0;
+              return (
+                <div key={entry.year} className={`relative flex flex-col md:flex-row items-start md:items-center gap-8 reveal ${isEven ? "" : "md:flex-row-reverse"}`}>
+                  <div className="absolute left-4 md:left-1/2 top-6 w-4 h-4 rounded-full bg-accent border-4 border-primary-dark shadow-md z-20 transform md:-translate-x-1/2 -translate-x-1/2"/>
+                  <div className="w-full md:w-1/2 pl-12 md:pl-0 md:pr-12">
+                    <div className={`bg-white rounded-3xl p-6 shadow-sm border border-stone-100 card-hover ${isEven ? "md:text-right" : ""}`}>
+                      <span className="inline-block bg-accent/15 text-primary font-bold text-xs px-3 py-1 rounded-full mb-3">{entry.year}</span>
+                      <h3 className="font-serif text-xl font-bold text-primary mb-2">{entry.title}</h3>
+                      <p className="text-stone-600 text-sm leading-relaxed">{entry.desc}</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:block w-1/2"/>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Core Values */}
+      <section className="py-24 bg-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14 reveal">
-            <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4">
-              <div className="w-8 h-px bg-primary-light/40"/>
-              WHAT WE BELIEVE
-              <div className="w-8 h-px bg-primary-light/40"/>
-            </div>
+            <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>WHAT WE BELIEVE<div className="w-8 h-px bg-primary-light/40"/></div>
             <h2 className="font-serif text-4xl font-bold text-primary">Our Core <span className="text-gradient-gold">Values</span></h2>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
-            {values.map((v) => (
-              <div key={v.title} className="bg-white rounded-2xl p-7 border border-stone-100 shadow-sm card-hover">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {values.map((v, i) => (
+              <div key={v.title} className="bg-white rounded-2xl p-7 border border-stone-100 shadow-sm card-hover reveal" style={{ transitionDelay: `${i * 0.08}s` }}>
                 <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-5">
-                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={v.icon}/>
-                  </svg>
+                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={v.icon}/></svg>
                 </div>
                 <h3 className="font-serif text-xl font-bold text-primary mb-2">{v.title}</h3>
-                <p className="text-text-muted text-sm leading-relaxed">{v.desc}</p>
+                <p className="text-stone-600 text-sm leading-relaxed">{v.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* TEMP DEBUG — remove once leadership display is confirmed working */}
-      <div className="max-w-3xl mx-auto px-4 pt-4">
-        <p className="text-xs font-mono bg-accent/10 text-primary border border-accent/30 rounded-lg px-3 py-2 text-center">
-          [debug] leaders: {debug} — build 2026-07-03
-        </p>
-      </div>
-
       {/* Leadership */}
-      <section className="py-20 bg-bg">
+      <section className="py-24 bg-bg-alt">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14 reveal">
-            <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4">
-              <div className="w-8 h-px bg-primary-light/40"/>
-              MEET THE TEAM
-              <div className="w-8 h-px bg-primary-light/40"/>
-            </div>
+            <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>MEET THE TEAM<div className="w-8 h-px bg-primary-light/40"/></div>
             <h2 className="font-serif text-4xl font-bold text-primary">Church <span className="text-gradient-gold">Leadership</span></h2>
-            <p className="text-text-muted mt-3 max-w-xl mx-auto">Godly leaders dedicated to shepherding the flock of Trinity Baptist Church, Ilora</p>
+            <p className="text-stone-600 mt-3 max-w-xl mx-auto">Godly leaders dedicated to shepherding the flock of Trinity Baptist Church, Ilora.</p>
           </div>
-
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {leaders.filter(l => l.active).map((leader, i) => (
-              <div key={leader.id} className="bg-white rounded-3xl overflow-hidden border border-stone-100 shadow-sm card-hover text-center" style={{ animationDelay: `${i * 0.1}s` }}>
-                <div className="relative h-52 overflow-hidden">
-                  <img src={leader.photoUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face"} alt={leader.name} className="w-full h-full object-cover"/>
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/50 to-transparent"/>
+              <div key={leader.id} className="bg-white rounded-3xl overflow-hidden border border-stone-100 shadow-sm card-hover reveal group" style={{ transitionDelay: `${i * 0.1}s` }}>
+                <div className="relative h-64 img-zoom">
+                  <img src={leader.photoUrl} alt={leader.name} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary-dark via-primary-dark/20 to-transparent opacity-80"/>
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <span className="inline-block bg-accent text-primary-dark text-[10px] font-bold px-2 py-0.5 rounded-full mb-1">{leader.role}</span>
+                    <h3 className="font-serif text-lg font-bold text-white leading-tight">{leader.name}</h3>
+                  </div>
                 </div>
                 <div className="p-5">
-                  <h3 className="font-serif text-base font-bold text-primary mb-1">{leader.name}</h3>
-                  <p className="text-primary-light text-sm font-semibold mb-3">{leader.role}</p>
-                  <p className="text-text-muted text-xs leading-relaxed">{leader.bio}</p>
+                  <p className="text-stone-600 text-xs leading-relaxed line-clamp-3">{leader.bio}</p>
                 </div>
               </div>
             ))}
@@ -179,19 +181,16 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 bg-primary relative overflow-hidden">
-        <div className="absolute inset-0 pattern-overlay opacity-40"/>
-        <div className="relative max-w-3xl mx-auto px-4 text-center reveal">
-          <h2 className="font-serif text-3xl text-white font-bold mb-4">Be Part of Our Family</h2>
-          <p className="text-white/60 mb-7">Join us this Sunday at 7:30 AM or 10:00 AM and experience the warmth of Trinity Baptist Church, Ilora.</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/book" className="btn-shine btn-gold inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl font-semibold">
-              Book a Pastor Session
-            </Link>
-            <Link href="/contact" className="btn-shine inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl font-semibold glass-card text-white hover:bg-white/15 transition-colors">
-              Contact Us
-            </Link>
-          </div>
+      <section className="py-24 bg-primary-dark text-white relative overflow-hidden">
+        <div className="absolute inset-0 pattern-overlay opacity-10"/>
+        <div className="floating-orb w-64 h-64 bg-accent/5 -top-20 -right-20 animate-float-slow"/>
+        <div className="max-w-4xl mx-auto px-4 text-center relative z-10 reveal">
+          <h2 className="font-serif text-4xl lg:text-5xl font-bold mb-4">Join Our Family</h2>
+          <p className="text-white/70 text-lg mb-8 max-w-xl mx-auto">Whether you are visiting, seeking a spiritual home, or looking to serve — there is a place for you at Trinity.</p>
+          <Link href="/contact" className="btn-shine btn-gold inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-primary-dark">
+            Connect With Us
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </Link>
         </div>
       </section>
 
