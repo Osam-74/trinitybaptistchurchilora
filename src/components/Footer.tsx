@@ -16,20 +16,28 @@ const quickLinks = [
 ];
 
 const serviceTimes = [
-  { day: "Sunday — 1st Service", time: "7:30 AM" },
-  { day: "Sunday — 2nd Service", time: "10:00 AM" },
-  { day: "Wednesday — Bible Study", time: "5:00 PM" },
-  { day: "Friday — Prayer Meeting", time: "5:30 PM" },
+  { day: "Sunday 1st Service", time: "7:30 AM" },
+  { day: "Sunday 2nd Service", time: "10:00 AM" },
+  { day: "Wednesday — Prayer Meeting", time: "5:00 PM" },
+  { day: "Wednesday — Bible Study", time: "6:00 PM" },
 ];
 
 export default function Footer() {
   const [logoUrl, setLogoUrl] = useState<string>("/logo/trinity-logo.png");
+  const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {
-    getSiteSettings().then((s) => { if (s.logoUrl) setLogoUrl(s.logoUrl); });
+    getSiteSettings().then((s) => {
+      setSettings(s);
+      if (s.logoUrl) setLogoUrl(s.logoUrl);
+    });
   }, []);
 
   const handleBackToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+  const contactEmail = settings?.contactEmail || "trinitybaptistchurchilora@gmail.com";
+  const contactPhone = settings?.contactPhone || "+234 (0) phone placeholder";
+  const address = settings?.address || "Ilora, Oyo State, Nigeria";
 
   return (
     <footer className="relative bg-primary-dark text-white/70 overflow-hidden">
@@ -128,9 +136,9 @@ export default function Footer() {
             </h4>
             <ul className="space-y-4">
               {[
-                { icon: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z", text: "Ilora, Oyo State, Nigeria" },
-                { icon: "M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z", text: "+234 (0) phone placeholder" },
-                { icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", text: "info@trinitybaptistilora.org" },
+                { icon: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z", text: address },
+                { icon: "M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z", text: contactPhone },
+                { icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", text: contactEmail },
               ].map((item, i) => (
                 <li key={i} className="flex gap-3">
                   <div className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center flex-shrink-0">

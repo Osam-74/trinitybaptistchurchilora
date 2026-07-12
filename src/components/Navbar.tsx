@@ -10,10 +10,13 @@ const navLinks = [
   { href: "/about", label: "About" },
   { href: "/sermons", label: "Sermons" },
   { href: "#", label: "Ministries", isDropdown: true },
-  { href: "/activities", label: "Activities" },
+  { href: "/activities", label: "Schedule" },
+  { href: "/hymns", label: "Hymns" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/pastor", label: "Our Pastor" },
+  { href: "/team", label: "Our Team" },
+  { href: "/pastor", label: "Pastor" },
   { href: "/contact", label: "Contact" },
+  { href: "/book", label: "Book a Session" },
 ];
 
 const ministries = [
@@ -85,14 +88,14 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden xl:flex items-center gap-1">
+          <div className="hidden xl:flex items-center gap-0.5">
             {navLinks.map((link) => {
               if (link.isDropdown) {
                 return (
                   <div key={link.label} className="relative"
                     onMouseEnter={() => setIsDropdownOpen(true)}
                     onMouseLeave={() => setIsDropdownOpen(false)}>
-                    <button className="px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/8 flex items-center gap-1 transition-all duration-300">
+                    <button className="px-2.5 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 flex items-center gap-1 transition-all duration-300">
                       {link.label}
                       <svg className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -115,19 +118,19 @@ export default function Navbar() {
               const isActive = pathname === link.href;
               return (
                 <Link key={link.href} href={link.href}
-                  className={`relative px-3 py-2 text-sm font-medium transition-all duration-300 hover:text-white rounded-lg ${isActive ? "text-accent bg-white/5" : "text-white/80 hover:bg-white/5"}`}>
+                  className={`relative px-2.5 py-2 text-sm font-medium transition-all duration-300 hover:text-white rounded-lg ${isActive ? "text-accent bg-white/5" : "text-white/80 hover:bg-white/5"}`}>
                   {link.label}
-                  {isActive && <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-accent rounded-full" />}
+                  {isActive && <span className="absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-accent rounded-full" />}
                 </Link>
               );
             })}
             <Link href="/live"
-              className="ml-3 px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-all flex items-center gap-2 shadow-lg hover:shadow-red-600/30 hover:scale-105">
-              <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+              className="ml-2 px-3 py-1.5 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-all flex items-center gap-1.5 shadow-lg hover:shadow-red-600/30 hover:scale-105">
+              <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
               Live
             </Link>
             <Link href="/give"
-              className="ml-2 px-4 py-2 bg-accent text-primary-dark text-sm font-bold rounded-lg hover:bg-accent-light transition-all shadow-lg hover:shadow-accent/30 hover:scale-105">
+              className="ml-1.5 px-3 py-1.5 bg-accent text-primary-dark text-sm font-bold rounded-lg hover:bg-accent-light transition-all shadow-lg hover:shadow-accent/30 hover:scale-105">
               Give
             </Link>
           </div>
@@ -153,13 +156,13 @@ export default function Navbar() {
       {/* Mobile menu panel — 75% width, slides from right */}
       <div className={`xl:hidden fixed top-0 right-0 bottom-0 w-[75%] sm:w-[50%] bg-primary-dark border-l border-accent/15 shadow-2xl z-50 transition-transform duration-300 ease-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex flex-col h-full justify-between p-6 pt-24 overflow-y-auto">
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {navLinks.map((link) => {
               if (link.isDropdown) {
                 return (
                   <div key={link.label} className="space-y-1">
                     <button onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="w-full flex items-center justify-between text-left px-4 py-3 text-base font-semibold text-white/80 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                      className="w-full flex items-center justify-between text-left px-4 py-2.5 text-base font-semibold text-white/80 hover:text-white hover:bg-white/5 rounded-xl transition-all">
                       {link.label}
                       <svg className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -179,20 +182,20 @@ export default function Navbar() {
               const isActive = pathname === link.href;
               return (
                 <Link key={link.href} href={link.href}
-                  className={`block px-4 py-3 rounded-xl text-base font-semibold transition-all ${isActive ? "text-accent bg-white/5 border border-accent/10" : "text-white/80 hover:text-white hover:bg-white/5"}`}>
+                  className={`block px-4 py-2.5 rounded-xl text-base font-semibold transition-all ${isActive ? "text-accent bg-white/5 border border-accent/10" : "text-white/80 hover:text-white hover:bg-white/5"}`}>
                   {link.label}
                 </Link>
               );
             })}
           </div>
-          <div className="space-y-3 mt-8">
+          <div className="space-y-3 mt-6">
             <Link href="/live"
-              className="flex items-center justify-center gap-2 w-full px-4 py-3.5 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-all">
+              className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-all">
               <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
               Watch Live
             </Link>
             <Link href="/give"
-              className="flex items-center justify-center w-full px-4 py-3.5 bg-accent text-primary-dark font-bold rounded-xl hover:bg-accent-light transition-all">
+              className="flex items-center justify-center w-full px-4 py-3 bg-accent text-primary-dark font-bold rounded-xl hover:bg-accent-light transition-all">
               Give Online
             </Link>
             <div className="flex justify-center gap-4 pt-4 border-t border-white/10">

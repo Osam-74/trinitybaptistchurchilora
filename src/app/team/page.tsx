@@ -4,22 +4,41 @@ import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { listLeaders, defaultLeaders } from "@/lib/leaders";
-import { Leader } from "@/types";
+import { listApprovedMembers } from "@/lib/choir";
+import { Leader, ChoirMember } from "@/types";
+import SignUpModal from "@/components/SignUpModal";
 
 export default function TeamPage() {
   const [leaders, setLeaders] = useState<Leader[]>([]);
+  const [choirMembers, setChoirMembers] = useState<ChoirMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingChoir, setLoadingChoir] = useState(true);
+  const [showSignup, setShowSignup] = useState(false);
 
   useEffect(() => {
     listLeaders()
       .then((data) => {
         const active = data.filter((l) => l.active);
-        setLeaders(active.length > 0 ? data : defaultLeaders);
+        // Bugfix: set leaders to active (which is the filtered active leaders), not data (which has all of them).
+        setLeaders(active.length > 0 ? active : defaultLeaders);
         setLoading(false);
       })
       .catch(() => {
         setLeaders(defaultLeaders);
         setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    listApprovedMembers()
+      .then((data) => {
+        setChoirMembers(data || []);
+        setLoadingChoir(false);
+      })
+      .catch((err) => {
+        console.error("Error loading approved choir members:", err);
+        setChoirMembers([]);
+        setLoadingChoir(false);
       });
   }, []);
 
@@ -125,6 +144,68 @@ export default function TeamPage() {
             )}
           </div>
 
+          {/* Choir & Media Team Members Section */}
+          <div className="mb-24 pt-16 border-t border-stone-200">
+            <div className="text-center mb-12">
+              <span className="text-primary-light text-xs font-bold uppercase tracking-widest">MINISTRY TEAM</span>
+              <h3 className="font-serif text-3xl font-bold text-primary mt-1">Choir &amp; Media Team Members</h3>
+              <p className="text-stone-600 text-sm mt-2">The gifted voices, hands, and hearts ministering before His altar.</p>
+            </div>
+
+            {loadingChoir ? (
+              <div className="flex justify-center py-12">
+                <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+              </div>
+            ) : choirMembers.length > 0 ? (
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {choirMembers.map((member) => (
+                  <div
+                    key={member.id}
+                    className="bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm hover:border-accent transition-all duration-300 card-hover group"
+                  >
+                    <div className="relative h-48 bg-primary-dark overflow-hidden">
+                      <img
+                        src={member.photoUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face"}
+                        alt={member.fullName}
+                        className="w-full h-full object-cover img-zoom"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/70 via-transparent to-transparent" />
+                      {member.section && (
+                        <div className="absolute bottom-3 left-3">
+                          <span className="bg-accent text-primary-dark text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                            {member.section}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h4 className="font-serif text-base font-bold text-primary mb-1">{member.fullName}</h4>
+                      <p className="text-stone-500 text-xs font-semibold mb-2">{member.department}</p>
+                      {member.bio && (
+                        <p className="text-stone-600 text-xs leading-relaxed line-clamp-2 italic">
+                          &ldquo;{member.bio}&rdquo;
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-white rounded-3xl border border-stone-200 max-w-xl mx-auto">
+                <p className="text-stone-500 text-sm font-semibold">No members approved yet</p>
+              </div>
+            )}
+
+            <div className="mt-12 text-center">
+              <button
+                onClick={() => setShowSignup(true)}
+                className="btn-gold px-8 py-3.5 rounded-xl font-bold text-sm cursor-pointer shadow-md hover:scale-105 transition-transform"
+              >
+                Join the Team
+              </button>
+            </div>
+          </div>
+
           {/* Departments Section */}
           <div className="mb-24 pt-16 border-t border-stone-200">
             <div className="text-center mb-12">
@@ -183,13 +264,21 @@ export default function TeamPage() {
               <p className="text-white/70 text-sm lg:text-base mb-8">
                 If you have a calling or desire to serve in any of our departments, we welcome you to join us in bringing glory to His sanctuary.
               </p>
-              <a href="/contact" className="btn-shine btn-gold px-8 py-3.5 rounded-xl font-bold inline-block text-primary-dark">
+              <button
+                onClick={() => setShowSignup(true)}
+                className="btn-shine btn-gold px-8 py-3.5 rounded-xl font-bold inline-block text-primary-dark cursor-pointer shadow-md hover:scale-105 transition-transform"
+              >
                 Apply to Join a Team
-              </a>
+              </button>
             </div>
           </div>
         </div>
       </section>
+
+      {/* SignUpModal */}
+      {showSignup && (
+        <SignUpModal dept="Choir" onClose={() => setShowSignup(false)} />
+      )}
 
       <Footer />
     </main>

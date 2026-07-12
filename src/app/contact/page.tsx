@@ -1,13 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { getSiteSettings } from "@/lib/settings";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", subject: "General Inquiry", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [settings, setSettings] = useState<any>(null);
+
+  useEffect(() => {
+    getSiteSettings().then((s) => {
+      setSettings(s);
+    });
+  }, []);
+
+  const contactEmail = settings?.contactEmail || "trinitybaptistchurchilora@gmail.com";
+  const contactPhone = settings?.contactPhone || "+234 (0) 800 123 4567";
+  const address = settings?.address || "Trinity Baptist Church, Ilora, Oyo State, Nigeria.";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,8 +175,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <h3 className="font-serif text-lg font-bold text-primary mb-1">Our Location</h3>
-                <p className="text-stone-600 text-sm">Trinity Baptist Church, Ilora,</p>
-                <p className="text-stone-600 text-sm">Oyo State, Nigeria.</p>
+                <p className="text-stone-600 text-sm">{address}</p>
               </div>
             </div>
 
@@ -207,8 +218,8 @@ export default function ContactPage() {
               </div>
               <div>
                 <h3 className="font-serif text-lg font-bold text-primary mb-1">Get in Touch Directly</h3>
-                <p className="text-stone-600 text-sm">Phone: <a href="tel:+234800000000" className="hover:underline font-semibold text-primary-light">+234 (0) 800 123 4567</a></p>
-                <p className="text-stone-600 text-sm">Email: <a href="mailto:trinitybaptistchurchilora@gmail.com" className="hover:underline font-semibold text-primary-light">trinitybaptistchurchilora@gmail.com</a></p>
+                <p className="text-stone-600 text-sm">Phone: <a href={`tel:${contactPhone}`} className="hover:underline font-semibold text-primary-light">{contactPhone}</a></p>
+                <p className="text-stone-600 text-sm">Email: <a href={`mailto:${contactEmail}`} className="hover:underline font-semibold text-primary-light">{contactEmail}</a></p>
               </div>
             </div>
 
@@ -241,7 +252,7 @@ export default function ContactPage() {
               </svg>
               <h4 className="font-serif text-xl font-bold text-gradient-gold">Trinity Baptist Church</h4>
               <p className="text-white/80 text-sm max-w-md mx-auto">
-                Opposite Local Government Secretariat area, Ilora, Oyo State, Nigeria.
+                {address}
               </p>
             </div>
           </div>

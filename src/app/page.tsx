@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LiveBanner from "@/components/LiveBanner";
 import { getYouTubeThumbnail } from "@/lib/utils";
-import { sampleSermons, sampleActivities } from "@/lib/seed-data";
+import { sampleSermons } from "@/lib/seed-data";
+import { doc, onSnapshot, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 // Custom useScrollReveal Hook
 function useScrollReveal() {
@@ -82,8 +84,90 @@ function StatCounter({ target, suffix = "" }: { target: number; suffix?: string 
 export default function HomePage() {
   useScrollReveal();
 
-  // 1. Live Banner State (simulate check or mock state)
-  const [isLive] = useState(true);
+  // 1. LIVE FEED: Subscription to settings/main doc in Firestore
+  const [isLive, setIsLive] = useState(false);
+
+  useEffect(() => {
+    if (!db) return;
+    try {
+      const docRef = doc(db, "settings", "main");
+      const unsubscribe = onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (typeof data.isLive === "boolean") {
+            setIsLive(data.isLive);
+          }
+        }
+      }, (error) => {
+        console.error("Error listening to settings/main:", error);
+      });
+      return () => unsubscribe();
+    } catch (e) {
+      console.error("Firestore live subscription failed:", e);
+    }
+  }, []);
+
+  // 3. GALLERY SECTION: Fetch 6 most recent photos from gallery_photos
+  interface GalleryPhoto {
+    id: string;
+    imageUrl?: string;
+    photoUrl?: string;
+    createdAt?: any;
+  }
+  const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
+  const [loadingPhotos, setLoadingPhotos] = useState(true);
+
+  // Pre-configured backup list of high-quality church/worship photos from Unsplash
+  const placeholderPhotos = [
+    { id: "p1", imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80", createdAt: "July 2026" },
+    { id: "p2", imageUrl: "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=600&q=80", createdAt: "July 2026" },
+    { id: "p3", imageUrl: "https://images.unsplash.com/photo-1478147427282-58a87a120781?w=600&q=80", createdAt: "July 2026" },
+    { id: "p4", imageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80", createdAt: "July 2026" },
+    { id: "p5", imageUrl: "https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=600&q=80", createdAt: "July 2026" },
+    { id: "p6", imageUrl: "https://images.unsplash.com/photo-1460574283810-2aab119d8511?w=600&q=80", createdAt: "July 2026" }
+  ];
+
+  useEffect(() => {
+    async function fetchGallery() {
+      if (!db) {
+        setLoadingPhotos(false);
+        return;
+      }
+      try {
+        const q = query(collection(db, "gallery_photos"), orderBy("createdAt", "desc"), limit(6));
+        const querySnapshot = await getDocs(q);
+        const photos: GalleryPhoto[] = [];
+        querySnapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          photos.push({
+            id: docSnap.id,
+            imageUrl: data.imageUrl || data.photoUrl,
+            createdAt: data.createdAt
+          });
+        });
+        setGalleryPhotos(photos);
+      } catch (err) {
+        console.error("Error fetching gallery photos:", err);
+      } finally {
+        setLoadingPhotos(false);
+      }
+    }
+    fetchGallery();
+  }, []);
+
+  // Helper function to format timestamp/date for overlay
+  const formatPhotoDate = (createdAt: any) => {
+    if (!createdAt) return "Recent";
+    if (typeof createdAt === "string") return createdAt;
+    if (createdAt.seconds) {
+      const d = new Date(createdAt.seconds * 1000);
+      return d.toLocaleDateString("en-US", { month: "short", year: "numeric", day: "numeric" });
+    }
+    if (createdAt instanceof Date) {
+      return createdAt.toLocaleDateString("en-US", { month: "short", year: "numeric", day: "numeric" });
+    }
+    return "Recent";
+  };
 
   // 2. Hero Background Image Rotation
   const [currentBg, setCurrentBg] = useState(0);
@@ -359,52 +443,73 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 7. Weekly Activities Section */}
+      {/* 7. Weekly Activities Section (NOW EXACT SERVICE TIME CARDS) */}
       <section className="py-24 bg-[#EFF6E0]/60 relative">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
           
           <div className="text-center max-w-2xl mx-auto mb-16 reveal">
-            <span className="text-primary-light text-xs font-bold uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10 inline-block mb-3">
-              Weekly Fellowships
+            <span className="text-primary text-xs font-bold uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10 inline-block mb-3">
+              Weekly Services & Fellowship Times
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl font-black text-primary-dark">
-              Join Our <span className="text-gradient-gold">Fellowships</span>
+              Join Our <span className="text-gradient-gold">Services & Studies</span>
             </h2>
             <p className="text-text-muted text-sm sm:text-base mt-3">
-              Meet with brethren throughout the week for scripture study, prayers, and deep Christian koinonia.
+              We look forward to worshiping, studying, and praying together with you. Find our weekly schedules below.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 stagger-children">
-            {sampleActivities.slice(0, 3).map((act, i) => (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
+            {[
+              {
+                title: "Sunday 1st Service",
+                time: "7:30 AM",
+                location: "Main Sanctuary",
+              },
+              {
+                title: "Sunday 2nd Service",
+                time: "10:00 AM",
+                location: "Main Sanctuary",
+              },
+              {
+                title: "Wednesday Bible Study",
+                time: "6:00 PM",
+                location: "Fellowship Hall",
+              },
+              {
+                title: "Wednesday Prayer Meeting",
+                time: "5:00 PM",
+                location: "Prayer Room",
+              },
+            ].map((srv, idx) => (
               <div
-                key={i}
-                className="bg-white rounded-3xl p-8 border border-stone-200/50 shadow-sm card-hover flex flex-col justify-between reveal"
+                key={idx}
+                className="bg-white rounded-3xl p-6 border border-stone-200/50 shadow-sm card-hover flex flex-col justify-between reveal"
               >
-                <div>
-                  <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center mb-6">
-                    <svg className="w-6 h-6 text-[#0D4A35]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
+                <div className="flex flex-col h-full justify-between">
+                  <div>
+                    {/* SVG clock icon matching the site's forest-green/gold theme */}
+                    <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center mb-5">
+                      <svg className="w-6 h-6 text-[#0D4A35]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="font-serif text-xl font-bold text-primary-dark mb-3">{srv.title}</h3>
                   </div>
-                  <h3 className="font-serif text-xl font-bold text-primary-dark mb-2">{act.title}</h3>
-                  <p className="text-xs font-bold text-primary flex items-center gap-1.5 uppercase tracking-wide">
-                    <svg className="w-4 h-4 text-accent-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][act.weekday]} • {act.startTime}
-                  </p>
-                  <p className="text-text-muted text-sm leading-relaxed mb-6">
-                    {act.description || "Gather with the family of believers for a rich spiritual atmosphere of growth."}
-                  </p>
+
+                  <div className="space-y-2 mt-2">
+                    <p className="text-sm font-bold text-primary flex items-center gap-2 uppercase tracking-wide">
+                      <span className="text-amber-600 font-bold">●</span> {srv.time}
+                    </p>
+                    <p className="text-text-muted text-xs flex items-center gap-1.5 font-medium">
+                      <svg className="w-4 h-4 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {srv.location}
+                    </p>
+                  </div>
                 </div>
-                <Link
-                  href="/activities"
-                  className="text-sm font-bold text-[#0D4A35] hover:text-[#0B2C22] flex items-center gap-1 hover:gap-2 transition-all"
-                >
-                  View Fellowships
-                  <span>&rarr;</span>
-                </Link>
               </div>
             ))}
           </div>
@@ -430,7 +535,7 @@ export default function HomePage() {
           
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6 reveal">
             <div>
-              <span className="text-primary-light text-xs font-bold uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10 inline-block mb-3">
+              <span className="text-primary text-xs font-bold uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10 inline-block mb-3">
                 Latest Message
               </span>
               <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-black text-primary-dark">
@@ -506,6 +611,59 @@ export default function HomePage() {
               </div>
             </div>
           )}
+
+        </div>
+      </section>
+
+      {/* GALLERY SECTION: Sunday Shots replacing/supplementing marquee */}
+      <section className="py-24 bg-bg border-t border-stone-100">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6 reveal">
+            <div>
+              <span className="text-primary text-xs font-bold uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10 inline-block mb-3">
+                This Sunday in Pictures
+              </span>
+              <h2 className="font-serif text-3xl sm:text-4xl font-black text-primary-dark">
+                Latest captures from our <span className="text-gradient-gold">church family</span>
+              </h2>
+            </div>
+            <Link
+              href="/gallery"
+              className="text-[#0D4A35] hover:text-[#0B2C22] font-bold text-sm flex items-center gap-1.5 shrink-0"
+            >
+              View Full Gallery &rarr;
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {(galleryPhotos.length > 0 ? galleryPhotos : placeholderPhotos).map((photo) => (
+              <div 
+                key={photo.id}
+                className="relative aspect-square rounded-2xl overflow-hidden bg-stone-100 group shadow-sm hover:shadow-md transition-all duration-300"
+              >
+                <img
+                  src={photo.imageUrl || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80"}
+                  alt="Sunday Shot"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                  <span className="text-white text-xs font-semibold tracking-wider uppercase">
+                    {formatPhotoDate(photo.createdAt)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12 reveal">
+            <Link
+              href="/gallery"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#0D4A35] hover:bg-[#0B2C22] text-white font-semibold rounded-xl text-sm transition-colors shadow-md"
+            >
+              View Full Gallery &rarr;
+            </Link>
+          </div>
 
         </div>
       </section>
