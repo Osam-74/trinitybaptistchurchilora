@@ -141,7 +141,7 @@ function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }
 
   const [verseIndex, setVerseIndex] = useState(0);
   const verseRef = useRef<HTMLDivElement>(null);
-  const [fontSize, setFontSize] = useState(3.5);
+  const [fontSize, _setFontSize] = useState(3.5);
 
   const next = useCallback(() => setVerseIndex(i => Math.min(i + 1, verses.length - 1)), [verses.length]);
   const prev = useCallback(() => setVerseIndex(i => Math.max(i - 1, 0)), []);
@@ -167,7 +167,7 @@ function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }
       void el.offsetHeight;
     }
 
-    setFontSize(size);
+    _setFontSize(size);
   }, [verseIndex, verses]);
 
   useEffect(() => {

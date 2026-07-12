@@ -43,7 +43,8 @@ function useScrollReveal() {
 
 export default function CalendarPage() {
   useScrollReveal();
-  const today = new Date();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const today = useMemo(() => new Date(), []);
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [events] = useState<CalendarEvent[]>(

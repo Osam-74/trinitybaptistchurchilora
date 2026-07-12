@@ -141,7 +141,7 @@ export default function BookPage() {
       // await fetch('/api/book', { method: 'POST', body: JSON.stringify({...}) });
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setSubmitted(true);
-    } catch (err) {
+    } catch {
       setFormError("Failed to submit request. Please try again.");
     } finally {
       setSubmitting(false);

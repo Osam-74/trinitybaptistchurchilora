@@ -35,7 +35,7 @@ export default function LivePage() {
   const upcoming = streams.filter(s => s.status === "scheduled");
 
   // Filter past stream replays for past streams list
-  const pastStreams = streams.filter(s => s.status === "ended" || s.status === "scheduled"); // fallbacks if needed
+  const _pastStreams = streams.filter(s => s.status === "ended" || s.status === "scheduled"); // fallbacks if needed
 
   return (
     <main className="min-h-screen bg-bg text-primary">
