@@ -150,7 +150,7 @@ export default function ActivitiesPage() {
                   }`}
                 >
                   <div className="pb-3 mb-4 border-b border-stone-200 text-center">
-                    <p className={`text-xs font-bold uppercase tracking-wider ${isTodayColumn ? "text-accent-dark" : "text-text-muted"}`}>
+                    <p className={`text-xs font-bold uppercase tracking-wider ${isTodayColumn ? "text-primary" : "text-text-muted"}`}>
                       {isTodayColumn ? "Today" : dayName.slice(0, 3)}
                     </p>
                     <h3 className={`font-serif text-lg font-extrabold ${isTodayColumn ? "text-primary-dark" : "text-primary"}`}>
@@ -173,7 +173,7 @@ export default function ActivitiesPage() {
                                 </span>
                               </div>
                             )}
-                            <p className="text-[10px] font-semibold text-accent-dark tracking-wider uppercase mb-1">
+                            <p className="text-[10px] font-semibold text-primary tracking-wider uppercase mb-1">
                               ⏰ {formatTime(act.startTime)}
                             </p>
                             <h4 className="font-serif font-bold text-sm text-primary-dark line-clamp-1 mb-1 group-hover:text-primary transition-colors">

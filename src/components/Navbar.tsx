@@ -10,13 +10,11 @@ const navLinks = [
   { href: "/about", label: "About" },
   { href: "/sermons", label: "Sermons" },
   { href: "#", label: "Ministries", isDropdown: true },
-  { href: "/activities", label: "Schedule" },
   { href: "/hymns", label: "Hymns" },
   { href: "/gallery", label: "Gallery" },
   { href: "/team", label: "Our Team" },
   { href: "/pastor", label: "Pastor" },
   { href: "/contact", label: "Contact" },
-  { href: "/book", label: "Book a Session" },
 ];
 
 const ministries = [

@@ -177,7 +177,7 @@ export default function SermonsPage() {
                 {/* Card Content */}
                 <div className="p-6 flex flex-col flex-1">
                   {sermon.series && (
-                    <p className="text-accent-dark text-xs font-extrabold uppercase tracking-widest mb-2">
+                    <p className="text-primary text-xs font-extrabold uppercase tracking-widest mb-2">
                       {sermon.series}
                     </p>
                   )}
@@ -188,7 +188,7 @@ export default function SermonsPage() {
                   <div className="mt-auto space-y-2.5">
                     <div className="flex flex-wrap items-center gap-3 text-xs text-stone-500">
                       <span className="inline-flex items-center gap-1.5 font-semibold text-stone-700">
-                        <svg className="w-3.5 h-3.5 text-accent-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3.5 h-3.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                         {sermon.preacher}

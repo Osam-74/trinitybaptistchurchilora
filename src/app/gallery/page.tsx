@@ -189,7 +189,7 @@ export default function GalleryPage() {
         {/* Video Gallery Section */}
         <div className="mt-24 pt-16 border-t border-stone-200">
           <div className="text-center mb-12">
-            <span className="text-accent-dark text-xs font-bold uppercase tracking-widest">DIGITAL MEDIA</span>
+            <span className="text-primary text-xs font-bold uppercase tracking-widest">DIGITAL MEDIA</span>
             <h2 className="font-serif text-3xl font-bold text-primary mt-2">Video Gallery</h2>
             <p className="text-stone-600 text-sm mt-2">Watch highlights and sermons from our streaming ministry</p>
           </div>

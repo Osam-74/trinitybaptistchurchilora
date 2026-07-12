@@ -124,7 +124,13 @@ export default function HomePage() {
     { id: "p3", imageUrl: "https://images.unsplash.com/photo-1478147427282-58a87a120781?w=600&q=80", createdAt: "July 2026" },
     { id: "p4", imageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80", createdAt: "July 2026" },
     { id: "p5", imageUrl: "https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=600&q=80", createdAt: "July 2026" },
-    { id: "p6", imageUrl: "https://images.unsplash.com/photo-1460574283810-2aab119d8511?w=600&q=80", createdAt: "July 2026" }
+    { id: "p6", imageUrl: "https://images.unsplash.com/photo-1460574283810-2aab119d8511?w=600&q=80", createdAt: "July 2026" },
+    { id: "p7", imageUrl: "https://images.unsplash.com/photo-1507692049790-de58290a4334?w=600&q=80", createdAt: "July 2026" },
+    { id: "p8", imageUrl: "https://images.unsplash.com/photo-1473177104440-ffee2f376098?w=600&q=80", createdAt: "July 2026" },
+    { id: "p9", imageUrl: "https://images.unsplash.com/photo-1438232992991-995b671e4427?w=600&q=80", createdAt: "July 2026" },
+    { id: "p10", imageUrl: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=600&q=80", createdAt: "July 2026" },
+    { id: "p11", imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80", createdAt: "July 2026" },
+    { id: "p12", imageUrl: "https://images.unsplash.com/photo-1609743522471-83c84ce23e32?w=600&q=80", createdAt: "July 2026" },
   ];
 
   useEffect(() => {
@@ -134,7 +140,7 @@ export default function HomePage() {
         return;
       }
       try {
-        const q = query(collection(db, "gallery_photos"), orderBy("createdAt", "desc"), limit(6));
+        const q = query(collection(db, "gallery_photos"), orderBy("createdAt", "desc"), limit(12));
         const querySnapshot = await getDocs(q);
         const photos: GalleryPhoto[] = [];
         querySnapshot.forEach((docSnap) => {
@@ -577,7 +583,7 @@ export default function HomePage() {
 
               {/* Sermon Description Details */}
               <div className="lg:col-span-6 space-y-5">
-                <span className="text-xs font-bold uppercase tracking-wider text-accent-dark bg-accent/15 border border-accent/20 px-3 py-1 rounded-md inline-block">
+                <span className="text-xs font-bold uppercase tracking-wider text-primary bg-accent/15 border border-accent/20 px-3 py-1 rounded-md inline-block">
                   Featured Message
                 </span>
                 <h3 className="font-serif text-2xl sm:text-3xl font-black text-primary-dark leading-tight">
@@ -615,56 +621,90 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* GALLERY SECTION: Sunday Shots replacing/supplementing marquee */}
-      <section className="py-24 bg-bg border-t border-stone-100">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6 reveal">
+      {/* GALLERY SECTION: Sunday Shots — Dual-row infinite auto-scroll */}
+      <section className="py-20 bg-bg border-t border-stone-100 overflow-hidden">
+        {/* Header */}
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 mb-10 reveal">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <span className="text-primary text-xs font-bold uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10 inline-block mb-3">
                 This Sunday in Pictures
               </span>
               <h2 className="font-serif text-3xl sm:text-4xl font-black text-primary-dark">
-                Latest captures from our <span className="text-gradient-gold">church family</span>
+                Moments from our <span className="text-gradient-gold">church family</span>
               </h2>
             </div>
             <Link
               href="/gallery"
-              className="text-[#0D4A35] hover:text-[#0B2C22] font-bold text-sm flex items-center gap-1.5 shrink-0"
+              className="text-[#0D4A35] hover:text-[#0B2C22] font-bold text-sm flex items-center gap-1.5 shrink-0 whitespace-nowrap"
             >
-              View Full Gallery &rarr;
+              View Full Gallery →
             </Link>
           </div>
+        </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {(galleryPhotos.length > 0 ? galleryPhotos : placeholderPhotos).map((photo) => (
-              <div 
-                key={photo.id}
-                className="relative aspect-square rounded-2xl overflow-hidden bg-stone-100 group shadow-sm hover:shadow-md transition-all duration-300"
+        {/* Row 1 — scrolls LEFT */}
+        <div className="relative mb-4" style={{ maskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)" }}>
+          <div
+            className="flex gap-4"
+            style={{
+              animation: "gallery-scroll-left 35s linear infinite",
+              width: "max-content",
+            }}
+          >
+            {[...(galleryPhotos.length >= 6 ? galleryPhotos : placeholderPhotos), ...(galleryPhotos.length >= 6 ? galleryPhotos : placeholderPhotos)].slice(0, 16).map((photo, i) => (
+              <div
+                key={`row1-${photo.id}-${i}`}
+                className="relative flex-shrink-0 w-52 h-52 sm:w-60 sm:h-60 rounded-2xl overflow-hidden bg-stone-100 group shadow-sm"
               >
                 <img
                   src={photo.imageUrl || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80"}
                   alt="Sunday Shot"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <span className="text-white text-xs font-semibold tracking-wider uppercase">
-                    {formatPhotoDate(photo.createdAt)}
-                  </span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                  <span className="text-white text-xs font-semibold">{formatPhotoDate(photo.createdAt)}</span>
                 </div>
               </div>
             ))}
           </div>
+        </div>
 
-          <div className="text-center mt-12 reveal">
-            <Link
-              href="/gallery"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#0D4A35] hover:bg-[#0B2C22] text-white font-semibold rounded-xl text-sm transition-colors shadow-md"
-            >
-              View Full Gallery &rarr;
-            </Link>
+        {/* Row 2 — scrolls RIGHT (reversed) */}
+        <div className="relative" style={{ maskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)" }}>
+          <div
+            className="flex gap-4"
+            style={{
+              animation: "gallery-scroll-right 42s linear infinite",
+              width: "max-content",
+            }}
+          >
+            {[...(galleryPhotos.length >= 6 ? [...galleryPhotos].reverse() : [...placeholderPhotos].reverse()), ...(galleryPhotos.length >= 6 ? [...galleryPhotos].reverse() : [...placeholderPhotos].reverse())].slice(0, 16).map((photo, i) => (
+              <div
+                key={`row2-${photo.id}-${i}`}
+                className="relative flex-shrink-0 w-52 h-52 sm:w-60 sm:h-60 rounded-2xl overflow-hidden bg-stone-100 group shadow-sm"
+              >
+                <img
+                  src={photo.imageUrl || "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=600&q=80"}
+                  alt="Sunday Shot"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                  <span className="text-white text-xs font-semibold">{formatPhotoDate(photo.createdAt)}</span>
+                </div>
+              </div>
+            ))}
           </div>
+        </div>
 
+        {/* CTA */}
+        <div className="text-center mt-10 reveal">
+          <Link
+            href="/gallery"
+            className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#0D4A35] hover:bg-[#0B2C22] text-white font-semibold rounded-xl text-sm transition-colors shadow-md"
+          >
+            View Full Gallery →
+          </Link>
         </div>
       </section>
 

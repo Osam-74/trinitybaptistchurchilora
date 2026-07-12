@@ -151,7 +151,7 @@ export default function MinistriesPage() {
                 <div className="p-7">
                   <div className="border-l-4 border-accent pl-4 mb-5">
                     <h2 className="font-serif text-2xl font-bold text-primary mb-1">{ministry.name}</h2>
-                    <p className="text-xs text-accent-dark font-semibold italic">{ministry.motto}</p>
+                    <p className="text-xs text-primary font-semibold italic">{ministry.motto}</p>
                   </div>
                   <p className="text-stone-600 text-sm leading-relaxed mb-5">{ministry.desc}</p>
                   <ul className="space-y-2 mb-6">

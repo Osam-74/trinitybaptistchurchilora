@@ -13,6 +13,8 @@ const quickLinks = [
   { href: "/gallery", label: "Gallery" },
   { href: "/contact", label: "Contact" },
   { href: "/give", label: "Give" },
+  { href: "/book", label: "Book a Counselling Session" },
+  { href: "/hymns", label: "Hymn Library" },
 ];
 
 const serviceTimes = [

@@ -5,13 +5,135 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Hymn } from "@/types";
 import { listHymnsFromFirestore } from "@/lib/hymns";
-import { seedHymns } from "@/lib/hymns-data";
-import SignUpModal from "@/components/SignUpModal";
+import { createChoirMember } from "@/lib/choir";
+import R2Uploader from "@/components/R2Uploader";
+
+// Sign-up form component
+function SignUpModal({ dept, onClose }: { dept: string; onClose: () => void }) {
+  const [form, setForm] = useState({ name: "", email: "", phone: "", dateJoined: "", bio: "", section: dept, department: dept });
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (!form.name.trim() || !form.email.trim()) { setError("Name and email are required."); return; }
+    setSubmitting(true);
+    try {
+      await createChoirMember({
+        fullName: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone || undefined,
+        department: form.department,
+        section: form.section || undefined,
+        photoUrl: photoUrl || undefined,
+        bio: form.bio || undefined,
+        dateJoined: form.dateJoined || undefined,
+      });
+      setSubmitted(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
+      <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto animate-scale-in">
+        <div className="p-6 border-b border-stone-100 flex items-center justify-between">
+          <h2 className="font-serif text-xl font-bold text-primary">Register as a Chorister</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center hover:bg-stone-200 transition-colors">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        {submitted ? (
+          <div className="p-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <h3 className="font-serif text-xl font-bold text-primary mb-2">Registration Submitted!</h3>
+            <p className="text-text-muted">Your registration is pending approval from the Music Director. You will be contacted once reviewed.</p>
+            <button onClick={onClose} className="mt-6 btn-gold px-6 py-2.5 rounded-xl font-semibold text-sm">Close</button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-primary mb-1.5">Upload your headshot</label>
+              {photoUrl && <img src={photoUrl} alt="Preview" className="w-20 h-20 rounded-2xl object-cover border border-stone-200 mb-2"/>}
+              <R2Uploader folder="choir" label="Choose Photo" onUploaded={(url) => setPhotoUrl(url)} />
+              <p className="text-xs text-text-muted mt-1">JPG or PNG, max 5MB</p>
+            </div>
+
+            {[
+              { label: "Full Name *", key: "name", type: "text", required: true },
+              { label: "Email Address *", key: "email", type: "email", required: true },
+              { label: "Phone Number", key: "phone", type: "tel", required: false },
+              { label: "Date Joined the Choir", key: "dateJoined", type: "date", required: false },
+            ].map(field => (
+              <div key={field.key}>
+                <label className="block text-sm font-medium text-primary mb-1.5">{field.label}</label>
+                <input type={field.type} required={field.required} value={(form as unknown as Record<string, string>)[field.key] ?? ""}
+                  onChange={e => setForm(prev => ({ ...prev, [field.key]: e.target.value }))}
+                  className="input-field"/>
+              </div>
+            ))}
+
+            <div>
+              <label className="block text-sm font-medium text-primary mb-1.5">Department</label>
+              <select value={form.department} onChange={e => setForm(prev => ({ ...prev, department: e.target.value }))}
+                className="input-field bg-white">
+                <option value="Choir">Choir</option>
+                <option value="Media Team">Media Team</option>
+                <option value="Instrumentalist">Instrumentalist</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-primary mb-1.5">Section / Voice Part</label>
+              <select value={form.section} onChange={e => setForm(prev => ({ ...prev, section: e.target.value }))}
+                className="input-field bg-white">
+                <option value="Soprano">Soprano</option>
+                <option value="Alto">Alto</option>
+                <option value="Tenor">Tenor</option>
+                <option value="Bass">Bass</option>
+                <option value="Instrumentalist">Instrumentalist</option>
+                <option value="Media Team">Media Team</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-primary mb-1.5">Brief Bio</label>
+              <textarea value={form.bio} onChange={e => setForm(prev => ({ ...prev, bio: e.target.value }))}
+                placeholder="Tell us a little about yourself..." rows={3}
+                className="input-field resize-none"/>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+              <strong>Note:</strong> Your registration will be pending approval from the Music Director before activation.
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>
+            )}
+            <button type="submit" disabled={submitting} className="w-full btn-gold py-3.5 rounded-xl font-semibold text-base disabled:opacity-50">
+              {submitting ? "Submitting…" : "Submit Registration"}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // ============ Presentation Mode ============
 function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
   const verses = useMemo(() => {
     if (!hymn.lyrics) return [];
     return hymn.lyrics.split(/\n\s*\n/).map(v => v.trim()).filter(Boolean);
@@ -19,26 +141,10 @@ function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }
 
   const [verseIndex, setVerseIndex] = useState(0);
   const verseRef = useRef<HTMLDivElement>(null);
-  const [fontSize, _setFontSize] = useState(4);
+  const [fontSize, setFontSize] = useState(3.5);
 
   const next = useCallback(() => setVerseIndex(i => Math.min(i + 1, verses.length - 1)), [verses.length]);
   const prev = useCallback(() => setVerseIndex(i => Math.max(i - 1, 0)), []);
-
-  // Make container truly fullscreen
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.requestFullscreen().catch((err) => {
-        console.error("Error enabling fullscreen mode:", err);
-      });
-    }
-    return () => {
-      if (document.fullscreenElement) {
-        document.exitFullscreen().catch((err) => {
-          console.error("Error exiting fullscreen mode:", err);
-        });
-      }
-    };
-  }, []);
 
   useEffect(() => {
     if (!verseRef.current) return;
@@ -46,7 +152,7 @@ function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }
     const availHeight = window.innerHeight - 200;
     const availWidth = window.innerWidth - 120;
 
-    let size = 5;
+    let size = 6;
     const minSize = 1.2;
 
     el.style.fontSize = size + "rem";
@@ -61,7 +167,7 @@ function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }
       void el.offsetHeight;
     }
 
-    _setFontSize(size);
+    setFontSize(size);
   }, [verseIndex, verses]);
 
   useEffect(() => {
@@ -83,52 +189,41 @@ function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }
 
   if (verses.length === 0) return null;
 
-  const currentVerseText = verses[verseIndex];
-  const isChorus = currentVerseText.toLowerCase().startsWith("chorus:") || currentVerseText.toLowerCase().startsWith("ègbè:");
-  const displayText = isChorus
-    ? currentVerseText.replace(/^(chorus:|ègbè:)\s*/i, "")
-    : currentVerseText;
-
   return (
-    <div ref={containerRef} className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center select-none p-6">
-      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-8 py-5 z-10 bg-gradient-to-b from-black/80 to-transparent">
+    <div className="fixed inset-0 z-[100] bg-primary-dark flex flex-col items-center justify-center select-none">
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-8 py-5 z-10">
         <div className="text-white/60 text-sm flex items-center gap-3">
           <span className="font-serif text-white font-bold text-xl">{hymn.title}</span>
           {hymn.author && <span className="text-white/40 hidden sm:inline">— {hymn.author}</span>}
         </div>
-        <button onClick={onClose} className="text-white/60 hover:text-white transition-colors flex items-center gap-1.5 text-sm font-semibold bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl">
+        <button onClick={onClose} className="text-white/60 hover:text-white transition-colors flex items-center gap-1.5 text-sm">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
-          Exit ESC
+          Exit (ESC)
         </button>
       </div>
 
-      <div className="flex-1 w-full max-w-6xl px-12 flex flex-col items-center justify-center text-center">
-        {isChorus && (
-          <div className="text-amber-400 font-sans uppercase tracking-widest text-lg lg:text-2xl font-black mb-4 animate-pulse">
-            Chorus
-          </div>
-        )}
+      <div className="flex-1 w-full max-w-6xl px-12 flex items-center justify-center text-center">
         <div ref={verseRef} className="text-white font-serif tracking-wide leading-normal whitespace-pre-wrap transition-all duration-300">
-          {displayText}
+          {verses[verseIndex]}
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 py-6 px-12 flex items-center justify-between z-10 bg-gradient-to-t from-black/80 to-transparent border-t border-white/5">
+      <div className="absolute bottom-0 left-0 right-0 py-6 px-12 flex items-center justify-between z-10 border-t border-white/5">
         <div className="flex items-center gap-2">
-          <button onClick={prev} disabled={verseIndex === 0} className="w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center disabled:opacity-30 transition-all">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+          <button onClick={prev} disabled={verseIndex === 0} className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white flex items-center justify-center disabled:opacity-30">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <button onClick={next} disabled={verseIndex === verses.length - 1} className="w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center disabled:opacity-30 transition-all">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+          <button onClick={next} disabled={verseIndex === verses.length - 1} className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white flex items-center justify-center disabled:opacity-30">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
-        <div className="text-white/50 text-base font-bold uppercase tracking-wider bg-white/5 px-4 py-2 rounded-xl">
+        <div className="text-white/40 text-sm font-semibold uppercase tracking-wider">
           Verse {verseIndex + 1} of {verses.length}
         </div>
       </div>
@@ -170,23 +265,9 @@ export default function HymnsPage() {
     async function load() {
       try {
         const list = await listHymnsFromFirestore();
-        if (list && list.length > 0) {
-          setHymns(list);
-        } else {
-          // If Firestore is empty, fall back to sample seed hymns (taking first 6)
-          const parsedSeed: Hymn[] = seedHymns.slice(0, 6).map((h, idx) => ({
-            id: `seed-${idx}`,
-            ...h,
-          } as Hymn));
-          setHymns(parsedSeed);
-        }
+        setHymns(list);
       } catch (e) {
         console.error(e);
-        const parsedSeed: Hymn[] = seedHymns.slice(0, 6).map((h, idx) => ({
-          id: `seed-${idx}`,
-          ...h,
-        } as Hymn));
-        setHymns(parsedSeed);
       } finally {
         setLoading(false);
       }
@@ -197,7 +278,7 @@ export default function HymnsPage() {
   const categories = useMemo(() => {
     const cats = new Set<string>();
     hymns.forEach(h => { if (h.category) cats.add(h.category); });
-    return ["All", ...Array.from(cats).map(c => c.charAt(0).toUpperCase() + c.slice(1))];
+    return ["All", ...Array.from(cats)];
   }, [hymns]);
 
   const filtered = useMemo(() => {
@@ -207,7 +288,7 @@ export default function HymnsPage() {
         (h.lyrics && h.lyrics.toLowerCase().includes(search.toLowerCase())) ||
         (h.number && h.number.toString().includes(search)) ||
         (h.author && h.author.toLowerCase().includes(search.toLowerCase()));
-      const matchCat = category === "All" || h.category.toLowerCase() === category.toLowerCase();
+      const matchCat = category === "All" || h.category === category || h.category === category.toLowerCase();
       return matchSearch && matchCat;
     });
   }, [hymns, search, category]);
@@ -250,13 +331,13 @@ export default function HymnsPage() {
           <div className="reveal mt-8 flex flex-wrap justify-center gap-3">
             <button
               onClick={() => { setSignUpDept("Choir"); setShowSignUp(true); }}
-              className="btn-gold text-primary-dark font-extrabold px-6 py-3 rounded-xl text-xs sm:text-sm shadow-md cursor-pointer hover:scale-105 transition-transform"
+              className="btn-gold text-primary-dark font-extrabold px-6 py-3 rounded-xl text-xs sm:text-sm shadow-md"
             >
               Join Choir Department
             </button>
             <button
               onClick={() => { setSignUpDept("Instrumentalist"); setShowSignUp(true); }}
-              className="btn-outline border-white/20 text-white font-semibold px-6 py-3 rounded-xl text-xs sm:text-sm hover:bg-white/10 cursor-pointer transition-colors"
+              className="btn-outline border-white/20 text-white font-semibold px-6 py-3 rounded-xl text-xs sm:text-sm hover:bg-white/10"
             >
               Join Instrumentalists
             </button>
@@ -290,14 +371,14 @@ export default function HymnsPage() {
                     </p>
                   )}
                   {featuredHymn.category && (
-                    <span className="inline-block text-xs bg-white/10 text-white px-3 py-1 rounded-lg uppercase font-bold tracking-wider">
-                      {featuredHymn.category}
+                    <span className="inline-block text-xs bg-white/10 text-white px-3 py-1 rounded-lg">
+                      Category: {featuredHymn.category}
                     </span>
                   )}
                   <div className="pt-4 flex flex-wrap gap-2">
                     <button
                       onClick={() => setPresentationHymn(featuredHymn)}
-                      className="btn-gold px-5 py-3 text-xs font-extrabold text-primary-dark rounded-xl flex items-center gap-1.5 cursor-pointer hover:scale-105 transition-transform"
+                      className="btn-gold px-5 py-3 text-xs font-extrabold text-primary-dark rounded-xl flex items-center gap-1.5"
                     >
                       📺 Present Mode
                     </button>
@@ -338,7 +419,7 @@ export default function HymnsPage() {
                 <button
                   key={cat}
                   onClick={() => setCategory(cat)}
-                  className={`px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-200 cursor-pointer ${
+                  className={`px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase transition-all duration-200 ${
                     category === cat
                       ? "bg-primary text-white shadow-md ring-2 ring-primary/20"
                       : "bg-white border border-stone-200 text-stone-600 hover:bg-stone-50"
@@ -365,7 +446,7 @@ export default function HymnsPage() {
                 return (
                   <div
                     key={hymn.id}
-                    className="hymn-card bg-white border border-stone-200 rounded-3xl p-6 hover:shadow-md transition-all duration-300 relative flex flex-col justify-between group"
+                    className="hymn-card bg-white border border-stone-200 rounded-3xl p-6 hover:shadow-md transition-all duration-300 relative flex flex-col justify-between"
                   >
                     {/* Corner music note icon decoration */}
                     <div className="absolute top-4 right-4 text-stone-200 group-hover:text-accent-light/40 transition-colors pointer-events-none">
@@ -375,19 +456,12 @@ export default function HymnsPage() {
                     </div>
 
                     <div className="space-y-4">
-                      {/* Hymn Number Badge Pill & Category Badge */}
-                      <div className="flex flex-wrap gap-2 items-center">
-                        {hymn.number && (
-                          <span className="inline-flex items-center bg-accent-light/30 text-accent-dark font-extrabold px-3 py-1 rounded-full text-xs">
-                            Hymn #{hymn.number}
-                          </span>
-                        )}
-                        {hymn.category && (
-                          <span className="inline-flex items-center bg-stone-100 text-stone-600 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider">
-                            {hymn.category}
-                          </span>
-                        )}
-                      </div>
+                      {/* Hymn Number Badge Pill */}
+                      {hymn.number && (
+                        <span className="inline-flex items-center bg-accent-light/30 text-accent-dark font-extrabold px-3 py-1 rounded-full text-xs">
+                          Hymn #{hymn.number}
+                        </span>
+                      )}
 
                       <h3 className="font-serif text-xl font-bold text-primary-dark">
                         {hymn.title}
@@ -414,7 +488,7 @@ export default function HymnsPage() {
                     <div className="mt-6 pt-4 border-t border-stone-100 flex items-center justify-between gap-3">
                       <button
                         onClick={() => toggleExpand(hymn.id!)}
-                        className="text-xs font-bold text-primary hover:text-primary-light flex items-center gap-1 transition-colors cursor-pointer"
+                        className="text-xs font-bold text-primary hover:text-primary-light flex items-center gap-1 transition-colors"
                       >
                         {isExpanded ? "Close Hymn" : "Read Full Hymn"}
                         <svg className={`w-4 h-4 transform transition-transform ${isExpanded ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -425,12 +499,10 @@ export default function HymnsPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => setPresentationHymn(hymn)}
-                          title="Project Hymn (Fullscreen Presentation)"
-                          className="w-10 h-10 rounded-xl bg-bg hover:bg-stone-200 flex items-center justify-center text-primary border border-stone-200 transition-colors cursor-pointer hover:border-accent"
+                          title="Present mode"
+                          className="w-8 h-8 rounded-lg bg-bg hover:bg-stone-150 flex items-center justify-center text-primary border border-stone-200 transition-colors"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
+                          📺
                         </button>
                       </div>
                     </div>
@@ -447,28 +519,6 @@ export default function HymnsPage() {
               <p className="text-text-muted text-sm">Try tweaking your search term or category filters.</p>
             </div>
           )}
-        </section>
-
-        {/* Music Ministry Sign-up section */}
-        <section className="reveal bg-gradient-to-br from-primary to-primary-dark rounded-3xl p-8 lg:p-12 text-white relative overflow-hidden shadow-xl border border-white/5">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(200,230,58,0.06),transparent_50%)]" />
-          <div className="relative z-10 max-w-3xl mx-auto text-center space-y-6">
-            <div className="inline-flex items-center gap-2 bg-accent/20 border border-accent/30 rounded-full px-4 py-1.5 text-accent-light text-xs font-semibold uppercase tracking-wider">
-              🎵 Praise & Worship
-            </div>
-            <h2 className="font-serif text-3xl lg:text-4xl font-bold">Join the Music Ministry</h2>
-            <p className="text-white/80 text-sm lg:text-base leading-relaxed max-w-2xl mx-auto">
-              Our music department leads the congregation into deep, glorious worship and celestial adoration. Whether you are a vocalist or an instrumentalist, we welcome you to serve God with your musical talents.
-            </p>
-            <div className="pt-2">
-              <button
-                onClick={() => { setSignUpDept("Choir"); setShowSignUp(true); }}
-                className="btn-gold text-primary-dark font-extrabold px-8 py-4 rounded-xl text-sm shadow-lg hover:scale-105 transition-transform cursor-pointer"
-              >
-                Register as Chorister
-              </button>
-            </div>
-          </div>
         </section>
       </div>
 
