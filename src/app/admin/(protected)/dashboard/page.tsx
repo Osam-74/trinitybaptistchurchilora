@@ -308,8 +308,8 @@ export default function AdminDashboardPage() {
                   {sampleActivities.slice(0, 3).map((act, i) => (
                     <div key={i} className="flex gap-3 items-start">
                       <div className="w-10 h-10 rounded-xl bg-[#0D4A35]/5 text-[#0D4A35] flex flex-col items-center justify-center font-bold text-[10px] p-1 flex-shrink-0">
-                        <span>{act.time.split(" ")[0]}</span>
-                        <span className="text-xs font-extrabold">{act.time.split(" ")[1] || ""}</span>
+                        <span>{act.startTime}</span>
+                        <span className="text-xs font-extrabold">{act.endTime}</span>
                       </div>
                       <div className="min-w-0">
                         <p className="font-semibold text-sm text-[#0B2C22] truncate">{act.title}</p>

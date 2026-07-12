@@ -286,7 +286,7 @@ export default function HymnsPage() {
       const matchSearch =
         h.title.toLowerCase().includes(search.toLowerCase()) ||
         (h.lyrics && h.lyrics.toLowerCase().includes(search.toLowerCase())) ||
-        (h.hymnNumber && h.hymnNumber.toString().includes(search)) ||
+        (h.number && h.number.toString().includes(search)) ||
         (h.author && h.author.toLowerCase().includes(search.toLowerCase()));
       const matchCat = category === "All" || h.category === category;
       return matchSearch && matchCat;
@@ -363,7 +363,7 @@ export default function HymnsPage() {
                     🏆 Featured
                   </div>
                   <h3 className="font-serif text-3xl text-white font-bold leading-tight">
-                    {featuredHymn.hymnNumber ? `#${featuredHymn.hymnNumber} ` : ""}{featuredHymn.title}
+                    {featuredHymn.number ? `#${featuredHymn.number} ` : ""}{featuredHymn.title}
                   </h3>
                   {featuredHymn.author && (
                     <p className="text-accent-light/80 text-sm font-semibold">
@@ -457,9 +457,9 @@ export default function HymnsPage() {
 
                     <div className="space-y-4">
                       {/* Hymn Number Badge Pill */}
-                      {hymn.hymnNumber && (
+                      {hymn.number && (
                         <span className="inline-flex items-center bg-accent-light/30 text-accent-dark font-extrabold px-3 py-1 rounded-full text-xs">
-                          Hymn #{hymn.hymnNumber}
+                          Hymn #{hymn.number}
                         </span>
                       )}
 

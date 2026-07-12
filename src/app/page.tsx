@@ -392,7 +392,7 @@ export default function HomePage() {
                     <svg className="w-4 h-4 text-accent-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    {act.day} • {act.time}
+                    {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][act.weekday]} • {act.startTime}
                   </p>
                   <p className="text-text-muted text-sm leading-relaxed mb-6">
                     {act.description || "Gather with the family of believers for a rich spiritual atmosphere of growth."}
@@ -452,7 +452,7 @@ export default function HomePage() {
               <div className="lg:col-span-6 relative rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 bg-stone-100 group">
                 <div className="aspect-video relative w-full overflow-hidden">
                   <img
-                    src={getYouTubeThumbnail(featuredSermon.youtubeUrl)}
+                    src={getYouTubeThumbnail(featuredSermon.youtubeId || "")}
                     alt={featuredSermon.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
@@ -487,7 +487,7 @@ export default function HomePage() {
                 
                 <div className="pt-2 flex flex-wrap gap-4 items-center">
                   <Link
-                    href={`/sermons?sermon=${featuredSermon.id}`}
+                    href="/sermons"
                     className="inline-flex items-center gap-2 px-7 py-3 bg-[#0D4A35] hover:bg-[#0B2C22] text-white font-semibold rounded-xl text-sm shadow-md transition-colors"
                   >
                     Listen / Watch Now

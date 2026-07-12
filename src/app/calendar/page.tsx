@@ -259,7 +259,7 @@ export default function CalendarPage() {
                             {EVENT_TYPE_LABELS[event.type] || event.type}
                           </span>
                           <h4 className="font-serif text-lg font-bold text-primary-dark">{event.title}</h4>
-                          <p className="text-xs text-text-muted mt-1">Time: {event.time}</p>
+                          <p className="text-xs text-text-muted mt-1">Time: {event.startTime}</p>
                           {event.location && <p className="text-xs text-text-muted">Location: {event.location}</p>}
                         </div>
                         <button className="text-primary hover:text-accent font-semibold text-xs shrink-0">
@@ -295,7 +295,7 @@ export default function CalendarPage() {
                     <svg className="w-4.5 h-4.5 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>{selectedEvent.time}</span>
+                    <span>{selectedEvent.startTime}</span>
                   </div>
                   {selectedEvent.location && (
                     <div className="flex items-center gap-2">
@@ -341,7 +341,7 @@ export default function CalendarPage() {
                     </div>
                     <div className="min-w-0">
                       <h4 className="font-serif text-sm font-bold text-primary-dark truncate">{event.title}</h4>
-                      <p className="text-xs text-text-muted truncate mt-0.5">{event.time}</p>
+                      <p className="text-xs text-text-muted truncate mt-0.5">{event.startTime}</p>
                     </div>
                   </div>
                 ))}
