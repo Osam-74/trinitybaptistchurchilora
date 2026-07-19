@@ -26,7 +26,7 @@ const serviceTimes = [
 
 export default function Footer() {
   const [logoUrl, setLogoUrl] = useState<string>("/logo/trinity-logo.png");
-  const [settings, setSettings] = useState<any>(null);
+  const [settings, setSettings] = useState<{ logoUrl?: string; churchName?: string; address?: string; contactPhone?: string } | null>(null);
 
   useEffect(() => {
     getSiteSettings().then((s) => {

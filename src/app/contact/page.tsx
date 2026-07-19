@@ -10,6 +10,7 @@ export default function ContactPage() {
   const [error, setError] = useState("");
   const contactPhone = "08034084270 / 07086454207";
   const address = "P.O. Box 43, Ilora, Oyo State, Nigeria.";
+  const contactEmail = "trinitybaptistchurchilora@gmail.com";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

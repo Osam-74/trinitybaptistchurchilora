@@ -161,7 +161,7 @@ export default function AboutPage() {
             <p className="text-stone-600 mt-3 max-w-xl mx-auto">Godly leaders dedicated to shepherding the flock of Trinity Baptist Church, Ilora.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {leaders.filter(l => l.active).map((leader, i) => (
+            {leaders.filter(l => l.active).map((leader) => (
               <div key={leader.id} className="bg-white rounded-3xl overflow-hidden border border-stone-100 shadow-sm card-hover group" style={{ opacity: 1 }}>
                 <div className="relative h-64 img-zoom">
                   <img src={leader.photoUrl} alt={leader.name} className="w-full h-full object-cover" />

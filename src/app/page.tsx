@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -113,10 +113,10 @@ export default function HomePage() {
     id: string;
     imageUrl?: string;
     photoUrl?: string;
-    createdAt?: any;
+    createdAt?: { seconds: number } | string | null;
   }
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
-  const [loadingPhotos, setLoadingPhotos] = useState(true);
+  const [, setLoadingPhotos] = useState(true);
 
   // Pre-configured backup list of high-quality church/worship photos from Unsplash
   const placeholderPhotos = [
@@ -163,7 +163,7 @@ export default function HomePage() {
   }, []);
 
   // Helper function to format timestamp/date for overlay
-  const formatPhotoDate = (createdAt: any) => {
+  const formatPhotoDate = (createdAt: { seconds: number } | string | null | undefined) => {
     if (!createdAt) return "Recent";
     if (typeof createdAt === "string") return createdAt;
     if (createdAt.seconds) {

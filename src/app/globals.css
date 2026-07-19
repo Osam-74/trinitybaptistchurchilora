@@ -81,7 +81,7 @@
 .hero-overlay { background: linear-gradient(160deg, rgba(11,44,34,0.97) 0%, rgba(13,74,53,0.82) 45%, rgba(11,44,34,0.55) 75%, rgba(11,44,34,0.90) 100%); }
 
 .nav-glass { background: rgba(11, 44, 34, 0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(200, 230, 58, 0.15); }
-.nav-transparent { background: transparent; border-bottom: 1px solid transparent; }
+.nav-transparent { background: linear-gradient(to bottom, rgba(11,44,34,0.55) 0%, transparent 100%); border-bottom: 1px solid transparent; }
 .navbar-solid { background: rgba(11, 44, 34, 0.98); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: 0 4px 30px rgba(0,0,0,0.35); border-bottom: 1px solid rgba(200, 230, 58, 0.18); }
 
 .gold-divider { height: 2px; background: linear-gradient(90deg, transparent, #C8E63A, #EFF6E0, #C8E63A, transparent); }
