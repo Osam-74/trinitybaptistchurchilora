@@ -341,40 +341,30 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. Statistics Section (Visual counters with ease-out scroll triggers) */}
-      <section className="bg-primary py-12 md:py-16 text-white border-y border-white/5 relative">
-        <div className="absolute inset-0 opacity-5 bg-[radial-gradient(#C8E63A_1px,transparent_1px)] [background-size:16px_16px]" />
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center relative z-10">
-          <div className="reveal">
-            <h3 className="text-4xl sm:text-5xl font-extrabold text-accent mb-2">
-              <StatCounter target={60} suffix="+" />
-            </h3>
-            <p className="text-white/60 text-xs sm:text-sm font-bold uppercase tracking-wider">Years of Grace</p>
-          </div>
-          <div className="reveal" style={{ animationDelay: "0.1s" }}>
-            <h3 className="text-4xl sm:text-5xl font-extrabold text-accent mb-2">
-              <StatCounter target={1500} suffix="+" />
-            </h3>
-            <p className="text-white/60 text-xs sm:text-sm font-bold uppercase tracking-wider">Active Members</p>
-          </div>
-          <div className="reveal" style={{ animationDelay: "0.2s" }}>
-            <h3 className="text-4xl sm:text-5xl font-extrabold text-accent mb-2">
-              <StatCounter target={12} suffix="+" />
-            </h3>
-            <p className="text-white/60 text-xs sm:text-sm font-bold uppercase tracking-wider">Ministries & Groups</p>
-          </div>
-          <div className="reveal" style={{ animationDelay: "0.3s" }}>
-            <h3 className="text-4xl sm:text-5xl font-extrabold text-accent mb-2">
-              <StatCounter target={5} suffix="+" />
-            </h3>
-            <p className="text-white/60 text-xs sm:text-sm font-bold uppercase tracking-wider">Planted Missions</p>
+      {/* 4. Statistics Counter — floats between hero and watchword (overlapping both) */}
+      <div className="relative z-20 -mt-10 -mb-10 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-2xl border border-stone-100 grid grid-cols-2 md:grid-cols-4 divide-x divide-stone-100">
+            {[
+              { target: 60, suffix: "+", label: "Years of Grace" },
+              { target: 1500, suffix: "+", label: "Active Members" },
+              { target: 12, suffix: "+", label: "Ministries & Groups" },
+              { target: 5, suffix: "+", label: "Planted Missions" },
+            ].map((stat, i) => (
+              <div key={stat.label} className={`py-8 px-6 text-center ${i >= 2 ? "border-t border-stone-100 md:border-t-0" : ""}`}>
+                <h3 className="text-4xl sm:text-5xl font-extrabold text-primary mb-1.5">
+                  <StatCounter target={stat.target} suffix={stat.suffix} />
+                </h3>
+                <p className="text-primary/60 text-[11px] sm:text-xs font-bold uppercase tracking-widest">{stat.label}</p>
+              </div>
+            ))}
           </div>
         </div>
-      </section>
+      </div>
 
 
       {/* 2026 YEARLY WATCHWORD SECTION */}
-      <section className="py-16 md:py-20 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0B2C22 0%, #0D3D2E 50%, #0B2C22 100%)' }}>
+      <section className="pt-24 pb-16 md:pt-28 md:pb-20 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0B2C22 0%, #0D3D2E 50%, #0B2C22 100%)' }}>
         {/* Background decorative elements */}
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#C8E63A_1px,transparent_1px)] [background-size:20px_20px]" />
         <div className="absolute top-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(90deg, transparent, #C8E63A, transparent)' }} />

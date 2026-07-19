@@ -1,25 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { getSiteSettings } from "@/lib/settings";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", subject: "General Inquiry", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
-  const [settings, setSettings] = useState<any>(null);
-
-  useEffect(() => {
-    getSiteSettings().then((s) => {
-      setSettings(s);
-    });
-  }, []);
-
-  const contactEmail = settings?.contactEmail || "trinitybaptistchurchilora@gmail.com";
-  const contactPhone = settings?.contactPhone || "08034084270, 07086454207";
-  const address = settings?.address || "P.O. Box 43, Ilora, Oyo State, Nigeria.";
+  const contactPhone = "08034084270 / 07086454207";
+  const address = "P.O. Box 43, Ilora, Oyo State, Nigeria.";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

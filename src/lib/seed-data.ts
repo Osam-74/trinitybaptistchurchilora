@@ -6,8 +6,8 @@ export const defaultSettings: SiteSettings = {
   tagline: "A Place of Grace, Faith & Community",
   serviceTimes: "Sundays 7:30 AM & 10:00 AM | Wednesdays 5:00 PM & 6:00 PM",
   contactEmail: "trinitybaptistchurchilora@gmail.com",
-  contactPhone: "+234 803 XXX XXXX",
-  address: "Ilora, Oyo State, Nigeria",
+  contactPhone: "08034084270, 07086454207",
+  address: "P.O. Box 43, Ilora, Oyo State, Nigeria",
   pastorName: "Rev'd Dr S. O. Mosebolatan",
   socialLinks: {
     facebook: "https://facebook.com/trinitybaptistilora",
