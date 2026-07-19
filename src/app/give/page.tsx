@@ -54,7 +54,7 @@ export default function GivePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>WHY WE GIVE<div className="w-8 h-px bg-primary-light/40"/></div>
-            <h2 className="font-serif text-4xl font-bold text-primary">Your Gift Makes a <span className="text-gradient-gold">Difference</span></h2>
+            <h2 className="font-serif text-4xl font-bold text-primary">Your Gift Makes a <span className="text-primary">Difference</span></h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {givingReasons.map((item, i) => (
@@ -75,7 +75,7 @@ export default function GivePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>HOW TO GIVE<div className="w-8 h-px bg-primary-light/40"/></div>
-            <h2 className="font-serif text-4xl font-bold text-primary">Giving <span className="text-gradient-gold">Methods</span></h2>
+            <h2 className="font-serif text-4xl font-bold text-primary">Giving <span className="text-primary">Methods</span></h2>
           </div>
           <div className="grid md:grid-cols-2 gap-8">
             {/* Bank Transfer */}
@@ -151,7 +151,7 @@ export default function GivePage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>GIVING FAQ<div className="w-8 h-px bg-primary-light/40"/></div>
-            <h2 className="font-serif text-4xl font-bold text-primary">Common <span className="text-gradient-gold">Questions</span></h2>
+            <h2 className="font-serif text-4xl font-bold text-primary">Common <span className="text-primary">Questions</span></h2>
           </div>
           <div className="space-y-4">
             {faqItems.map((item, i) => (

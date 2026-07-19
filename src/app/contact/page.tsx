@@ -181,20 +181,28 @@ export default function ContactPage() {
                 <h3 className="font-serif text-lg font-bold text-primary mb-2.5">Service Times</h3>
                 <ul className="space-y-1.5 text-stone-600 text-sm">
                   <li className="flex items-center justify-between gap-4">
-                    <span className="font-semibold text-stone-700">Sunday 1st Service</span>
+                    <span className="font-semibold text-stone-700">Sunday English Service</span>
                     <span>7:30 AM</span>
                   </li>
                   <li className="flex items-center justify-between gap-4">
                     <span className="font-semibold text-stone-700">Sunday School</span>
-                    <span>9:00 AM</span>
+                    <span>9:15 AM</span>
                   </li>
                   <li className="flex items-center justify-between gap-4">
-                    <span className="font-semibold text-stone-700">Sunday 2nd Service</span>
-                    <span>10:00 AM</span>
+                    <span className="font-semibold text-stone-700">Sunday Yoruba Service</span>
+                    <span>10:15 AM</span>
                   </li>
                   <li className="flex items-center justify-between gap-4">
-                    <span className="font-semibold text-stone-700">Wednesday Midweek Service</span>
+                    <span className="font-semibold text-stone-700">Wednesday Prayer Meeting</span>
                     <span>5:00 PM</span>
+                  </li>
+                  <li className="flex items-center justify-between gap-4">
+                    <span className="font-semibold text-stone-700">Wednesday Bible Study</span>
+                    <span>6:00 PM</span>
+                  </li>
+                  <li className="flex items-center justify-between gap-4">
+                    <span className="font-semibold text-stone-700">Sunday Evening Service</span>
+                    <span>6:00 PM</span>
                   </li>
                 </ul>
               </div>

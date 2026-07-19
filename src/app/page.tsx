@@ -481,7 +481,7 @@ export default function HomePage() {
               </span>
               <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-black text-primary-dark tracking-tight leading-tight">
                 Grace and peace be <br />
-                <span className="text-gradient-gold">multiplied unto you.</span>
+                <span className="text-primary font-extrabold">multiplied unto you.</span>
               </h2>
               <div className="w-16 h-1 bg-accent rounded-full" />
               <p className="text-text-muted text-base sm:text-lg leading-relaxed pt-2">
@@ -550,7 +550,7 @@ export default function HomePage() {
               Weekly Services & Fellowship Times
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl font-black text-primary-dark">
-              Join Our <span className="text-gradient-gold">Services & Studies</span>
+              Join Our <span className="text-primary">Services & Studies</span>
             </h2>
             <p className="text-text-muted text-sm sm:text-base mt-3">
               We look forward to worshiping, studying, and praying together with you. Find our weekly schedules below.
@@ -727,7 +727,7 @@ export default function HomePage() {
                 Latest Message
               </span>
               <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-black text-primary-dark">
-                Hear the <span className="text-gradient-gold">Word of God</span>
+                Hear the <span className="text-primary">Word of God</span>
               </h2>
             </div>
             <Link
@@ -813,7 +813,7 @@ export default function HomePage() {
                 This Sunday in Pictures
               </span>
               <h2 className="font-serif text-3xl sm:text-4xl font-black text-primary-dark">
-                Moments from our <span className="text-gradient-gold">church family</span>
+                Moments from our <span className="text-primary">church family</span>
               </h2>
             </div>
             <Link

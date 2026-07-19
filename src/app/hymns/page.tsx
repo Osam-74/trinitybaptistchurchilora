@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Hymn } from "@/types";
@@ -146,7 +147,9 @@ function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }
   const prev = useCallback(() => setVerseIndex(i => Math.max(i - 1, 0)), []);
 
   // Lock body scroll when presentation is open
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    setMounted(true);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     document.body.style.position = "fixed";
@@ -185,8 +188,9 @@ function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }
   }, [verseIndex]);
 
   if (verses.length === 0) return null;
+  if (!mounted) return null;
 
-  return (
+  return createPortal(
     <div
       style={{
         position: "fixed",
@@ -269,7 +273,7 @@ function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }
         </button>
       </div>
     </div>
-  );
+  , document.body);
 }
 
 const CATEGORIES: { key: "english" | "yoruba"; label: string }[] = [

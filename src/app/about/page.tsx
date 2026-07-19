@@ -72,7 +72,7 @@ export default function AboutPage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="reveal-left">
               <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>OUR MISSION</div>
-              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-primary mb-6 leading-tight">Built on the <span className="text-gradient-gold">Rock</span> of Christ</h2>
+              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-primary mb-6 leading-tight">Built on the <span className="text-primary">Rock</span> of Christ</h2>
               <p className="text-stone-700 text-lg leading-relaxed mb-5">
                 Trinity Baptist Church, Ilora is a sanctified community founded with a singular, glorious vision: to be a <strong>Sanctuary of Praise</strong> — a place where lives are transformed, hearts are healed, and souls are drawn into the fullness of God's love.
               </p>
