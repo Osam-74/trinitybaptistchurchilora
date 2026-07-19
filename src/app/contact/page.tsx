@@ -18,8 +18,8 @@ export default function ContactPage() {
   }, []);
 
   const contactEmail = settings?.contactEmail || "trinitybaptistchurchilora@gmail.com";
-  const contactPhone = settings?.contactPhone || "+234 (0) 800 123 4567";
-  const address = settings?.address || "Trinity Baptist Church, Ilora, Oyo State, Nigeria.";
+  const contactPhone = settings?.contactPhone || "08034084270, 07086454207";
+  const address = settings?.address || "P.O. Box 43, Ilora, Oyo State, Nigeria.";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

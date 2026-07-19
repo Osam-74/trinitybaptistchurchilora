@@ -5,6 +5,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LiveBanner from "@/components/LiveBanner";
+import SideRays from "@/components/SideRays";
 import { getYouTubeThumbnail } from "@/lib/utils";
 import { sampleSermons } from "@/lib/seed-data";
 import { doc, onSnapshot, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
@@ -178,9 +179,9 @@ export default function HomePage() {
   // 2. Hero Background Image Rotation
   const [currentBg, setCurrentBg] = useState(0);
   const heroBackgrounds = [
-    "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=1920&q=80", // beautiful church interior
-    "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1920&q=80", // worship crowd
-    "https://images.unsplash.com/photo-1478147427282-58a87a120781?w=1920&q=80", // vibrant light / service
+    "/church-building.jpg",
+    "/church-front.jpg",
+    "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1920&q=80",
   ];
 
   useEffect(() => {
@@ -247,6 +248,18 @@ export default function HomePage() {
         {/* Hero Overlay */}
         <div className="absolute inset-0 hero-overlay bg-black/65 mix-blend-multiply" />
 
+        {/* Cascadian Side Rays */}
+        <SideRays
+          speed={2.5}
+          rayColor1="#e4af0b"
+          rayColor2="#c4ffc4"
+          intensity={1.5}
+          spread={2.4}
+          origin="top-right"
+          tilt={-4}
+          opacity={0.6}
+        />
+
         {/* Slow-moving background shape particles for depth (very low opacity) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-72 h-72 rounded-full bg-accent/10 blur-[120px] animate-pulse-slow" style={{ animationDuration: "12s" }} />
@@ -297,7 +310,7 @@ export default function HomePage() {
 
           {/* Sub-headline */}
           <p className="text-white/90 text-base sm:text-lg md:text-xl font-normal max-w-2xl mx-auto mb-10 leading-relaxed drop-shadow font-sans animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
-            A place of grace, faith, and community in Ilora, Oyo State, Nigeria
+            For Christ is our Peace — Eph. 2:14
           </p>
 
           {/* 3 CTA Buttons */}
@@ -359,7 +372,93 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. Welcome & Pastoral Message Section */}
+
+      {/* 2026 YEARLY WATCHWORD SECTION */}
+      <section className="py-16 md:py-20 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0B2C22 0%, #0D3D2E 50%, #0B2C22 100%)' }}>
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#C8E63A_1px,transparent_1px)] [background-size:20px_20px]" />
+        <div className="absolute top-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(90deg, transparent, #C8E63A, transparent)' }} />
+        <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(90deg, transparent, #C8E63A, transparent)' }} />
+
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
+          {/* Section label */}
+          <div className="text-center mb-10">
+            <span className="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 text-accent text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full">
+              ✝ Yearly Watchword — 2026
+            </span>
+          </div>
+
+          {/* Main 2-column layout */}
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+
+            {/* LEFT: Year + Watchword */}
+            <div className="text-center lg:text-left">
+              {/* Big 2026 */}
+              <div className="inline-block relative mb-4">
+                <span className="font-serif font-black leading-none text-white select-none"
+                  style={{ fontSize: 'clamp(5rem, 16vw, 9rem)', WebkitTextStroke: '3px #C8E63A', color: 'transparent', letterSpacing: '-0.02em' }}>
+                  20
+                </span>
+                <span className="font-serif font-black leading-none select-none"
+                  style={{ fontSize: 'clamp(5rem, 16vw, 9rem)', color: '#C8E63A', letterSpacing: '-0.02em' }}>
+                  26
+                </span>
+              </div>
+
+              {/* English watchword */}
+              <div className="mb-3">
+                <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">My Year of</p>
+                <h2 className="font-serif font-black text-white leading-tight"
+                  style={{ fontSize: 'clamp(2.2rem, 6vw, 3.5rem)', textShadow: '0 2px 20px rgba(200,230,58,0.3)' }}>
+                  UPLIFTMENT
+                </h2>
+              </div>
+
+              {/* Yoruba watchword */}
+              <div className="mt-4 inline-block bg-white/5 border border-white/15 rounded-2xl px-6 py-3">
+                <p className="text-accent/70 text-xs font-bold uppercase tracking-widest mb-1">Odun</p>
+                <h3 className="font-serif font-bold text-accent text-2xl md:text-3xl">IGBE-DIDE MI</h3>
+              </div>
+            </div>
+
+            {/* RIGHT: Bible Verse */}
+            <div className="lg:border-l lg:border-white/10 lg:pl-12">
+              <div className="grid sm:grid-cols-2 gap-5">
+                {/* English verse */}
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                  <svg className="w-6 h-6 text-accent mb-3 opacity-60" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M13 14.725c0-5.141 3.892-10.519 10-11.725l.984 2.126c-2.215.835-4.161 2.51-4.884 4.371 1.405.353 2.842 1.34 2.842 3.528 0 2.525-1.748 4.275-4.477 4.275-2.272 0-4.465-1.368-4.465-4.275zm-13 0c0-5.141 3.892-10.519 10-11.725l.984 2.126c-2.215.835-4.161 2.51-4.884 4.371 1.405.353 2.843 1.34 2.843 3.528 0 2.525-1.748 4.275-4.477 4.275-2.272 0-4.465-1.368-4.465-4.275z" />
+                  </svg>
+                  <p className="text-white/85 text-sm leading-relaxed font-serif italic">
+                    &ldquo;Rejoice not against me, O my enemy! when I fall, I shall arise; when I sit in darkness, the LORD shall be a light unto me.&rdquo;
+                  </p>
+                  <p className="text-accent font-bold text-xs uppercase tracking-widest mt-4">MICAH 7:8 (AMPC)</p>
+                </div>
+
+                {/* Yoruba verse */}
+                <div className="bg-white/5 border border-accent/20 rounded-2xl p-6 backdrop-blur-sm">
+                  <svg className="w-6 h-6 text-accent mb-3 opacity-60" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M13 14.725c0-5.141 3.892-10.519 10-11.725l.984 2.126c-2.215.835-4.161 2.51-4.884 4.371 1.405.353 2.842 1.34 2.842 3.528 0 2.525-1.748 4.275-4.477 4.275-2.272 0-4.465-1.368-4.465-4.275zm-13 0c0-5.141 3.892-10.519 10-11.725l.984 2.126c-2.215.835-4.161 2.51-4.884 4.371 1.405.353 2.843 1.34 2.843 3.528 0 2.525-1.748 4.275-4.477 4.275-2.272 0-4.465-1.368-4.465-4.275z" />
+                  </svg>
+                  <p className="text-white/85 text-sm leading-relaxed font-serif italic">
+                    &ldquo;Má yọ mí, Iwọ ọ̀tà mi: nígba tí mo bà ṣubú, emi ò dide; nígba tí mo bà jokoo ní okùnkun, OLUWA yoo jẹ ìmọlẹ fun mi.&rdquo;
+                  </p>
+                  <p className="text-accent font-bold text-xs uppercase tracking-widest mt-4">MIKA 7:8 (ATỌKA)</p>
+                </div>
+              </div>
+
+              {/* Footer quote */}
+              <div className="mt-6 text-center lg:text-left">
+                <p className="text-white/40 text-xs italic">
+                  &ldquo;God bless you as you come again. Amen.&rdquo;
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Welcome & Pastoral Message Section */
       <section className="py-24 bg-bg relative">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="grid lg:grid-cols-12 gap-16 items-center">
@@ -465,59 +564,149 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
-            {[
-              {
-                title: "Sunday 1st Service",
-                time: "7:30 AM",
-                location: "Main Sanctuary",
-              },
-              {
-                title: "Sunday 2nd Service",
-                time: "10:00 AM",
-                location: "Main Sanctuary",
-              },
-              {
-                title: "Wednesday Bible Study",
-                time: "6:00 PM",
-                location: "Fellowship Hall",
-              },
-              {
-                title: "Wednesday Prayer Meeting",
-                time: "5:00 PM",
-                location: "Prayer Room",
-              },
-            ].map((srv, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-3xl p-6 border border-stone-200/50 shadow-sm card-hover flex flex-col justify-between reveal"
-              >
-                <div className="flex flex-col h-full justify-between">
-                  <div>
-                    {/* SVG clock icon matching the site's forest-green/gold theme */}
-                    <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center mb-5">
-                      <svg className="w-6 h-6 text-[#0D4A35]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <h3 className="font-serif text-xl font-bold text-primary-dark mb-3">{srv.title}</h3>
-                  </div>
-
-                  <div className="space-y-2 mt-2">
-                    <p className="text-sm font-bold text-primary flex items-center gap-2 uppercase tracking-wide">
-                      <span className="text-amber-600 font-bold">●</span> {srv.time}
-                    </p>
-                    <p className="text-text-muted text-xs flex items-center gap-1.5 font-medium">
-                      <svg className="w-4 h-4 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      {srv.location}
-                    </p>
+          {/* Weekly Programme from Bulletin */}
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {/* SUNDAY */}
+            <div className="bg-white rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, #0B2C22, #0D4A35)' }}>
+                <span className="text-xl">☀️</span>
+                <h3 className="font-serif text-base font-bold text-white">Sunday</h3>
+              </div>
+              <div className="p-5 space-y-2.5 text-sm">
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">English Service</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">7:30 – 9:15am</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Sunday School</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">9:15 – 10:15am</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Yoruba Service</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">10:15am – 12:15pm</span>
+                </div>
+                <div className="border-t border-stone-100 pt-2 mt-2">
+                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2">Evening</p>
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between"><span className="text-stone-600 text-xs">Discipleship / Baptismal Class</span><span className="text-primary text-xs font-semibold">4–5pm</span></div>
+                    <div className="flex justify-between"><span className="text-stone-600 text-xs">Church Training Programme</span><span className="text-primary text-xs font-semibold">5–6pm</span></div>
+                    <div className="flex justify-between"><span className="text-stone-600 text-xs">Evening Service</span><span className="text-primary text-xs font-semibold">6–7pm</span></div>
                   </div>
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* MONDAY */}
+            <div className="bg-white rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, #1a4a35, #0D4A35)' }}>
+                <span className="text-xl">🌅</span>
+                <h3 className="font-serif text-base font-bold text-white">Monday</h3>
+              </div>
+              <div className="p-5 space-y-2.5 text-sm">
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Early Morning Prayer</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:30 – 6:00am</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">MMU / WMU Meeting</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:30 – 6:30pm</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">G.A. / R.A. / Sun. Beam / Lydia</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:00 – 6:00pm</span>
+                </div>
+              </div>
+            </div>
+
+            {/* TUESDAY */}
+            <div className="bg-white rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, #1a3a50, #174060)' }}>
+                <span className="text-xl">💼</span>
+                <h3 className="font-serif text-base font-bold text-white">Tuesday</h3>
+              </div>
+              <div className="p-5 space-y-2.5 text-sm">
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Business Men&apos;s Fellowship</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:30 – 6:30pm</span>
+                </div>
+              </div>
+            </div>
+
+            {/* WEDNESDAY */}
+            <div className="bg-white rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, #3a2a0a, #5a4010)' }}>
+                <span className="text-xl">📖</span>
+                <h3 className="font-serif text-base font-bold text-white">Wednesday</h3>
+              </div>
+              <div className="p-5 space-y-2.5 text-sm">
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Prayer Meeting</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:00 – 6:00pm</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Bible Study</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">6:00 – 7:00pm</span>
+                </div>
+              </div>
+            </div>
+
+            {/* THURSDAY */}
+            <div className="bg-white rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, #2a1a40, #3d2560)' }}>
+                <span className="text-xl">🙌</span>
+                <h3 className="font-serif text-base font-bold text-white">Thursday</h3>
+              </div>
+              <div className="p-5 space-y-2.5 text-sm">
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Prayer Band (Spiritual Clinic)</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:00 – 7:00pm</span>
+                </div>
+              </div>
+            </div>
+
+            {/* FRIDAY */}
+            <div className="bg-white rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, #3a1a10, #5a2818)' }}>
+                <span className="text-xl">🔥</span>
+                <h3 className="font-serif text-base font-bold text-white">Friday</h3>
+              </div>
+              <div className="p-5 space-y-2.5 text-sm">
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Early Morning Prayer</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:30 – 6:00am</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">SS Preparatory Class</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:00 – 6:00pm</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Church Executive Meeting</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">6:00 – 7:00pm</span>
+                </div>
+                <p className="text-[10px] text-stone-400 italic">(1st & 3rd Friday)</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Monthly Programme */}
+          <div className="mt-8 bg-primary rounded-3xl p-6 sm:p-8 text-white">
+            <h3 className="font-serif text-xl font-bold mb-5 flex items-center gap-2">
+              <span>📅</span> Monthly Programme
+            </h3>
+            <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              {[
+                { name: "Night Watch Prayer", schedule: "Every Last Friday", time: "6:00pm – 8:00pm" },
+                { name: "Covenant Service", schedule: "Every 1st Saturday", time: "6:00am – 7:00am" },
+                { name: "3 Days Overcomers Service", schedule: "Last Mon to Wed", time: "Monthly" },
+                { name: "Marriage Breakthrough", schedule: "Every Last Sunday", time: "5:00pm – 7:00pm" },
+              ].map((item, i) => (
+                <div key={i} className="bg-white/10 border border-white/10 rounded-2xl p-4">
+                  <p className="font-bold text-accent text-sm mb-1">{item.name}</p>
+                  <p className="text-white/70 text-xs">{item.schedule}</p>
+                  <p className="text-white/60 text-xs mt-0.5">{item.time}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="text-center mt-12 reveal">

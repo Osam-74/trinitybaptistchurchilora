@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getSiteSettings } from "@/lib/settings";
@@ -13,7 +13,6 @@ const navLinks = [
   { href: "/hymns", label: "Hymns" },
   { href: "/gallery", label: "Gallery" },
   { href: "/team", label: "Our Team" },
-  { href: "/pastor", label: "Pastor" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -45,6 +44,8 @@ export default function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string>("/logo/trinity-logo.png");
   const pathname = usePathname();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     getSiteSettings().then((s) => { if (s.logoUrl) setLogoUrl(s.logoUrl); });
@@ -56,6 +57,17 @@ export default function Navbar() {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
+
+  const handleDropdownEnter = () => {
+    if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current);
+    setIsDropdownOpen(true);
+  };
+
+  const handleDropdownLeave = () => {
+    dropdownTimerRef.current = setTimeout(() => {
+      setIsDropdownOpen(false);
+    }, 200);
+  };
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "nav-glass shadow-xl" : "nav-transparent"}`}>
@@ -81,7 +93,7 @@ export default function Navbar() {
               <h1 className="text-white font-serif text-base lg:text-lg font-bold leading-tight whitespace-nowrap">
                 Trinity Baptist Church, Ilora
               </h1>
-              <p className="text-accent text-[10px] uppercase tracking-widest font-medium">Sanctuary of Praise</p>
+              <p className="text-accent text-[10px] uppercase tracking-widest font-medium">For Christ is our Peace</p>
             </div>
           </Link>
 
@@ -90,16 +102,22 @@ export default function Navbar() {
             {navLinks.map((link) => {
               if (link.isDropdown) {
                 return (
-                  <div key={link.label} className="relative"
-                    onMouseEnter={() => setIsDropdownOpen(true)}
-                    onMouseLeave={() => setIsDropdownOpen(false)}>
+                  <div
+                    key={link.label}
+                    className="relative"
+                    ref={dropdownRef}
+                    onMouseEnter={handleDropdownEnter}
+                    onMouseLeave={handleDropdownLeave}
+                  >
                     <button className="px-2.5 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 flex items-center gap-1 transition-all duration-300">
                       {link.label}
                       <svg className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
-                    <div className={`absolute top-full left-0 w-72 bg-primary-dark border border-accent/15 rounded-2xl shadow-2xl py-2 mt-2 transition-all duration-300 transform origin-top-left ${isDropdownOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}>
+                    {/* Bridge gap between button and dropdown to prevent accidental close */}
+                    <div className="absolute top-full left-0 w-72 h-3" style={{ display: isDropdownOpen ? 'block' : 'none' }} />
+                    <div className={`absolute top-full left-0 w-72 bg-primary-dark border border-accent/15 rounded-2xl shadow-2xl py-2 mt-3 transition-all duration-300 transform origin-top-left ${isDropdownOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}>
                       <div className="px-4 py-2 border-b border-white/10 mb-1">
                         <Link href="/ministries" className="text-xs font-bold text-accent uppercase tracking-wider">View All Ministries →</Link>
                       </div>
@@ -151,7 +169,7 @@ export default function Navbar() {
         style={{ background: 'rgba(11,44,34,0.5)', backdropFilter: 'blur(8px)' }}
         onClick={() => setIsOpen(false)} />
 
-      {/* Mobile menu panel — 75% width, slides from right */}
+      {/* Mobile menu panel */}
       <div className={`xl:hidden fixed top-0 right-0 bottom-0 w-[75%] sm:w-[50%] bg-primary-dark border-l border-accent/15 shadow-2xl z-50 transition-transform duration-300 ease-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex flex-col h-full justify-between p-6 pt-24 overflow-y-auto">
           <div className="space-y-1.5">
@@ -180,32 +198,21 @@ export default function Navbar() {
               const isActive = pathname === link.href;
               return (
                 <Link key={link.href} href={link.href}
-                  className={`block px-4 py-2.5 rounded-xl text-base font-semibold transition-all ${isActive ? "text-accent bg-white/5 border border-accent/10" : "text-white/80 hover:text-white hover:bg-white/5"}`}>
+                  className={`block px-4 py-2.5 rounded-xl text-base font-semibold transition-all ${isActive ? "text-accent bg-white/5 border border-accent/20" : "text-white/80 hover:text-white hover:bg-white/5"}`}>
                   {link.label}
                 </Link>
               );
             })}
           </div>
-          <div className="space-y-3 mt-6">
-            <Link href="/live"
-              className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-all">
-              <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-              Watch Live
+          <div className="space-y-3 pt-6 border-t border-white/10">
+            <Link href="/live" onClick={() => setIsOpen(false)}
+              className="flex items-center justify-center gap-2 w-full py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors">
+              <span className="w-2 h-2 bg-white rounded-full animate-pulse"/>Watch Live
             </Link>
-            <Link href="/give"
-              className="flex items-center justify-center w-full px-4 py-3 bg-accent text-primary-dark font-bold rounded-xl hover:bg-accent-light transition-all">
-              Give Online
+            <Link href="/give" onClick={() => setIsOpen(false)}
+              className="flex items-center justify-center w-full py-3 bg-accent text-primary-dark font-bold rounded-xl hover:bg-accent-light transition-colors">
+              Give / Donate
             </Link>
-            <div className="flex justify-center gap-4 pt-4 border-t border-white/10">
-              {[
-                { label: "Facebook", path: "M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" },
-                { label: "YouTube", path: "M22.54 6.42a2.78 2.78 0 00-1.95-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 11.75a29 29 0 00.46 5.33A2.78 2.78 0 003.4 19.13C5.12 19.56 12 19.56 12 19.56s6.88 0 8.6-.46a2.78 2.78 0 001.94-2 29 29 0 00.46-5.25 29 29 0 00-.46-5.43z" },
-              ].map((s) => (
-                <a key={s.label} href="#" className="text-white/50 hover:text-accent transition-colors">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d={s.path}/></svg>
-                </a>
-              ))}
-            </div>
           </div>
         </div>
       </div>

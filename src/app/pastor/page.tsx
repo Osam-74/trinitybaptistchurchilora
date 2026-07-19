@@ -43,9 +43,9 @@ function useCounter(target: number, duration = 2000) {
 }
 
 const stats = [
-  { label: "Years in Ministry", target: 30, suffix: "+" },
-  { label: "Lives Transformed", target: 1200, suffix: "+" },
-  { label: "Community Outreaches", target: 85, suffix: "+" },
+  { label: "Years in Ministry", target: 20, suffix: "+" },
+  { label: "Lives Transformed", target: 5000, suffix: "+" },
+  { label: "Community Outreaches", target: 15, suffix: "+" },
 ];
 
 const philosophy = [

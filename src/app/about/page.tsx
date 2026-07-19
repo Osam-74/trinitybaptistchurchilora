@@ -86,7 +86,7 @@ export default function AboutPage() {
             </div>
             <div className="reveal-right">
               <div className="relative rounded-3xl overflow-hidden shadow-2xl img-zoom group">
-                <img src="https://images.unsplash.com/photo-1438032005730-c779502df39b?w=800&auto=format&fit=crop&q=80" alt="Church community" className="w-full h-[420px] object-cover" />
+                <img src="/church-building.jpg" alt="Trinity Baptist Church, Ilora" className="w-full h-[420px] object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/60 to-transparent pointer-events-none" />
                 <div className="absolute bottom-6 left-6 right-6">
                   <div className="glass-card p-4 rounded-2xl text-white">
@@ -106,7 +106,7 @@ export default function AboutPage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16 reveal">
             <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>OUR JOURNEY<div className="w-8 h-px bg-primary-light/40"/></div>
-            <h2 className="font-serif text-4xl font-bold text-primary">Our <span className="text-gradient-gold">Timeline</span></h2>
+            <h2 className="font-serif text-4xl font-bold text-primary">Our <span className="text-primary-dark font-extrabold">Timeline</span></h2>
             <p className="text-stone-600 mt-3 max-w-xl mx-auto">How God has faithfully guided and built His church across generations.</p>
           </div>
           <div className="relative space-y-12">
@@ -136,7 +136,7 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14 reveal">
             <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>WHAT WE BELIEVE<div className="w-8 h-px bg-primary-light/40"/></div>
-            <h2 className="font-serif text-4xl font-bold text-primary">Our Core <span className="text-gradient-gold">Values</span></h2>
+            <h2 className="font-serif text-4xl font-bold text-primary">Our Core <span className="text-primary-dark font-extrabold">Values</span></h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {values.map((v, i) => (
@@ -157,12 +157,12 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14 reveal">
             <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>MEET THE TEAM<div className="w-8 h-px bg-primary-light/40"/></div>
-            <h2 className="font-serif text-4xl font-bold text-primary">Church <span className="text-gradient-gold">Leadership</span></h2>
+            <h2 className="font-serif text-4xl font-bold text-primary">Church <span className="text-primary-dark font-extrabold">Leadership</span></h2>
             <p className="text-stone-600 mt-3 max-w-xl mx-auto">Godly leaders dedicated to shepherding the flock of Trinity Baptist Church, Ilora.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {leaders.filter(l => l.active).map((leader, i) => (
-              <div key={leader.id} className="bg-white rounded-3xl overflow-hidden border border-stone-100 shadow-sm card-hover reveal group" style={{ transitionDelay: `${i * 0.1}s` }}>
+              <div key={leader.id} className="bg-white rounded-3xl overflow-hidden border border-stone-100 shadow-sm card-hover group" style={{ opacity: 1 }}>
                 <div className="relative h-64 img-zoom">
                   <img src={leader.photoUrl} alt={leader.name} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-primary-dark via-primary-dark/20 to-transparent opacity-80"/>
