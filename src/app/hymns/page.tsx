@@ -145,6 +145,19 @@ function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }
   const next = useCallback(() => setVerseIndex(i => Math.min(i + 1, verses.length - 1)), [verses.length]);
   const prev = useCallback(() => setVerseIndex(i => Math.max(i - 1, 0)), []);
 
+  // Lock body scroll when presentation is open
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.width = "100%";
+    return () => {
+      document.body.style.overflow = prev;
+      document.body.style.position = "";
+      document.body.style.width = "";
+    };
+  }, []);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " ") {
@@ -175,8 +188,19 @@ function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }
 
   return (
     <div
-      className="fixed inset-0 z-[100] bg-primary-dark select-none overflow-hidden"
-      style={{ height: '100dvh' }}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 99999,
+        backgroundColor: "#0B2C22",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+      }}
+      className="select-none"
     >
       {/* Background cross watermark */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.04]">
@@ -314,12 +338,13 @@ export default function HymnsPage() {
   }), [allHymns]);
 
   return (
-    <main className="min-h-screen bg-bg">
-      <Navbar />
-      {showSignUp && <SignUpModal dept="Choir" onClose={() => setShowSignUp(false)}/>}
+    <>
       {presenting && <PresentationMode hymn={presenting} onClose={() => setPresenting(null)} />}
+      <main className="min-h-screen bg-bg">
+        <Navbar />
+        {showSignUp && <SignUpModal dept="Choir" onClose={() => setShowSignUp(false)}/>}
 
-      {/* Hero */}
+        {/* Hero */}
       <div className="page-hero pt-20">
         <div className="py-20 lg:py-28">
           <div className="max-w-4xl mx-auto px-4 text-center">
@@ -547,6 +572,7 @@ export default function HymnsPage() {
       </div>
 
       <Footer />
-    </main>
+      </main>
+    </>
   );
 }

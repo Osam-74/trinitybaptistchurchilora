@@ -12,7 +12,7 @@ const navLinks = [
   { href: "#", label: "Ministries", isDropdown: true },
   { href: "/hymns", label: "Hymns" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/team", label: "Our Team" },
+  { href: "/team", label: "Executives" },
   { href: "/contact", label: "Contact" },
 ];
 
