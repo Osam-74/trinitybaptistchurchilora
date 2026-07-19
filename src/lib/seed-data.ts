@@ -150,60 +150,29 @@ export const sampleAlbums: Omit<Album, "id">[] = [
 ];
 
 export const sampleActivities: Omit<Activity, "id">[] = [
-  {
-    title: "Sunday Worship Service (1st)",
-    weekday: 0,
-    startTime: "07:30",
-    endTime: "09:30",
-    location: "Main Sanctuary",
-    description: "First Sunday morning worship service.",
-    active: true,
-  },
-  {
-    title: "Sunday Worship Service (2nd)",
-    weekday: 0,
-    startTime: "10:00",
-    endTime: "12:00",
-    location: "Main Sanctuary",
-    description: "Second Sunday morning worship service.",
-    active: true,
-  },
-  {
-    title: "Prayer Meeting",
-    weekday: 3,
-    startTime: "17:00",
-    endTime: "18:00",
-    location: "Prayer Room",
-    description: "Corporate prayer, intercession, and spiritual warfare.",
-    active: true,
-  },
-  {
-    title: "Bible Study",
-    weekday: 3,
-    startTime: "18:00",
-    endTime: "19:30",
-    location: "Fellowship Hall",
-    description: "In-depth study of God's Word.",
-    active: true,
-  },
-  {
-    title: "Youth Fellowship (BYF)",
-    weekday: 5,
-    startTime: "16:00",
-    endTime: "18:00",
-    location: "Youth Center",
-    description: "Dynamic fellowship for young adults.",
-    active: true,
-  },
-  {
-    title: "Women's Fellowship",
-    weekday: 2,
-    startTime: "10:00",
-    endTime: "12:00",
-    location: "Fellowship Hall",
-    description: "Women gathering in faith and fellowship.",
-    active: true,
-  },
+  // SUNDAY
+  { title: "English Worship Service", weekday: 0, startTime: "07:30", endTime: "09:15", location: "Main Sanctuary", description: "Morning English worship service.", active: true },
+  { title: "Sunday School", weekday: 0, startTime: "09:15", endTime: "10:15", location: "Main Sanctuary", description: "Sunday school for all ages.", active: true },
+  { title: "Yoruba Worship Service", weekday: 0, startTime: "10:15", endTime: "12:15", location: "Main Sanctuary", description: "Morning Yoruba worship service.", active: true },
+  { title: "Discipleship / Baptismal Class", weekday: 0, startTime: "16:00", endTime: "17:00", location: "Church Premises", description: "Discipleship and baptismal class for new converts.", active: true },
+  { title: "Church Training Programme (CTP)", weekday: 0, startTime: "17:00", endTime: "18:00", location: "Main Sanctuary", description: "Church training programme.", active: true },
+  { title: "Evening Service", weekday: 0, startTime: "18:00", endTime: "19:00", location: "Main Sanctuary", description: "Sunday evening worship service.", active: true },
+  // MONDAY
+  { title: "Early Morning Prayer", weekday: 1, startTime: "05:30", endTime: "06:00", location: "Church Premises", description: "Early morning prayer to start the week.", active: true },
+  { title: "MMU / WMU Meeting", weekday: 1, startTime: "17:30", endTime: "18:30", location: "Fellowship Hall", description: "Men's Missionary Union & Women's Missionary Union meeting.", active: true },
+  { title: "G.A. / R.A. / Sunbeam / Lydia", weekday: 1, startTime: "17:00", endTime: "18:00", location: "Church Premises", description: "Girls' Auxiliaries, Royal Ambassadors, Sunbeam, and Lydia Band meeting.", active: true },
+  // TUESDAY
+  { title: "Business Men's Fellowship", weekday: 2, startTime: "17:30", endTime: "18:30", location: "Fellowship Hall", description: "Fellowship and prayer for businessmen.", active: true },
+  // WEDNESDAY
+  { title: "Prayer Meeting", weekday: 3, startTime: "17:00", endTime: "18:00", location: "Prayer Room", description: "Corporate prayer, intercession and spiritual warfare.", active: true },
+  { title: "Bible Study", weekday: 3, startTime: "18:00", endTime: "19:00", location: "Fellowship Hall", description: "In-depth study of God's Word.", active: true },
+  // THURSDAY
+  { title: "Prayer Band (Spiritual Clinic)", weekday: 4, startTime: "17:00", endTime: "19:00", location: "Church Premises", description: "Prayer band and spiritual clinic for healing and intercession.", active: true },
+  // FRIDAY
+  { title: "Early Morning Prayer", weekday: 5, startTime: "05:30", endTime: "06:00", location: "Church Premises", description: "Early morning prayer session.", active: true },
+  { title: "SS Preparatory Class", weekday: 5, startTime: "17:00", endTime: "18:00", location: "Fellowship Hall", description: "Sunday school preparatory class.", active: true },
+  { title: "Church Executive Meeting", weekday: 5, startTime: "18:00", endTime: "19:00", location: "Conference Room", description: "Church executive meeting (1st & 3rd Friday of the month).", active: true },
+  // SATURDAY (no regular programme listed in bulletin — leave empty for accuracy)
 ];
 
 export const sampleStreams: Omit<LiveStream, "id">[] = [

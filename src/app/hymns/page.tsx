@@ -162,56 +162,84 @@ function PresentationMode({ hymn, onClose }: { hymn: Hymn; onClose: () => void }
     return () => window.removeEventListener("keydown", handler);
   }, [next, prev, onClose, verseIndex, verses.length]);
 
+  const [visible, setVisible] = useState(false);
+
+  // Trigger fade-in on mount and fade-out on verse change
+  useEffect(() => {
+    setVisible(false);
+    const t = setTimeout(() => setVisible(true), 40);
+    return () => clearTimeout(t);
+  }, [verseIndex]);
+
   if (verses.length === 0) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-primary-dark flex flex-col items-center justify-center p-6 select-none">
-      {/* Top bar */}
-      <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 z-10">
-        <div className="text-white/60 text-sm">
-          <span className="font-serif text-white font-bold text-lg">{hymn.title}</span>
-          {hymn.author && <span className="ml-3 text-white/40">— {hymn.author}</span>}
+    <div
+      className="fixed inset-0 z-[100] bg-primary-dark select-none overflow-hidden"
+      style={{ height: '100dvh' }}
+    >
+      {/* Background cross watermark */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.04]">
+        <svg viewBox="0 0 48 60" fill="white" className="w-64 h-80">
+          <rect x="20" y="0" width="8" height="60" rx="4"/>
+          <rect x="0" y="16" width="48" height="8" rx="4"/>
+        </svg>
+      </div>
+
+      {/* Top bar — fixed height, no flex-grow */}
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-5 py-4 z-10 bg-gradient-to-b from-black/40 to-transparent">
+        <div className="flex flex-col">
+          <span className="font-serif text-white font-bold text-base sm:text-lg leading-tight">{hymn.title}</span>
+          {hymn.number && <span className="text-accent text-xs font-bold uppercase tracking-widest">Hymn #{hymn.number}</span>}
+          {hymn.author && <span className="text-white/40 text-xs">— {hymn.author}</span>}
         </div>
-        <button onClick={onClose} className="text-white/60 hover:text-white transition-colors flex items-center gap-1.5 text-sm">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button onClick={onClose} className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-xl px-3 py-2 text-xs font-semibold">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
           </svg>
           Exit (Esc)
         </button>
       </div>
 
-      {/* Verse content */}
-      <div className="max-w-4xl w-full text-center flex-1 flex flex-col items-center justify-center">
-        <p className="text-accent/60 text-sm font-semibold uppercase tracking-widest mb-6">
-          Verse {verseIndex + 1} of {verses.length}
+      {/* Verse content — fills remaining space, centred */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-6 sm:px-12 pt-20 pb-24">
+        <p className="text-accent/70 text-xs sm:text-sm font-bold uppercase tracking-widest mb-6">
+          Verse {verseIndex + 1} / {verses.length}
         </p>
-        <p className="whitespace-pre-line text-white font-serif text-2xl md:text-4xl lg:text-5xl leading-relaxed max-w-3xl">
+        <p
+          className="whitespace-pre-line text-white font-serif leading-relaxed text-center max-w-4xl transition-all duration-300"
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? 'translateY(0)' : 'translateY(12px)',
+            fontSize: 'clamp(1.4rem, 3.5vw, 3rem)',
+            lineHeight: 1.55,
+          }}
+        >
           {verses[verseIndex]}
         </p>
       </div>
 
-      {/* Bottom controls */}
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-6 p-6 z-10">
+      {/* Bottom controls — fixed at bottom, no scroll */}
+      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-6 px-5 py-5 z-10 bg-gradient-to-t from-black/40 to-transparent">
         <button onClick={prev} disabled={verseIndex === 0}
           className="text-white/60 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
           </svg>
-          <span className="text-sm hidden sm:inline">Prev</span>
+          <span className="text-sm hidden sm:inline font-semibold">Prev</span>
         </button>
 
-        {/* Dots indicator */}
-        <div className="flex gap-1.5">
+        <div className="flex gap-1.5 flex-wrap justify-center max-w-xs">
           {verses.map((_, i) => (
             <button key={i} onClick={() => setVerseIndex(i)}
-              className={`w-2 h-2 rounded-full transition-all ${i === verseIndex ? 'bg-accent w-6' : 'bg-white/20 hover:bg-white/40'}`} />
+              className={`h-2 rounded-full transition-all duration-300 ${i === verseIndex ? 'bg-accent w-8' : 'bg-white/25 w-2 hover:bg-white/50'}`} />
           ))}
         </div>
 
         <button onClick={() => verseIndex < verses.length - 1 ? next() : onClose()}
           className="text-white/60 hover:text-white transition-colors flex items-center gap-2">
-          <span className="text-sm hidden sm:inline">{verseIndex < verses.length - 1 ? 'Next' : 'Done'}</span>
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <span className="text-sm hidden sm:inline font-semibold">{verseIndex < verses.length - 1 ? 'Next' : 'Done'}</span>
+          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
           </svg>
         </button>

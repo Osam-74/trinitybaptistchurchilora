@@ -121,14 +121,14 @@ export default function PastorPage() {
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-3 gap-4 mt-10">
+              <div className="grid grid-cols-3 gap-3 mt-10">
                 {stats.map((stat) => {
                   // eslint-disable-next-line react-hooks/rules-of-hooks
                   const { count, ref } = useCounter(stat.target);
                   return (
-                    <div key={stat.label} ref={ref} className="bg-bg-alt rounded-2xl p-5 text-center border border-stone-100">
-                      <p className="counter-num text-3xl lg:text-4xl text-primary">{count}{stat.suffix}</p>
-                      <p className="text-stone-500 text-xs mt-1 font-medium">{stat.label}</p>
+                    <div key={stat.label} ref={ref} className="bg-bg-alt rounded-2xl p-3 sm:p-5 text-center border border-stone-100">
+                      <p className="counter-num text-xl sm:text-2xl lg:text-4xl text-primary font-extrabold break-words">{count}{stat.suffix}</p>
+                      <p className="text-stone-500 text-[10px] sm:text-xs mt-1 font-medium leading-tight">{stat.label}</p>
                     </div>
                   );
                 })}

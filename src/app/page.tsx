@@ -461,9 +461,12 @@ export default function HomePage() {
                   alt="Pastoral Greeting"
                   className="w-full h-auto aspect-[4/5] object-cover"
                 />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent p-6 text-white">
-                  <p className="text-accent text-xs font-bold uppercase tracking-widest mb-1">Our Senior Pastor</p>
-                  <h4 className="font-serif text-2xl font-bold leading-tight">Rev&apos;d Dr S. O. Mosebolatan</h4>
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-5 text-white">
+                  <span className="inline-block bg-accent text-primary-dark text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full mb-2">
+                    Senior Pastor
+                  </span>
+                  <h4 className="font-serif text-xl sm:text-2xl font-bold leading-tight">Rev&apos;d Dr S. O. Mosebolatan, PhD. JP</h4>
+                  <p className="text-white/60 text-xs mt-1">Trinity Baptist Church, Ilora</p>
                 </div>
               </div>
               
