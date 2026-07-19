@@ -26,7 +26,7 @@ const serviceTimes = [
 
 export default function Footer() {
   const [logoUrl, setLogoUrl] = useState<string>("/logo/trinity-logo.png");
-  const [settings, setSettings] = useState<{ logoUrl?: string; churchName?: string; address?: string; contactPhone?: string } | null>(null);
+  const [settings, setSettings] = useState<{ logoUrl?: string; churchName?: string; address?: string; contactPhone?: string; contactEmail?: string } | null>(null);
 
   useEffect(() => {
     getSiteSettings().then((s) => {
@@ -37,9 +37,9 @@ export default function Footer() {
 
   const handleBackToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
-  const contactEmail = settings?.contactEmail || "trinitybaptistchurchilora@gmail.com";
-  const contactPhone = settings?.contactPhone || "+234 (0) phone placeholder";
-  const address = settings?.address || "Ilora, Oyo State, Nigeria";
+  const contactEmail = "trinitybaptistchurchilora@gmail.com";
+  const contactPhone = settings?.contactPhone || "08034084270 / 07086454207";
+  const address = settings?.address || "P.O. Box 43, Ilora, Oyo State, Nigeria";
 
   return (
     <footer className="relative bg-primary-dark text-white/70 overflow-hidden">
