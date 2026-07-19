@@ -458,7 +458,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. Welcome & Pastoral Message Section */
+      {/* 5. Welcome & Pastoral Message Section */}
       <section className="py-24 bg-bg relative">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="grid lg:grid-cols-12 gap-16 items-center">
