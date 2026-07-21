@@ -82,90 +82,74 @@ export default function Navbar() {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "nav-glass shadow-xl" : "nav-transparent"}`} style={{ overflow: 'visible' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
-        <div className="flex items-center justify-between h-16 lg:h-20" style={{ overflow: 'visible' }}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "nav-glass shadow-xl" : "nav-transparent"}`} >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" >
+        <div className="flex items-center justify-between h-16 lg:h-20" >
 
-          {/* Logo */}
-          {/* On mobile+scroll: logo centres and drops 20px below nav. On desktop or at rest: normal left-align */}
-          <Link
-            href="/"
-            className="flex items-center gap-3 group flex-shrink-0 xl:flex xl:items-center"
-            style={isMobile && scrolled ? {
-              position: 'absolute',
-              left: '50%',
-              transform: 'translateX(-50%) translateY(36px)',
-              transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              zIndex: 60,
-            } : {
-              position: 'relative',
-              transform: 'translateX(0) translateY(0)',
-              transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-            }}
-          >
-            <div
-              className="relative flex-shrink-0"
-              style={isMobile && scrolled ? {
-                width: '52px',
-                height: '52px',
-                transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              } : {
-                width: '40px',
-                height: '40px',
-                transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          {/* ── LEFT ZONE (mobile: flex-1 to push hamburger right; desktop: auto) ── */}
+          <div className="relative flex-1 xl:flex-none flex items-center" style={{ minWidth: 0 }}>
+
+            {/* LAYER A — logo + text: visible at rest, fades OUT when scrolled on mobile */}
+            <Link
+              href="/"
+              className="flex items-center gap-3 group flex-shrink-0"
+              style={{
+                opacity: isMobile && scrolled ? 0 : 1,
+                pointerEvents: isMobile && scrolled ? 'none' : 'auto',
+                transition: 'opacity 0.35s ease',
               }}
             >
-              {/* Green glow ring — always visible but more prominent on scroll */}
-              <div
-                className="absolute rounded-full"
-                style={isMobile && scrolled ? {
-                  inset: '-6px',
-                  background: 'rgba(11,44,34,0.85)',
-                  boxShadow: '0 0 0 3px rgba(200,230,58,0.5), 0 4px 20px rgba(0,0,0,0.4)',
-                  borderRadius: '50%',
-                  transition: 'all 0.4s ease',
-                } : {
-                  inset: '0',
-                  background: 'rgba(200,230,58,0.15)',
-                  borderRadius: '50%',
-                  transition: 'all 0.4s ease',
+              <div className="relative w-10 h-10 flex-shrink-0">
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Trinity Baptist Church, Ilora logo" className="w-10 h-10 rounded-full object-cover shadow-lg" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center shadow-lg">
+                    <svg className="w-5 h-5 text-primary-dark" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="10.5" y="2" width="3" height="20" rx="1.5"/>
+                      <rect x="2" y="8" width="20" height="3" rx="1.5"/>
+                    </svg>
+                  </div>
+                )}
+                <div className="absolute inset-0 rounded-full bg-accent/20 animate-pulse-glow -z-10"/>
+              </div>
+              <div>
+                <h1 className="text-white font-serif text-base lg:text-lg font-bold leading-tight whitespace-nowrap">
+                  Trinity Baptist Church, Ilora
+                </h1>
+                <p className="text-accent text-[10px] uppercase tracking-widest font-medium">For Christ is our Peace</p>
+              </div>
+            </Link>
+
+            {/* LAYER B — logo only, centred in nav: hidden at rest, fades IN when scrolled on mobile.
+                Fades out again when the mobile menu is open so it doesn't float over the panel. */}
+            {isMobile && (
+              <Link
+                href="/"
+                tabIndex={scrolled && !isOpen ? 0 : -1}
+                className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center xl:hidden"
+                style={{
+                  opacity: scrolled && !isOpen ? 1 : 0,
+                  pointerEvents: scrolled && !isOpen ? 'auto' : 'none',
+                  transition: 'opacity 0.35s ease',
+                  zIndex: 45,
                 }}
-              />
-              {logoUrl ? (
-                <img
-                  src={logoUrl}
-                  alt="Trinity Baptist Church, Ilora logo"
-                  className="rounded-full object-cover shadow-lg"
-                  style={{ width: '100%', height: '100%' }}
-                />
-              ) : (
-                <div className="rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center shadow-lg" style={{ width: '100%', height: '100%' }}>
-                  <svg className="w-5 h-5 text-primary-dark" viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="10.5" y="2" width="3" height="20" rx="1.5"/>
-                    <rect x="2" y="8" width="20" height="3" rx="1.5"/>
-                  </svg>
+              >
+                <div className="relative w-12 h-12">
+                  {logoUrl ? (
+                    <img src={logoUrl} alt="Trinity Baptist Church, Ilora logo" className="w-12 h-12 rounded-full object-cover shadow-lg" style={{ opacity: 1 }} />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center shadow-lg">
+                      <svg className="w-6 h-6 text-primary-dark" viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="10.5" y="2" width="3" height="20" rx="1.5"/>
+                        <rect x="2" y="8" width="20" height="3" rx="1.5"/>
+                      </svg>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 rounded-full bg-accent/20 animate-pulse-glow -z-10"/>
                 </div>
-              )}
-            </div>
-            {/* Church name + motto — hidden on mobile when scrolled */}
-            <div
-              style={isMobile && scrolled ? {
-                opacity: 0,
-                maxWidth: 0,
-                overflow: 'hidden',
-                transition: 'all 0.3s ease',
-              } : {
-                opacity: 1,
-                maxWidth: '300px',
-                transition: 'all 0.3s ease',
-              }}
-            >
-              <h1 className="text-white font-serif text-base lg:text-lg font-bold leading-tight whitespace-nowrap">
-                Trinity Baptist Church, Ilora
-              </h1>
-              <p className="text-accent text-[10px] uppercase tracking-widest font-medium">For Christ is our Peace</p>
-            </div>
-          </Link>
+              </Link>
+            )}
+          </div>
 
           {/* Desktop Nav */}
           <div className="hidden xl:flex items-center gap-0.5">
