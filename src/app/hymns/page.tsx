@@ -17,6 +17,13 @@ function SignUpModal({ dept, onClose }: { dept: string; onClose: () => void }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  // Lock body scroll while modal is open
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -41,10 +48,10 @@ function SignUpModal({ dept, onClose }: { dept: string; onClose: () => void }) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
-      <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto animate-scale-in">
-        <div className="p-6 border-b border-stone-100 flex items-center justify-between">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}>
+      <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl max-w-lg w-full flex flex-col animate-scale-in" style={{ maxHeight: '100dvh', height: 'auto' }}>
+        <div className="p-5 border-b border-stone-100 flex items-center justify-between flex-shrink-0 sticky top-0 bg-white rounded-t-3xl z-10">
           <h2 className="font-serif text-xl font-bold text-primary">Register as a Chorister</h2>
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center hover:bg-stone-200 transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,6 +59,7 @@ function SignUpModal({ dept, onClose }: { dept: string; onClose: () => void }) {
             </svg>
           </button>
         </div>
+        <div className="overflow-y-auto flex-1" style={{ overscrollBehavior: 'contain' }}>
         {submitted ? (
           <div className="p-8 text-center">
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
@@ -128,9 +136,10 @@ function SignUpModal({ dept, onClose }: { dept: string; onClose: () => void }) {
             </button>
           </form>
         )}
+        </div>
       </div>
     </div>
-  );
+  , document.body);
 }
 
 // ============ Presentation Mode ============
