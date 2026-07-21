@@ -104,9 +104,9 @@ export default function GalleryPage() {
             <h1 className="font-serif text-4xl lg:text-6xl text-white font-bold mb-5 animate-fade-in-up">
               Moments of <span className="text-gradient-gold">Worship</span>
             </h1>
-            <p className="text-white/60 text-lg animate-fade-in" style={{ animationDelay: "0.2s" }}>
+            {/*<p className="text-white/60 text-lg animate-fade-in" style={{ animationDelay: "0.2s" }}>
               Cherished moments of sincere fellowship, praise, and grace at Trinity Baptist Church, Ilora.
-            </p>
+            </p>*/}
           </div>
         </div>
       </div>
