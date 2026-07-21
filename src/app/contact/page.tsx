@@ -204,6 +204,10 @@ export default function ContactPage() {
                     <span className="font-semibold text-stone-700">Sunday Evening Service</span>
                     <span>6:00 PM</span>
                   </li>
+                  <li className="flex items-center justify-between gap-4">
+                    <span className="font-semibold text-stone-700">Saturday Convenient Service</span>
+                    <span className="text-right text-xs text-stone-500 leading-tight">6:00 AM<br/><em>1st Sat. monthly</em></span>
+                  </li>
                 </ul>
               </div>
             </div>

@@ -38,8 +38,20 @@ function useScrolled(threshold = 60) {
   return scrolled;
 }
 
+function useIsMobile(breakpoint = 1280) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < breakpoint);
+    check();
+    window.addEventListener("resize", check, { passive: true });
+    return () => window.removeEventListener("resize", check);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 export default function Navbar() {
   const scrolled = useScrolled(60);
+  const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string>("/logo/trinity-logo.png");
@@ -70,26 +82,84 @@ export default function Navbar() {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "nav-glass shadow-xl" : "nav-transparent"}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "nav-glass shadow-xl" : "nav-transparent"}`} style={{ overflow: 'visible' }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ overflow: 'visible' }}>
+        <div className="flex items-center justify-between h-16 lg:h-20" style={{ overflow: 'visible' }}>
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
-            <div className="relative w-10 h-10 flex-shrink-0">
+          {/* On mobile+scroll: logo centres and drops 20px below nav. On desktop or at rest: normal left-align */}
+          <Link
+            href="/"
+            className="flex items-center gap-3 group flex-shrink-0 xl:flex xl:items-center"
+            style={isMobile && scrolled ? {
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%) translateY(36px)',
+              transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              zIndex: 60,
+            } : {
+              position: 'relative',
+              transform: 'translateX(0) translateY(0)',
+              transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            }}
+          >
+            <div
+              className="relative flex-shrink-0"
+              style={isMobile && scrolled ? {
+                width: '52px',
+                height: '52px',
+                transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              } : {
+                width: '40px',
+                height: '40px',
+                transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              }}
+            >
+              {/* Green glow ring — always visible but more prominent on scroll */}
+              <div
+                className="absolute rounded-full"
+                style={isMobile && scrolled ? {
+                  inset: '-6px',
+                  background: 'rgba(11,44,34,0.85)',
+                  boxShadow: '0 0 0 3px rgba(200,230,58,0.5), 0 4px 20px rgba(0,0,0,0.4)',
+                  borderRadius: '50%',
+                  transition: 'all 0.4s ease',
+                } : {
+                  inset: '0',
+                  background: 'rgba(200,230,58,0.15)',
+                  borderRadius: '50%',
+                  transition: 'all 0.4s ease',
+                }}
+              />
               {logoUrl ? (
-                <img src={logoUrl} alt="Trinity Baptist Church, Ilora logo" className="w-10 h-10 rounded-full object-cover group-hover:scale-110 transition-transform shadow-lg" />
+                <img
+                  src={logoUrl}
+                  alt="Trinity Baptist Church, Ilora logo"
+                  className="rounded-full object-cover shadow-lg"
+                  style={{ width: '100%', height: '100%' }}
+                />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                <div className="rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center shadow-lg" style={{ width: '100%', height: '100%' }}>
                   <svg className="w-5 h-5 text-primary-dark" viewBox="0 0 24 24" fill="currentColor">
                     <rect x="10.5" y="2" width="3" height="20" rx="1.5"/>
                     <rect x="2" y="8" width="20" height="3" rx="1.5"/>
                   </svg>
                 </div>
               )}
-              <div className="absolute inset-0 rounded-full bg-accent/20 animate-pulse-glow -z-10"/>
             </div>
-            <div>
+            {/* Church name + motto — hidden on mobile when scrolled */}
+            <div
+              style={isMobile && scrolled ? {
+                opacity: 0,
+                maxWidth: 0,
+                overflow: 'hidden',
+                transition: 'all 0.3s ease',
+              } : {
+                opacity: 1,
+                maxWidth: '300px',
+                transition: 'all 0.3s ease',
+              }}
+            >
               <h1 className="text-white font-serif text-base lg:text-lg font-bold leading-tight whitespace-nowrap">
                 Trinity Baptist Church, Ilora
               </h1>
