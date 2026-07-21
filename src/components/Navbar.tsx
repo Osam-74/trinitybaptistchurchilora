@@ -84,7 +84,7 @@ export default function Navbar() {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "nav-glass shadow-xl" : "nav-transparent"}`} >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" >
-        <div className="flex items-center justify-between h-16 lg:h-20" >
+        <div className="relative flex items-center justify-between h-16 lg:h-20">
 
           {/* ── LEFT ZONE (mobile: flex-1 to push hamburger right; desktop: auto) ── */}
           <div className="relative flex-1 xl:flex-none flex items-center" style={{ minWidth: 0 }}>
@@ -120,36 +120,49 @@ export default function Navbar() {
               </div>
             </Link>
 
-            {/* LAYER B — logo only, centred in nav: hidden at rest, fades IN when scrolled on mobile.
-                Fades out again when the mobile menu is open so it doesn't float over the panel. */}
-            {isMobile && (
-              <Link
-                href="/"
-                tabIndex={scrolled && !isOpen ? 0 : -1}
-                className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center xl:hidden"
-                style={{
-                  opacity: scrolled && !isOpen ? 1 : 0,
-                  pointerEvents: scrolled && !isOpen ? 'auto' : 'none',
-                  transition: 'opacity 0.35s ease',
-                  zIndex: 45,
-                }}
-              >
-                <div className="relative w-12 h-12">
-                  {logoUrl ? (
-                    <img src={logoUrl} alt="Trinity Baptist Church, Ilora logo" className="w-12 h-12 rounded-full object-cover shadow-lg" style={{ opacity: 1 }} />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center shadow-lg">
-                      <svg className="w-6 h-6 text-primary-dark" viewBox="0 0 24 24" fill="currentColor">
-                        <rect x="10.5" y="2" width="3" height="20" rx="1.5"/>
-                        <rect x="2" y="8" width="20" height="3" rx="1.5"/>
-                      </svg>
-                    </div>
-                  )}
-                  <div className="absolute inset-0 rounded-full bg-accent/20 animate-pulse-glow -z-10"/>
-                </div>
-              </Link>
-            )}
           </div>
+
+          {/* LAYER B — centred logo, mobile-only. Positioned absolute relative to the full nav row
+              so left:50% is true screen centre (not centre of left-zone). Fades in on scroll,
+              fades out when menu is open. Drops below the nav bottom with dark green circle. */}
+          {isMobile && (
+            <Link
+              href="/"
+              tabIndex={scrolled && !isOpen ? 0 : -1}
+              className="xl:hidden"
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: 'translateX(-50%) translateY(30px)',
+                opacity: scrolled && !isOpen ? 1 : 0,
+                pointerEvents: scrolled && !isOpen ? 'auto' : 'none',
+                transition: 'opacity 0.35s ease',
+                zIndex: 45,
+              }}
+            >
+              {/* Dark green circle backdrop */}
+              <div style={{
+                position: 'absolute',
+                inset: '-8px',
+                borderRadius: '50%',
+                background: 'rgba(11,44,34,0.92)',
+                boxShadow: '0 0 0 2.5px rgba(200,230,58,0.55), 0 6px 24px rgba(0,0,0,0.45)',
+              }} />
+              <div className="relative w-12 h-12">
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Trinity Baptist Church, Ilora logo" className="w-12 h-12 rounded-full object-cover shadow-lg" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center shadow-lg">
+                    <svg className="w-6 h-6 text-primary-dark" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="10.5" y="2" width="3" height="20" rx="1.5"/>
+                      <rect x="2" y="8" width="20" height="3" rx="1.5"/>
+                    </svg>
+                  </div>
+                )}
+              </div>
+            </Link>
+          )}
 
           {/* Desktop Nav */}
           <div className="hidden xl:flex items-center gap-0.5">
