@@ -134,27 +134,28 @@ export default function Navbar() {
                 position: 'absolute',
                 left: '50%',
                 top: '50%',
-                transform: 'translateX(-50%) translateY(30px)',
+                transform: 'translateX(-50%) translateY(24px)',
                 opacity: scrolled && !isOpen ? 1 : 0,
                 pointerEvents: scrolled && !isOpen ? 'auto' : 'none',
                 transition: 'opacity 0.35s ease',
                 zIndex: 45,
               }}
             >
-              {/* Dark green circle backdrop */}
+              {/* Dark green circle backdrop — no border, just pure dark green + shadow */}
               <div style={{
                 position: 'absolute',
                 inset: '-8px',
                 borderRadius: '50%',
-                background: 'rgba(11,44,34,0.92)',
-                boxShadow: '0 0 0 2.5px rgba(200,230,58,0.55), 0 6px 24px rgba(0,0,0,0.45)',
+                background: 'rgba(11,44,34,0.95)',
+                boxShadow: '0 6px 24px rgba(0,0,0,0.45)',
               }} />
-              <div className="relative w-12 h-12">
+              {/* Logo: 64px (was the bg size before), bg is now 80px (64 + 2×8px padding) */}
+              <div className="relative w-16 h-16">
                 {logoUrl ? (
-                  <img src={logoUrl} alt="Trinity Baptist Church, Ilora logo" className="w-12 h-12 rounded-full object-cover shadow-lg" />
+                  <img src={logoUrl} alt="Trinity Baptist Church, Ilora logo" className="w-16 h-16 rounded-full object-cover shadow-lg" />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-primary-dark" viewBox="0 0 24 24" fill="currentColor">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center shadow-lg">
+                    <svg className="w-7 h-7 text-primary-dark" viewBox="0 0 24 24" fill="currentColor">
                       <rect x="10.5" y="2" width="3" height="20" rx="1.5"/>
                       <rect x="2" y="8" width="20" height="3" rx="1.5"/>
                     </svg>
