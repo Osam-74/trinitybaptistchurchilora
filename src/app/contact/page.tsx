@@ -40,7 +40,7 @@ export default function ContactPage() {
               Get In <span className="text-gradient-gold">Touch</span>
             </h1>
             <p className="text-white/60 text-lg animate-fade-in" style={{ animationDelay: "0.2s" }}>
-              We would love to hear from you. Reach out to Trinity Baptist Church, Ilora for prayers, inquiries, and counseling.
+              We would love to hear from you. Reach out for prayers, inquiries, and counseling.
             </p>
           </div>
         </div>
