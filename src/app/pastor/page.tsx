@@ -112,7 +112,7 @@ export default function PastorPage() {
             {/* Bio Text */}
             <div className="lg:col-span-3 reveal-right">
               <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>SENIOR PASTOR</div>
-              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-primary mb-2 leading-tight">Rev. Solomon Olugbenga<br/>Mosebolatan</h2>
+              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-primary mb-2 leading-tight">Rev. Solomon Olugbenga<br/>Mosebolatan PhD JP</h2>
               <div className="gold-divider max-w-xs mb-8"/>
               <div className="space-y-5 text-stone-600 leading-relaxed">
                 <p>Rev. Solomon Olugbenga Mosebolatan is a passionate preacher of the word of faith, an accomplished author, and a compassionate minister with over 24 years of pulpit experience. He currently serves as the full-time pastor of Trinity Baptist Church, Ilora, where he has faithfully shepherded his congregation for two decades.</p>
