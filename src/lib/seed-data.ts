@@ -169,7 +169,6 @@ export const sampleActivities: Omit<Activity, "id">[] = [
   // THURSDAY
   { title: "Prayer Band (Spiritual Clinic)", weekday: 4, startTime: "17:00", endTime: "19:00", location: "Church Premises", description: "Prayer band and spiritual clinic for healing and intercession.", active: true },
   // FRIDAY
-  { title: "Early Morning Prayer", weekday: 5, startTime: "05:30", endTime: "06:00", location: "Church Premises", description: "Early morning prayer session.", active: true },
   { title: "SS Preparatory Class", weekday: 5, startTime: "17:00", endTime: "18:00", location: "Fellowship Hall", description: "Sunday school preparatory class.", active: true },
   { title: "Church Executive Meeting", weekday: 5, startTime: "18:00", endTime: "19:00", location: "Conference Room", description: "Church executive meeting (1st & 3rd Friday of the month).", active: true },
   // SATURDAY — Convenient Service (1st Saturday of every month)

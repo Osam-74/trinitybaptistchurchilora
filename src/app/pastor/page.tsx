@@ -87,14 +87,14 @@ export default function PastorPage() {
             <div className="lg:col-span-2 reveal-left">
               <div className="relative rounded-3xl overflow-hidden shadow-2xl img-zoom">
                 <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80"
-                  alt="Rev'd Dr S. O. Mosebolatan — Senior Pastor"
+                  src="/images/pastor-mosebolatan.jpg"
+                  alt="Rev. Solomon Olugbenga Mosebolatan — Senior Pastor"
                   className="w-full h-[520px] object-cover object-top"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/70 via-transparent to-transparent"/>
                 <div className="absolute bottom-6 left-6 right-6">
                   <div className="glass-card p-4 rounded-2xl text-white">
-                    <p className="text-accent font-bold text-sm">REV'D DR S. O. MOSEBOLATAN</p>
+                    <p className="text-accent font-bold text-sm">REV. SOLOMON OLUGBENGA MOSEBOLATAN</p>
                     <p className="text-xs text-white/80">Senior Pastor, Trinity Baptist Church, Ilora</p>
                   </div>
                 </div>
@@ -112,12 +112,14 @@ export default function PastorPage() {
             {/* Bio Text */}
             <div className="lg:col-span-3 reveal-right">
               <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>SENIOR PASTOR</div>
-              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-primary mb-2 leading-tight">Rev&apos;d Dr S. O.<br/>Mosebolatan</h2>
+              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-primary mb-2 leading-tight">Rev. Solomon Olugbenga<br/>Mosebolatan</h2>
               <div className="gold-divider max-w-xs mb-8"/>
               <div className="space-y-5 text-stone-600 leading-relaxed">
-                <p>Rev&apos;d Dr S. O. Mosebolatan is a devoted servant of God who has faithfully shepherded Trinity Baptist Church, Ilora with wisdom, compassion, and unwavering vision. A scholar of the Word and a preacher of remarkable depth, his ministry has touched hundreds of lives across Ilora and Oyo State.</p>
-                <p>Ordained and recognised under the Nigerian Baptist Convention, Pastor Mosebolatan carries a burning passion for discipleship, missions, and the transformational power of the Gospel. Under his leadership, Trinity Baptist Church has experienced significant spiritual growth, expanded its community outreach programmes, and deepened its commitment to raising kingdom leaders.</p>
-                <p>Known for his accessibility, pastoral warmth, and Spirit-filled preaching, he is not just a pastor who preaches from a pulpit — he walks alongside his congregation through life&apos;s most tender moments, celebrating victories and providing godly counsel in seasons of challenge.</p>
+                <p>Rev. Solomon Olugbenga Mosebolatan is a passionate preacher of the word of faith, an accomplished author, and a compassionate minister with over 24 years of pulpit experience. He currently serves as the full-time pastor of Trinity Baptist Church, Ilora, where he has faithfully shepherded his congregation for two decades.</p>
+                <p>Born in Ilora, Oyo State, Rev. Mosebolatan possesses a rich academic and theological background. He holds degrees across various prestigious institutions — B.Th., M.Th., and Ph.D. from The Nigerian Baptist Theological Seminary, Ogbomoso; B.A. degrees from Ajayi Crowther University and Olabisi Onabanjo University; M.A. from the University of Jos; PGDE from Ekiti State University; and an ND from the Federal School of Surveying, Oyo.</p>
+                <p>Beyond the local pulpit, he is an international speaker who has ministered in Cote d&apos;Ivoire, Ghana, Togo, and Israel. Driven by a heart for humanitarian service, he established an empowerment foundation in 2020 dedicated to distributing relief aid, grants, and support to families in need.</p>
+                <p>As a respected social critic, public speaker, and ethicist, Rev. Mosebolatan is also the author of <em>Four Stages of Marriage</em> among other published articles and works.</p>
+                <p>He is happily married to Mrs. Olubunmi Esther Mosebolatan, and their union is blessed with four children: AyoOluwa, Akinola, Oluwapamilerinayo, and Oluwafeyikemi.</p>
               </div>
 
               {/* Stats */}

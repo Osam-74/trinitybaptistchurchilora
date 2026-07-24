@@ -457,7 +457,7 @@ export default function HomePage() {
             <div className="lg:col-span-5 relative reveal-left">
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-stone-100 z-10">
                 <img
-                  src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1200&auto=format&fit=crop"
+                  src="/images/pastor-mosebolatan.jpg"
                   alt="Pastoral Greeting"
                   className="w-full h-auto aspect-[4/5] object-cover"
                 />
@@ -477,18 +477,18 @@ export default function HomePage() {
             {/* Right side: Welcome text block */}
             <div className="lg:col-span-7 space-y-6 reveal-right">
               <span className="text-primary-light text-xs font-bold uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10 inline-block">
-                Welcome to Sanctuary of Praise
+                Welcome to Trinity Baptist Church
               </span>
               <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-black text-primary-dark tracking-tight leading-tight">
-                Grace and peace be <br />
-                <span className="text-primary font-extrabold">multiplied unto you.</span>
+                We&apos;re genuinely <br />
+                <span className="text-primary font-extrabold">glad you&apos;re here.</span>
               </h2>
               <div className="w-16 h-1 bg-accent rounded-full" />
               <p className="text-text-muted text-base sm:text-lg leading-relaxed pt-2">
-                We are delighted to welcome you to the official platform of Trinity Baptist Church, Ilora. Guided by the Holy Spirit and rooted deeply in the unadulterated Word of God, our congregation is a warm sanctuary where lives find purpose, hearts find healing, and souls lift ultimate praises to the Almighty.
+                We&apos;re a community of everyday people passionate about sharing God&apos;s love and growing in our faith together. Our desire is simple: to know Christ more deeply and make Him known in our community. We gather to worship, study Scripture, and encourage one another through every season of life.
               </p>
               <p className="text-text-muted text-base leading-relaxed">
-                Whether you are exploring Christianity for the first time, seeking a spiritual family to call home, or joining us virtually from afar, we pray that you experience the transforming love, overflowing grace, and deep-seated joy of our Lord Jesus Christ today.
+                Come as you are and you&apos;ll be made welcome. We&apos;d love to get to know you. Here, you&apos;ll find friends who care, a God who loves, and a community that prays for one another. Join us this Sunday — we will be happy to fellowship with you.
               </p>
               
               <div className="pt-4 flex flex-wrap gap-4 items-center">
