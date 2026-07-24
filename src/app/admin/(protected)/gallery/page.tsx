@@ -208,7 +208,7 @@ export default function AdminGalleryPage() {
                     className="bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm group cursor-pointer hover:border-accent/40 hover:shadow-md transition-all">
                     <div className="relative h-48 bg-primary-dark overflow-hidden">
                       {album.coverUrl ? (
-                        <img src={album.coverUrl} alt={album.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <img src={album.coverUrl} alt={album.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e)=>{ (e.target as HTMLImageElement).src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23e7e5e4' width='100' height='100'/%3E%3C/svg%3E"; }} />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <svg className="w-16 h-16 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -260,7 +260,7 @@ export default function AdminGalleryPage() {
                 {photos.map(photo => (
                   <div key={photo.id} className="bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm group">
                     <div className="relative aspect-square overflow-hidden bg-stone-100">
-                      <img src={photo.url} alt={photo.caption || ""} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <img src={photo.url} alt={photo.caption || ""} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e)=>{ const el=(e.target as HTMLElement).closest("[data-photo-tile]"); if(el)(el as HTMLElement).style.display="none"; }} />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
                         <button onClick={() => handleDeletePhoto(photo)}
                           className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition-colors">

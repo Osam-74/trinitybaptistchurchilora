@@ -3,20 +3,13 @@
 /**
  * AnnouncementTicker
  * ─ Pulls announcements from Firestore settings/main.announcements[]
- * ─ Falls back to defaultSettings.announcements (from seed-data) if Firestore not loaded yet
+ * ─ Renders NOTHING until Firestore has responded — zero bleed/flash
  * ─ Alternates white / gold text for each announcement
- * ─ Seamless infinite loop — no gap, no restart flash
+ * ─ Seamless infinite loop
  */
 
 import { useEffect, useState } from "react";
 import { getSiteSettings } from "@/lib/settings";
-
-const FALLBACK = [
-  "Welcome to Trinity Baptist Church, Ilora — Sanctuary of Praise!",
-  "Sunday Worship: 8:00 AM – 9:30 AM (Sunday School) & 9:30 AM – 12:00 PM",
-  "2026 Theme: My Year of Upliftment — For Christ is our Peace",
-  "Convenient Service: First Saturday, 6:00 AM – 7:00 AM",
-];
 
 const BULLET = "\u00A0\u00A0\u2022\u00A0\u00A0";
 
@@ -25,27 +18,26 @@ interface Props {
 }
 
 export default function AnnouncementTicker({ onDismiss }: Props) {
-  // Start with null so we know "not yet loaded"
+  // null = still loading (renders nothing), [] = loaded but empty, string[] = show these
   const [announcements, setAnnouncements] = useState<string[] | null>(null);
 
   useEffect(() => {
     getSiteSettings()
       .then(s => {
-        // Use whatever is in settings (could be from Firestore or defaultSettings)
-        // Always trust the settings result — it already merges defaults + Firestore
-        setAnnouncements(s.announcements && s.announcements.length > 0 ? s.announcements : FALLBACK);
+        setAnnouncements(s.announcements && s.announcements.length > 0 ? s.announcements : []);
       })
       .catch(() => {
-        setAnnouncements(FALLBACK);
+        setAnnouncements([]);
       });
   }, []);
 
-  // While loading, show the fallback silently so the bar renders immediately
-  const items = announcements ?? FALLBACK;
-  if (items.length === 0) return null;
+  // Still loading → render nothing (no flash of old/default content)
+  if (announcements === null) return null;
+  // Loaded but no announcements → hide the bar
+  if (announcements.length === 0) return null;
 
   const buildSpans = (keyPrefix: string) =>
-    items.map((text, i) => (
+    announcements.map((text, i) => (
       <span key={`${keyPrefix}-${i}`}>
         <span style={{ color: i % 2 === 0 ? "rgba(255,255,255,0.92)" : "#C8E63A" }}>
           {text}

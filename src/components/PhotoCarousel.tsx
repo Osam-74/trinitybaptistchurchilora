@@ -89,6 +89,11 @@ export default function PhotoCarousel({ speed = 35, rowCount = 2, label, hideWhe
         alt={photo.caption || "Church photo"}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         loading="lazy"
+        onError={(e) => {
+          // Hide the entire card if the image fails to load (e.g. deleted R2 file)
+          const card = (e.target as HTMLElement).closest("button");
+          if (card) card.style.display = "none";
+        }}
       />
       {/* Hover overlay */}
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">

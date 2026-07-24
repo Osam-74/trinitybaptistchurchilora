@@ -13,11 +13,31 @@ export default function AnnouncementsPage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
 
+  // Default announcements — seeded into Firestore on first load if none exist
+  const DEFAULT_ANNOUNCEMENTS = [
+    "Welcome to Trinity Baptist Church, Ilora — Sanctuary of Praise!",
+    "Sunday Worship: 8:00 AM – 9:30 AM (Sunday School) & 9:30 AM – 12:00 PM (Main Service)",
+    "Midweek Bible Study: Wednesdays 5:00 PM & 6:00 PM",
+    "2026 Theme: My Year of Upliftment — For Christ is our Peace",
+    "Convenient Service: First Saturday of every month, 6:00 AM – 7:00 AM",
+    "House Fellowship: Sundays 5:00 PM – 6:30 PM across Ilora",
+  ];
+
   useEffect(() => {
-    getSiteSettings().then((s) => {
-      setAnnouncements(s.announcements || []);
+    getSiteSettings().then(async (s) => {
+      if (s.announcements && s.announcements.length > 0) {
+        // Real data already in Firestore — just display it
+        setAnnouncements(s.announcements);
+      } else {
+        // First time — seed defaults into Firestore so they are real & deletable
+        try {
+          await updateSiteSettings({ announcements: DEFAULT_ANNOUNCEMENTS } as Parameters<typeof updateSiteSettings>[0]);
+        } catch { /* ignore — will show defaults in UI anyway */ }
+        setAnnouncements(DEFAULT_ANNOUNCEMENTS);
+      }
       setLoading(false);
     }).catch(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const save = async (updated: string[], msg: string) => {
