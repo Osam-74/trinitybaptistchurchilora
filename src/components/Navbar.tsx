@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getSiteSettings } from "@/lib/settings";
+import AnnouncementTicker from "@/components/AnnouncementTicker";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -55,12 +56,19 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string>("/logo/trinity-logo.png");
+  const [isLive, setIsLive] = useState(false);
+  const [tickerVisible, setTickerVisible] = useState(true);
   const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    getSiteSettings().then((s) => { if (s.logoUrl) setLogoUrl(s.logoUrl); });
+    getSiteSettings().then((s) => {
+      if (s.logoUrl) setLogoUrl(s.logoUrl);
+      if ((s as {liveEnabled?: boolean}).liveEnabled !== undefined) {
+        setIsLive(!!(s as {liveEnabled?: boolean}).liveEnabled);
+      }
+    });
   }, []);
 
   useEffect(() => { setIsOpen(false); setIsDropdownOpen(false); }, [pathname]);
@@ -83,6 +91,7 @@ export default function Navbar() {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "nav-glass shadow-xl" : "nav-transparent"}`} >
+      {tickerVisible && <AnnouncementTicker onDismiss={() => setTickerVisible(false)} />}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" >
         <div className="relative flex items-center justify-between h-16 lg:h-20">
 
@@ -208,11 +217,13 @@ export default function Navbar() {
                 </Link>
               );
             })}
-            <Link href="/live"
-              className="ml-2 px-3 py-1.5 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-all flex items-center gap-1.5 shadow-lg hover:shadow-red-600/30 hover:scale-105">
-              <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-              Live
-            </Link>
+            {isLive && (
+              <Link href="/live"
+                className="ml-2 px-3 py-1.5 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-all flex items-center gap-1.5 shadow-lg hover:shadow-red-600/30 hover:scale-105">
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                Live
+              </Link>
+            )}
             <Link href="/give"
               className="ml-1.5 px-3 py-1.5 bg-accent text-primary-dark text-sm font-bold rounded-lg hover:bg-accent-light transition-all shadow-lg hover:shadow-accent/30 hover:scale-105">
               Give
@@ -283,10 +294,12 @@ export default function Navbar() {
             })}
           </div>
           <div className="space-y-3 pt-6 border-t border-white/10">
-            <Link href="/live" onClick={() => setIsOpen(false)}
-              className="flex items-center justify-center gap-2 w-full py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors">
-              <span className="w-2 h-2 bg-white rounded-full animate-pulse"/>Watch Live
-            </Link>
+            {isLive && (
+              <Link href="/live" onClick={() => setIsOpen(false)}
+                className="flex items-center justify-center gap-2 w-full py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors">
+                <span className="w-2 h-2 bg-white rounded-full animate-pulse"/>Watch Live
+              </Link>
+            )}
             <Link href="/give" onClick={() => setIsOpen(false)}
               className="flex items-center justify-center w-full py-3 bg-accent text-primary-dark font-bold rounded-xl hover:bg-accent-light transition-colors">
               Give / Donate

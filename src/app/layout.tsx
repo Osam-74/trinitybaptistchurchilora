@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import AnnouncementTicker from "@/components/AnnouncementTicker";
 
 export const metadata: Metadata = {
   title: "Trinity Baptist Church, Ilora | Sanctuary of Praise",
@@ -22,7 +21,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="text-text bg-bg min-h-screen antialiased" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
         <div className="page-transition">
-          <AnnouncementTicker />
           {children}
         </div>
       </body>

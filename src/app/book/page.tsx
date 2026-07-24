@@ -191,7 +191,7 @@ ${formData.notes}` : ""),
       {bookingEnabled !== false && <>
 
       {/* Hero: Compact header */}
-      <section className="bg-primary-dark pt-32 pb-16 overflow-hidden pattern-overlay">
+      <section className="bg-primary-dark overflow-hidden pattern-overlay" style={{ paddingTop: "calc(30px + 80px + 2rem)", paddingBottom: "4rem" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="reveal inline-flex items-center gap-2 glass-card rounded-full px-4 py-1 mb-4 text-accent-light text-xs font-semibold uppercase tracking-wider">
             🤝 One-On-One Sessions

@@ -132,6 +132,7 @@ export interface SiteSettings {
   };
   gmailSenderEmail?: string;
   bookingEnabled?: boolean;
+  liveEnabled?: boolean;      // controls Live button visibility in navbar
   announcements?: string[];   // list of announcement strings for the ticker
 }
 

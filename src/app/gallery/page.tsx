@@ -115,7 +115,7 @@ export default function GalleryPage() {
       {/* Photo Carousel — random picks from all albums */}
       <section className="py-8 bg-bg overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <PhotoCarousel speed={40} rowCount={2} label="Our Church in Pictures" />
+          <PhotoCarousel speed={40} rowCount={2} label="Our Church in Pictures" hideWhenEmpty={true} />
         </div>
       </section>
 

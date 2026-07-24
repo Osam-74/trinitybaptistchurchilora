@@ -11,14 +11,8 @@ const givingReasons = [
   { title: "Building Fund", desc: "Contribute to the expansion and maintenance of our sanctuary and facilities — a lasting legacy for generations.", icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" },
 ];
 
-const faqItems = [
-  { q: "Is my giving tax deductible?", a: "Trinity Baptist Church, Ilora is a registered faith-based organisation under the Nigerian Baptist Convention. Please speak with the church secretary for documentation." },
-  { q: "How are donated funds used?", a: "All funds are managed transparently by the church finance committee. They support ministry operations, community outreach, building maintenance, and missions work — all overseen by the church leadership." },
-  { q: "Can I give online or via bank transfer?", a: "Yes! You can give via bank transfer using the account details on this page. We are also working to make online giving available soon. Contact us if you need help." },
-];
 
 export default function GivePage() {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -146,30 +140,7 @@ export default function GivePage() {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="py-24 bg-bg">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>GIVING FAQ<div className="w-8 h-px bg-primary-light/40"/></div>
-            <h2 className="font-serif text-4xl font-bold text-primary">Common <span className="text-primary">Questions</span></h2>
-          </div>
-          <div className="space-y-4">
-            {faqItems.map((item, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
-                <button className="w-full flex items-center justify-between px-6 py-5 text-left" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                  <span className="font-serif text-base font-bold text-primary pr-4">{item.q}</span>
-                  <div className={`w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 transition-transform duration-300 ${openFaq === i ? "rotate-180" : ""}`}>
-                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
-                  </div>
-                </button>
-                <div className={`overflow-hidden transition-all duration-300 ${openFaq === i ? "max-h-40" : "max-h-0"}`}>
-                  <p className="px-6 pb-5 text-stone-600 text-sm leading-relaxed">{item.a}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
 
       {/* Prayer CTA */}
       <section className="py-20 bg-bg-alt">

@@ -97,7 +97,7 @@ export default function AdminLeadershipPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {leaders.sort((a, b) => a.order - b.order).map(l => (
               <div key={l.id} className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
-                <div className="relative h-40 overflow-hidden">
+                <div className="relative w-full overflow-hidden" style={{ aspectRatio: "3/4" }}>
                   {l.photoUrl ? (
                     <img src={l.photoUrl} alt={l.name} className="w-full h-full object-cover"/>
                   ) : (

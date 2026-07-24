@@ -196,7 +196,10 @@ export default function AdminGalleryPage() {
                 <svg className="w-16 h-16 text-stone-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
-                <p className="text-text-muted font-semibold">No albums yet. Create your first album above.</p>
+                <div className="text-center">
+                  <p className="text-text-muted font-semibold">No albums yet. Create your first album above.</p>
+                  <p className="text-xs text-stone-400 mt-2">Note: The public gallery page currently shows placeholder photos until real albums are created here.</p>
+                </div>
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

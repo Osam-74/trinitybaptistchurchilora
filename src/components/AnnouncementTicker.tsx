@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+/**
+ * AnnouncementTicker
+ * ─ Pulls announcements from Firestore settings/main.announcements[]
+ * ─ Alternates white / gold text for each announcement
+ * ─ Seamless infinite loop — no gap, no restart flash
+ * ─ Each item flows continuously: 1→2→3→1→2→3→…
+ */
+
+import { useEffect, useState, useRef } from "react";
 import { getSiteSettings } from "@/lib/settings";
 
 const DEFAULT_ANNOUNCEMENTS = [
@@ -9,9 +17,14 @@ const DEFAULT_ANNOUNCEMENTS = [
   "For Christ is our Peace — 2026: My Year of Upliftment",
 ];
 
-export default function AnnouncementTicker() {
+const BULLET = "\u00A0\u00A0\u2022\u00A0\u00A0";
+
+interface Props {
+  onDismiss?: () => void;
+}
+
+export default function AnnouncementTicker({ onDismiss }: Props) {
   const [announcements, setAnnouncements] = useState<string[]>(DEFAULT_ANNOUNCEMENTS);
-  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     getSiteSettings()
@@ -23,53 +36,59 @@ export default function AnnouncementTicker() {
       .catch(() => {});
   }, []);
 
-  if (!visible || announcements.length === 0) return null;
+  if (announcements.length === 0) return null;
 
-  // Build the scrolling text: join all announcements with a long separator
-  const separator = "\u00A0\u00A0\u00A0\u00A0\u2022\u00A0\u00A0\u00A0\u00A0"; // four spaces, bullet, four spaces
-  const fullText = announcements.join(separator) + separator;
+  // Build spans with alternating colours. We render the set THREE times for
+  // a perfectly seamless loop: the animation moves by exactly -1/3 of total width.
+  const buildSpans = (keyPrefix: string) =>
+    announcements.map((text, i) => (
+      <span key={`${keyPrefix}-${i}`}>
+        <span style={{ color: i % 2 === 0 ? "rgba(255,255,255,0.92)" : "#C8E63A" }}>
+          {text}
+        </span>
+        <span style={{ color: "rgba(255,255,255,0.40)" }}>{BULLET}</span>
+      </span>
+    ));
 
   return (
-    <div className="relative w-full bg-primary-dark border-b border-accent/20 overflow-hidden" style={{ height: "32px" }}>
-      {/* Dismiss button */}
-      <button
-        onClick={() => setVisible(false)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-5 h-5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-        aria-label="Dismiss announcements"
-      >
-        <svg className="w-3 h-3 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+    <div
+      className="relative w-full overflow-hidden"
+      style={{ height: "30px", background: "rgba(11,44,34,0.98)", borderBottom: "1px solid rgba(200,230,58,0.18)" }}
+    >
+      {/* Dismiss */}
+      {onDismiss && (
+        <button
+          onClick={onDismiss}
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-5 h-5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+          aria-label="Dismiss announcements"
+        >
+          <svg className="w-3 h-3" style={{ color: "rgba(255,255,255,0.45)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
 
-      {/* Left fade mask */}
-      <div className="absolute left-0 top-0 bottom-0 w-12 z-10 pointer-events-none"
-        style={{ background: "linear-gradient(to right, rgba(11,44,34,1), transparent)" }} />
-
-      {/* Right fade mask (before dismiss button) */}
-      <div className="absolute right-8 top-0 bottom-0 w-12 z-10 pointer-events-none"
-        style={{ background: "linear-gradient(to left, rgba(11,44,34,1), transparent)" }} />
-
-      {/* Scrolling track */}
+      {/* Scrolling track — 3× content, animate by -33.333% for seamless loop */}
       <div className="flex items-center h-full">
-        <div className="ticker-track whitespace-nowrap text-white/85 text-xs font-medium" aria-live="polite">
-          {/* Duplicate for seamless loop */}
-          <span>{fullText}{fullText}</span>
+        <div
+          className="whitespace-nowrap text-xs font-medium select-none ticker-inner"
+          style={{ willChange: "transform" }}
+        >
+          {buildSpans("a")}
+          {buildSpans("b")}
+          {buildSpans("c")}
         </div>
       </div>
 
       <style jsx>{`
-        .ticker-track {
+        .ticker-inner {
           display: inline-block;
-          animation: ticker-scroll 40s linear infinite;
-          padding-left: 100%;
+          animation: ticker3x 50s linear infinite;
+          padding-left: 60px;
         }
-        .ticker-track:hover {
-          animation-play-state: paused;
-        }
-        @keyframes ticker-scroll {
+        @keyframes ticker3x {
           0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+          100% { transform: translateX(-33.3334%); }
         }
       `}</style>
     </div>
