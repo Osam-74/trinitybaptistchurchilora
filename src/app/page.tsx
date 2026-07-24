@@ -116,6 +116,11 @@ export default function HomePage() {
     createdAt?: { seconds: number } | string | null;
   }
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
+
+  // Remove a broken photo from state so it vanishes from BOTH carousel rows
+  const handlePhotoError = (photoId: string) => {
+    setGalleryPhotos(prev => prev.filter(p => p.id !== photoId));
+  };
   const [, setLoadingPhotos] = useState(true);
 
   // Pre-configured backup list of high-quality church/worship photos from Unsplash
@@ -848,7 +853,7 @@ export default function HomePage() {
                   src={photo.imageUrl || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80"}
                   alt="Sunday Shot"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  onError={(e) => { const el = (e.target as HTMLElement).closest("[data-photo-card]"); if (el) (el as HTMLElement).style.display = "none"; }}
+                  onError={() => handlePhotoError(photo.id)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
                   <span className="text-white text-xs font-semibold">{formatPhotoDate(photo.createdAt)}</span>
@@ -877,6 +882,7 @@ export default function HomePage() {
                   src={photo.imageUrl || "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=600&q=80"}
                   alt="Sunday Shot"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  onError={() => handlePhotoError(photo.id)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
                   <span className="text-white text-xs font-semibold">{formatPhotoDate(photo.createdAt)}</span>

@@ -92,16 +92,18 @@ export async function listAllPhotos(): Promise<GalleryPhoto[]> {
   if (!db) return [];
   const q = query(collection(db, "gallery_photos"), orderBy("createdAt", "desc"));
   const snap = await getDocs(q);
-  return snap.docs.map(d => {
-    const data = d.data();
-    return {
-      id: d.id,
-      albumId: data.albumId || "",
-      url: data.url || data.cloudinaryUrl || data.imageUrl || "",
-      caption: data.caption,
-      createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : (data.createdAt || ""),
-    };
-  });
+  return snap.docs
+    .map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        albumId: data.albumId || "",
+        url: data.url || data.cloudinaryUrl || data.imageUrl || "",
+        caption: data.caption,
+        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : (data.createdAt || ""),
+      };
+    })
+    .filter(p => p.url.startsWith("http")); // skip records with no valid URL
 }
 
 export async function addPhoto(albumId: string, url: string, caption?: string): Promise<string> {
