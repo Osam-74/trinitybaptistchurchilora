@@ -8,16 +8,16 @@ import { uploadToR2 } from "@/lib/r2";
 import { submitMembership } from "@/lib/ministryMembers";
 
 const RA_RANKS = [
-  { rank: 1, name: "Rank 1 — Page" },
-  { rank: 2, name: "Rank 2 — Squire" },
-  { rank: 3, name: "Rank 3 — Knight" },
-  { rank: 4, name: "Rank 4 — Crusader" },
-  { rank: 5, name: "Rank 5 — Ambassador" },
-  { rank: 6, name: "Rank 6 — Ambassador in Training" },
-  { rank: 7, name: "Rank 7 — Ambassador in Service" },
-  { rank: 8, name: "Rank 8 — King's Ambassador" },
-  { rank: 9, name: "Rank 9 — Ambassador at Large" },
-  { rank: 10, name: "Rank 10 — Royal Ambassador" },
+  { rank: 1, name: "Rank 1 — Assistant Intern" },
+  { rank: 2, name: "Rank 2 — Intern" },
+  { rank: 3, name: "Rank 3 — Senior Intern" },
+  { rank: 4, name: "Rank 4 — Envoy" },
+  { rank: 5, name: "Rank 5 — Special Envoy" },
+  { rank: 6, name: "Rank 6 — Senior Envoy" },
+  { rank: 7, name: "Rank 7 — Dean" },
+  { rank: 8, name: "Rank 8 — Ambassador" },
+  { rank: 9, name: "Rank 9 — Ambassador Extra-ordinary" },
+  { rank: 10, name: "Rank 10 — Ambassador Pleni-potentiary" },
 ];
 
 export default function RoyalAmbassadorsPage() {
@@ -99,10 +99,10 @@ export default function RoyalAmbassadorsPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center reveal">
             <div>
               <img
-                src="https://nigerianbaptist.org/wp-content/uploads/2026/05/NBCAbuja2026-Day-6-MS-_10.jpg"
+                src="/images/royal-ambassadors.jpg"
                 alt="Royal Ambassadors"
                 className="w-full rounded-3xl shadow-xl object-cover aspect-[4/3]"
-                onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1529390079861-591de354faf5?w=800&q=80"; }}
+                
               />
             </div>
             <div>

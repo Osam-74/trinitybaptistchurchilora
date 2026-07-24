@@ -21,7 +21,7 @@ const ministries = [
     id: "royal-ambassadors",
     name: "Royal Ambassadors",
     badge: "Boys · Ages 6–24",
-    image: "https://nigerianbaptist.org/wp-content/uploads/2026/05/NBCAbuja2026-Day-6-MS-_10.jpg",
+    image: "/images/royal-ambassadors.jpg",
     fallback: "https://images.unsplash.com/photo-1529390079861-591de354faf5?w=600&q=70",
     verse: '"We are Ambassadors for Christ" — 2 Cor 5:20',
     cta: "Explore & Register",
