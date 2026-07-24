@@ -146,11 +146,15 @@ export default function HomePage() {
         const photos: GalleryPhoto[] = [];
         querySnapshot.forEach((docSnap) => {
           const data = docSnap.data();
-          photos.push({
-            id: docSnap.id,
-            imageUrl: data.imageUrl || data.photoUrl,
-            createdAt: data.createdAt
-          });
+          const url = data.imageUrl || data.photoUrl || "";
+          // Skip local/public-folder paths — these can be deleted; only keep http(s) URLs
+          if (url && url.startsWith("http")) {
+            photos.push({
+              id: docSnap.id,
+              imageUrl: url,
+              createdAt: data.createdAt
+            });
+          }
         });
         setGalleryPhotos(photos);
       } catch (err) {
@@ -837,12 +841,14 @@ export default function HomePage() {
             {[...(galleryPhotos.length >= 6 ? galleryPhotos : placeholderPhotos), ...(galleryPhotos.length >= 6 ? galleryPhotos : placeholderPhotos)].slice(0, 16).map((photo, i) => (
               <div
                 key={`row1-${photo.id}-${i}`}
+                data-photo-card
                 className="relative flex-shrink-0 w-52 h-52 sm:w-60 sm:h-60 rounded-2xl overflow-hidden bg-stone-100 group shadow-sm"
               >
                 <img
                   src={photo.imageUrl || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80"}
                   alt="Sunday Shot"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  onError={(e) => { const el = (e.target as HTMLElement).closest("[data-photo-card]"); if (el) (el as HTMLElement).style.display = "none"; }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
                   <span className="text-white text-xs font-semibold">{formatPhotoDate(photo.createdAt)}</span>
@@ -864,6 +870,7 @@ export default function HomePage() {
             {[...(galleryPhotos.length >= 6 ? [...galleryPhotos].reverse() : [...placeholderPhotos].reverse()), ...(galleryPhotos.length >= 6 ? [...galleryPhotos].reverse() : [...placeholderPhotos].reverse())].slice(0, 16).map((photo, i) => (
               <div
                 key={`row2-${photo.id}-${i}`}
+                data-photo-card
                 className="relative flex-shrink-0 w-52 h-52 sm:w-60 sm:h-60 rounded-2xl overflow-hidden bg-stone-100 group shadow-sm"
               >
                 <img

@@ -177,14 +177,7 @@ export default function AdminUsersPage() {
             </button>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-800 mb-6">
-            <strong>Real Firebase accounts:</strong> Clicking &ldquo;Add User&rdquo; creates an actual email/password account in Firebase Authentication.
-            The user can then log in at the admin portal with the email and password you set.
-            <br/><br/>
-            <strong>Note:</strong> Creating a user signs you out temporarily — you&apos;ll need to log back in afterward.
-            To reset a user&apos;s password or delete their auth account, use the{" "}
-            <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="underline font-semibold">Firebase Console</a>.
-          </div>
+
 
           {loading && <p className="text-text-muted text-sm">Loading…</p>}
 

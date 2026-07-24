@@ -3,18 +3,19 @@
 /**
  * AnnouncementTicker
  * ─ Pulls announcements from Firestore settings/main.announcements[]
+ * ─ Falls back to defaultSettings.announcements (from seed-data) if Firestore not loaded yet
  * ─ Alternates white / gold text for each announcement
  * ─ Seamless infinite loop — no gap, no restart flash
- * ─ Each item flows continuously: 1→2→3→1→2→3→…
  */
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { getSiteSettings } from "@/lib/settings";
 
-const DEFAULT_ANNOUNCEMENTS = [
-  "Welcome to Trinity Baptist Church, Ilora!",
-  "Join us this Sunday for worship at 9:00 AM",
-  "For Christ is our Peace — 2026: My Year of Upliftment",
+const FALLBACK = [
+  "Welcome to Trinity Baptist Church, Ilora — Sanctuary of Praise!",
+  "Sunday Worship: 8:00 AM – 9:30 AM (Sunday School) & 9:30 AM – 12:00 PM",
+  "2026 Theme: My Year of Upliftment — For Christ is our Peace",
+  "Convenient Service: First Saturday, 6:00 AM – 7:00 AM",
 ];
 
 const BULLET = "\u00A0\u00A0\u2022\u00A0\u00A0";
@@ -24,24 +25,27 @@ interface Props {
 }
 
 export default function AnnouncementTicker({ onDismiss }: Props) {
-  const [announcements, setAnnouncements] = useState<string[]>(DEFAULT_ANNOUNCEMENTS);
+  // Start with null so we know "not yet loaded"
+  const [announcements, setAnnouncements] = useState<string[] | null>(null);
 
   useEffect(() => {
     getSiteSettings()
       .then(s => {
-        if (s.announcements && s.announcements.length > 0) {
-          setAnnouncements(s.announcements);
-        }
+        // Use whatever is in settings (could be from Firestore or defaultSettings)
+        // Always trust the settings result — it already merges defaults + Firestore
+        setAnnouncements(s.announcements && s.announcements.length > 0 ? s.announcements : FALLBACK);
       })
-      .catch(() => {});
+      .catch(() => {
+        setAnnouncements(FALLBACK);
+      });
   }, []);
 
-  if (announcements.length === 0) return null;
+  // While loading, show the fallback silently so the bar renders immediately
+  const items = announcements ?? FALLBACK;
+  if (items.length === 0) return null;
 
-  // Build spans with alternating colours. We render the set THREE times for
-  // a perfectly seamless loop: the animation moves by exactly -1/3 of total width.
   const buildSpans = (keyPrefix: string) =>
-    announcements.map((text, i) => (
+    items.map((text, i) => (
       <span key={`${keyPrefix}-${i}`}>
         <span style={{ color: i % 2 === 0 ? "rgba(255,255,255,0.92)" : "#C8E63A" }}>
           {text}
@@ -55,7 +59,6 @@ export default function AnnouncementTicker({ onDismiss }: Props) {
       className="relative w-full overflow-hidden"
       style={{ height: "30px", background: "rgba(11,44,34,0.98)", borderBottom: "1px solid rgba(200,230,58,0.18)" }}
     >
-      {/* Dismiss */}
       {onDismiss && (
         <button
           onClick={onDismiss}
@@ -68,10 +71,9 @@ export default function AnnouncementTicker({ onDismiss }: Props) {
         </button>
       )}
 
-      {/* Scrolling track — 3× content, animate by -33.333% for seamless loop */}
-      <div className="flex items-center h-full">
+      <div className="flex items-center h-full overflow-hidden">
         <div
-          className="whitespace-nowrap text-xs font-medium select-none ticker-inner"
+          className="whitespace-nowrap text-xs font-medium select-none ticker-track"
           style={{ willChange: "transform" }}
         >
           {buildSpans("a")}
@@ -81,12 +83,12 @@ export default function AnnouncementTicker({ onDismiss }: Props) {
       </div>
 
       <style jsx>{`
-        .ticker-inner {
+        .ticker-track {
           display: inline-block;
-          animation: ticker3x 50s linear infinite;
           padding-left: 60px;
+          animation: tickerScroll 55s linear infinite;
         }
-        @keyframes ticker3x {
+        @keyframes tickerScroll {
           0%   { transform: translateX(0); }
           100% { transform: translateX(-33.3334%); }
         }

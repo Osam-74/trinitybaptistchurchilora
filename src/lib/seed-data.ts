@@ -14,6 +14,15 @@ export const defaultSettings: SiteSettings = {
     youtube: "https://youtube.com/@trinitybaptistilora",
   },
   gmailSenderEmail: "trinitybaptistchurchilora@gmail.com",
+  liveEnabled: false,
+  announcements: [
+    "Welcome to Trinity Baptist Church, Ilora — Sanctuary of Praise!",
+    "Sunday Worship: 8:00 AM – 9:30 AM (Sunday School) & 9:30 AM – 12:00 PM (Main Service)",
+    "Midweek Bible Study: Wednesdays 5:00 PM & 6:00 PM",
+    "2026 Theme: My Year of Upliftment — For Christ is our Peace",
+    "Convenient Service: First Saturday of every month, 6:00 AM – 7:00 AM",
+    "House Fellowship: Sundays 5:00 PM – 6:30 PM across Ilora",
+  ],
 };
 
 export const samplePosts: Omit<Post, "id">[] = [
