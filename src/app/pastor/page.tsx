@@ -94,7 +94,7 @@ export default function PastorPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/70 via-transparent to-transparent"/>
                 <div className="absolute bottom-6 left-6 right-6">
                   <div className="glass-card p-4 rounded-2xl text-white">
-                    <p className="text-accent font-bold text-sm">REV. SOLOMON OLUGBENGA MOSEBOLATAN</p>
+                    <p className="text-accent font-bold text-sm">REV. SOLOMON OLUGBENGA MOSEBOLATAN PhD JP</p>
                     <p className="text-xs text-white/80">Senior Pastor, Trinity Baptist Church, Ilora</p>
                   </div>
                 </div>
@@ -116,7 +116,7 @@ export default function PastorPage() {
               <div className="gold-divider max-w-xs mb-8"/>
               <div className="space-y-5 text-stone-600 leading-relaxed">
                 <p>Rev. Solomon Olugbenga Mosebolatan is a passionate preacher of the word of faith, an accomplished author, and a compassionate minister with over 24 years of pulpit experience. He currently serves as the full-time pastor of Trinity Baptist Church, Ilora, where he has faithfully shepherded his congregation for two decades.</p>
-                <p>Born in Ilora, Oyo State, Rev. Mosebolatan possesses a rich academic and theological background. He holds degrees across various prestigious institutions — B.Th., M.Th., and Ph.D. from The Nigerian Baptist Theological Seminary, Ogbomoso; B.A. degrees from Ajayi Crowther University and Olabisi Onabanjo University; M.A. from the University of Jos; PGDE from Ekiti State University; and an ND from the Federal School of Surveying, Oyo.</p>
+                <p>Born in Ilora, Oyo State, Rev. Mosebolatan possesses a rich academic and theological background. He holds degrees across various prestigious institutions, B.Th., M.Th., and Ph.D. from The Nigerian Baptist Theological Seminary, Ogbomoso; B.A. degrees from Ajayi Crowther University and Olabisi Onabanjo University; M.A. from the University of Jos; PGDE from Ekiti State University; and an ND from the Federal School of Surveying, Oyo.</p>
                 <p>Beyond the local pulpit, he is an international speaker who has ministered in Cote d&apos;Ivoire, Ghana, Togo, and Israel. Driven by a heart for humanitarian service, he established an empowerment foundation in 2020 dedicated to distributing relief aid, grants, and support to families in need.</p>
                 <p>As a respected social critic, public speaker, and ethicist, Rev. Mosebolatan is also the author of <em>Four Stages of Marriage</em> among other published articles and works.</p>
                 <p>He is happily married to Mrs. Olubunmi Esther Mosebolatan, and their union is blessed with four children: AyoOluwa, Akinola, Oluwapamilerinayo, and Oluwafeyikemi.</p>
