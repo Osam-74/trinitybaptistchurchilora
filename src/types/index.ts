@@ -131,6 +131,8 @@ export interface SiteSettings {
     youtube?: string;
   };
   gmailSenderEmail?: string;
+  bookingEnabled?: boolean;
+  announcements?: string[];   // list of announcement strings for the ticker
 }
 
 export interface Hymn {

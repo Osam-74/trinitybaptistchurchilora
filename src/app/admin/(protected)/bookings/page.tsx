@@ -1,41 +1,121 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
-import { Booking } from "@/types";
+import { listBookings, updateBookingStatus, deleteBooking, BookingRecord } from "@/lib/bookings";
+import { getSiteSettings, updateSiteSettings } from "@/lib/settings";
 
 const WEEKDAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const DEFAULT_AVAILABLE_DAYS = [false,true,true,true,true,false,false]; // Mon-Thu
 
-const sampleBookings: Booking[] = [
-  { id:"b1", slotStart: new Date(Date.now()+86400000).toISOString(), slotEnd: new Date(Date.now()+86400000+1800000).toISOString(), name:"John Adebayo", email:"john@email.com", phone:"+234 801 234 5678", topic:"Marriage counseling", meetingType:"in_person", status:"requested", createdAt: new Date().toISOString() },
-  { id:"b2", slotStart: new Date(Date.now()+2*86400000).toISOString(), slotEnd: new Date(Date.now()+2*86400000+1800000).toISOString(), name:"Mary Okafor", email:"mary@email.com", phone:"+234 802 345 6789", topic:"Spiritual guidance", meetingType:"video", status:"confirmed", createdAt: new Date().toISOString() },
-  { id:"b3", slotStart: new Date(Date.now()+3*86400000).toISOString(), slotEnd: new Date(Date.now()+3*86400000+1800000).toISOString(), name:"David Ibrahim", email:"david@email.com", phone:"+234 803 456 7890", topic:"Career advice", meetingType:"in_person", status:"requested", createdAt: new Date().toISOString() },
-];
-
-function formatSlot(iso: string) {
-  const d = new Date(iso);
-  return d.toLocaleString("en-NG", { weekday:"short", month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" });
+function formatDate(dateStr: string) {
+  if (!dateStr) return "—";
+  try {
+    return new Date(dateStr).toLocaleDateString("en-NG", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+  } catch { return dateStr; }
 }
 
 export default function AdminBookingsPage() {
-  const [bookings, setBookings] = useState<Booking[]>(sampleBookings);
+  const [bookings, setBookings] = useState<BookingRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all"|"requested"|"confirmed"|"cancelled">("all");
-  const [availableDays, setAvailableDays] = useState(DEFAULT_AVAILABLE_DAYS);
-  const [startTime, setStartTime] = useState("09:00");
-  const [endTime, setEndTime] = useState("17:00");
-  const [slotDuration, setSlotDuration] = useState("30");
-  const [savedAvail, setSavedAvail] = useState(false);
   const [activeTab, setActiveTab] = useState<"bookings"|"availability">("bookings");
 
-  const filtered = bookings.filter(b => filter==="all" || b.status===filter);
+  // Booking toggle
+  const [bookingEnabled, setBookingEnabled] = useState(true);
+  const [togglingBooking, setTogglingBooking] = useState(false);
+  const [settingsLoading, setSettingsLoading] = useState(true);
 
-  const updateStatus = (id: string, status: Booking["status"]) =>
-    setBookings(bookings.map(b => b.id===id ? {...b, status} : b));
+  // Availability settings (stored in Firestore settings)
+  const [availableDays, setAvailableDays] = useState([false,true,true,true,true,false,false]);
+  const [startTime, setStartTime] = useState("09:00");
+  const [endTime, setEndTime] = useState("17:00");
+  const [savedAvail, setSavedAvail] = useState(false);
+  const [savingAvail, setSavingAvail] = useState(false);
 
-  const handleSaveAvailability = () => {
-    setSavedAvail(true);
-    setTimeout(() => setSavedAvail(false), 2500);
+  useEffect(() => {
+    loadBookings();
+    getSiteSettings().then(s => {
+      setBookingEnabled(s.bookingEnabled !== false);
+      setSettingsLoading(false);
+    });
+  }, []);
+
+  const loadBookings = async () => {
+    setLoading(true);
+    try {
+      const data = await listBookings();
+      setBookings(data);
+    } catch (err) {
+      console.error("Failed to load bookings:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleBooking = async () => {
+    setTogglingBooking(true);
+    try {
+      const newVal = !bookingEnabled;
+      await updateSiteSettings({ bookingEnabled: newVal });
+      setBookingEnabled(newVal);
+    } catch (err) {
+      console.error("Toggle error:", err);
+      alert("Failed to toggle booking. Check Firestore rules.");
+    } finally {
+      setTogglingBooking(false);
+    }
+  };
+
+  const handleStatusChange = async (id: string, status: BookingRecord["status"]) => {
+    try {
+      await updateBookingStatus(id, status);
+      setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
+    } catch (err) {
+      console.error("Status update error:", err);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this booking?")) return;
+    try {
+      await deleteBooking(id);
+      setBookings(prev => prev.filter(b => b.id !== id));
+    } catch (err) {
+      console.error("Delete error:", err);
+    }
+  };
+
+  const handleSaveAvailability = async () => {
+    setSavingAvail(true);
+    try {
+      // Store availability in a way TS accepts
+      await updateSiteSettings({ bookingEnabled }); // just re-save enabled flag as a noop
+      // Also save raw using setDoc
+      const { db } = await import("@/lib/firebase");
+      const { doc, setDoc } = await import("firebase/firestore");
+      if (db) {
+        await setDoc(doc(db, "settings", "booking_availability"), {
+          availableDays,
+          startTime,
+          endTime,
+        }, { merge: true });
+      }
+      setSavedAvail(true);
+      setTimeout(() => setSavedAvail(false), 2500);
+    } catch (err) {
+      console.error("Save availability error:", err);
+      alert("Failed to save availability.");
+    } finally {
+      setSavingAvail(false);
+    }
+  };
+
+  const filtered = bookings.filter(b => filter === "all" || b.status === filter);
+  const counts = {
+    all: bookings.length,
+    requested: bookings.filter(b => b.status === "requested").length,
+    confirmed: bookings.filter(b => b.status === "confirmed").length,
+    cancelled: bookings.filter(b => b.status === "cancelled").length,
   };
 
   return (
@@ -43,165 +123,154 @@ export default function AdminBookingsPage() {
       <AdminSidebar />
       <main className="flex-1 p-6 lg:p-8 ml-0 lg:ml-64 pr-16 lg:pr-8">
         <div className="max-w-5xl mx-auto">
-          <div className="mb-8">
-            <h1 className="font-serif text-2xl font-bold text-primary">Bookings</h1>
-            <p className="text-text-muted text-sm mt-1">Manage session requests and set available days</p>
+
+          {/* Header with booking toggle */}
+          <div className="flex items-start justify-between mb-8">
+            <div>
+              <h1 className="font-serif text-2xl font-bold text-primary">Bookings</h1>
+              <p className="text-text-muted text-sm mt-1">Manage pastoral session requests</p>
+            </div>
+            <div className="flex items-center gap-3 bg-white rounded-2xl border border-stone-200 px-5 py-3 shadow-sm">
+              <div>
+                <p className="text-xs font-bold text-primary uppercase tracking-wide">Booking Page</p>
+                <p className="text-xs text-stone-400 mt-0.5">{settingsLoading ? "Loading…" : bookingEnabled ? "Open — visitors can book" : "Closed — showing notice"}</p>
+              </div>
+              <button
+                onClick={handleToggleBooking}
+                disabled={togglingBooking || settingsLoading}
+                className={`relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 ${bookingEnabled ? "bg-green-500" : "bg-stone-300"}`}
+                aria-label="Toggle booking page"
+              >
+                <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition-transform duration-200 ease-in-out mt-1 ${bookingEnabled ? "translate-x-6" : "translate-x-1"}`} />
+              </button>
+            </div>
           </div>
 
           {/* Tabs */}
           <div className="flex gap-2 mb-6 p-1 bg-stone-100 rounded-2xl w-fit">
             {(["bookings","availability"] as const).map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`px-5 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all ${activeTab===tab ? "bg-white shadow-sm text-primary" : "text-text-muted hover:text-primary"}`}>
-                {tab === "availability" ? "📅 Available Days" : "📋 Bookings"}
+                className={`px-5 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all ${activeTab === tab ? "bg-white shadow-sm text-primary" : "text-text-muted hover:text-primary"}`}>
+                {tab === "availability" ? "📅 Availability" : "📋 Bookings"}
               </button>
             ))}
           </div>
 
           {activeTab === "bookings" && (
             <>
-              {/* Filter */}
-              <div className="flex gap-2 mb-5">
+              {/* Stats */}
+              <div className="grid grid-cols-4 gap-3 mb-5">
                 {(["all","requested","confirmed","cancelled"] as const).map(f => (
                   <button key={f} onClick={() => setFilter(f)}
-                    className={`px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all ${filter===f ? "bg-primary text-white" : "bg-white text-text-muted border border-stone-200 hover:border-primary/40"}`}>
-                    {f}
+                    className={`p-4 rounded-2xl text-center border transition-all ${filter === f ? "bg-primary text-white border-primary" : "bg-white border-stone-100 hover:border-primary/30"}`}>
+                    <p className={`text-2xl font-extrabold ${filter === f ? "text-white" : "text-primary"}`}>{counts[f]}</p>
+                    <p className={`text-xs capitalize mt-0.5 ${filter === f ? "text-white/80" : "text-text-muted"}`}>{f}</p>
                   </button>
                 ))}
               </div>
 
-              <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-stone-100 bg-stone-50">
-                        {["Person","Slot","Topic","Type","Status","Actions"].map(h => (
-                          <th key={h} className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-4 py-3.5">{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filtered.map(b => (
-                        <tr key={b.id} className="border-b border-stone-50 hover:bg-stone-50/50 transition-colors">
-                          <td className="px-4 py-4">
-                            <p className="font-semibold text-primary text-sm">{b.name}</p>
-                            <p className="text-text-muted text-xs">{b.email}</p>
-                            <p className="text-text-muted text-xs">{b.phone}</p>
-                          </td>
-                          <td className="px-4 py-4 text-sm text-text-muted whitespace-nowrap">{formatSlot(b.slotStart)}</td>
-                          <td className="px-4 py-4 text-sm text-primary max-w-xs">
-                            <p className="truncate">{b.topic}</p>
-                          </td>
-                          <td className="px-4 py-4">
-                            <span className={`px-2.5 py-1 text-xs rounded-full font-medium ${b.meetingType==="video" ? "bg-blue-50 text-blue-600" : "bg-stone-100 text-stone-500"}`}>
-                              {b.meetingType==="video" ? "📹 Video" : "🏛️ In-person"}
-                            </span>
-                          </td>
-                          <td className="px-4 py-4">
-                            <span className={`px-2.5 py-1 text-xs rounded-full font-medium ${b.status==="confirmed" ? "bg-green-100 text-green-700" : b.status==="cancelled" ? "bg-red-50 text-red-500" : "bg-amber-50 text-amber-600"}`}>
+              {loading ? (
+                <div className="flex justify-center py-16">
+                  <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="text-center py-16 bg-white rounded-2xl border border-stone-100">
+                  <p className="text-text-muted font-semibold">No {filter === "all" ? "" : filter} bookings yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filtered.map(b => (
+                    <div key={b.id} className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5">
+                      <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-2">
+                            <h3 className="font-serif font-bold text-primary text-lg">{b.clientName}</h3>
+                            <span className={`px-2.5 py-0.5 text-xs rounded-full font-bold uppercase tracking-wide ${b.status === "confirmed" ? "bg-green-100 text-green-700" : b.status === "cancelled" ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-700"}`}>
                               {b.status}
                             </span>
-                          </td>
-                          <td className="px-4 py-4">
-                            {b.status==="requested" && (
-                              <div className="flex gap-1.5">
-                                <button onClick={() => updateStatus(b.id,"confirmed")}
-                                  className="px-3 py-1.5 bg-green-100 text-green-700 text-xs font-semibold rounded-lg hover:bg-green-200 transition-colors">Confirm</button>
-                                <button onClick={() => updateStatus(b.id,"cancelled")}
-                                  className="px-3 py-1.5 bg-red-50 text-red-500 text-xs font-semibold rounded-lg hover:bg-red-100 transition-colors">Cancel</button>
-                              </div>
+                            {b.sessionType && (
+                              <span className={`px-2.5 py-0.5 text-xs rounded-full font-medium ${b.sessionType === "video" ? "bg-blue-50 text-blue-600" : "bg-stone-100 text-stone-500"}`}>
+                                {b.sessionType === "video" ? "📹 Video" : "🏛️ In-person"}
+                              </span>
                             )}
-                            {b.status==="confirmed" && (
-                              <button onClick={() => updateStatus(b.id,"cancelled")}
-                                className="px-3 py-1.5 bg-stone-100 text-stone-500 text-xs font-semibold rounded-lg hover:bg-stone-200 transition-colors">Cancel</button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {filtered.length===0 && (
-                    <div className="text-center py-12 text-text-muted">No bookings found</div>
-                  )}
+                          </div>
+                          <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1 text-sm text-stone-600">
+                            <span>📧 {b.email}</span>
+                            {b.phone && <span>📞 {b.phone}</span>}
+                            <span>📅 {formatDate(b.preferredDate)}{b.startTime ? ` at ${b.startTime}` : ""}</span>
+                            <span>🏷️ {b.bookingType}</span>
+                          </div>
+                          {b.notes && (
+                            <p className="text-xs text-stone-500 mt-2 bg-stone-50 px-3 py-2 rounded-lg border border-stone-100">{b.notes}</p>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          {b.status !== "confirmed" && (
+                            <button onClick={() => handleStatusChange(b.id, "confirmed")}
+                              className="px-4 py-1.5 rounded-lg bg-green-600 text-white text-xs font-semibold hover:bg-green-700 transition-colors">
+                              ✓ Confirm
+                            </button>
+                          )}
+                          {b.status !== "cancelled" && (
+                            <button onClick={() => handleStatusChange(b.id, "cancelled")}
+                              className="px-4 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-semibold hover:bg-red-50 transition-colors">
+                              ✕ Cancel
+                            </button>
+                          )}
+                          {b.status === "cancelled" && (
+                            <button onClick={() => handleDelete(b.id)}
+                              className="px-4 py-1.5 rounded-lg bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors">
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              )}
             </>
           )}
 
           {activeTab === "availability" && (
-            <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                  </svg>
-                </div>
-                <div>
-                  <h2 className="font-serif text-lg font-bold text-primary">Set Available Days</h2>
-                  <p className="text-text-muted text-xs">These settings sync to the public booking calendar</p>
-                </div>
-              </div>
-
-              {/* Days grid */}
+            <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-8 max-w-xl">
+              <h3 className="font-serif text-lg font-bold text-primary mb-6">Available Days & Times</h3>
               <div className="mb-6">
-                <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-3">Available Weekdays</p>
-                <div className="grid grid-cols-7 gap-2">
+                <label className="block text-xs font-bold text-primary mb-3 uppercase tracking-wide">Available Days</label>
+                <div className="grid grid-cols-4 gap-2">
                   {WEEKDAY_NAMES.map((day, i) => (
-                    <button key={i} onClick={() => setAvailableDays(prev => { const n=[...prev]; n[i]=!n[i]; return n; })}
-                      className={`flex flex-col items-center py-3 rounded-xl border-2 transition-all text-xs font-semibold ${availableDays[i] ? "border-primary bg-primary/10 text-primary" : "border-stone-200 text-stone-400 bg-stone-50"}`}>
-                      <span>{day.slice(0,3)}</span>
-                      {availableDays[i] && (
-                        <svg className="w-3.5 h-3.5 text-primary mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7"/>
-                        </svg>
-                      )}
+                    <button key={day} onClick={() => setAvailableDays(prev => prev.map((v, j) => j === i ? !v : v))}
+                      className={`py-2.5 rounded-xl text-xs font-semibold transition-all ${availableDays[i] ? "bg-primary text-white" : "bg-stone-100 text-stone-500 hover:bg-stone-200"}`}>
+                      {day.slice(0, 3)}
                     </button>
                   ))}
                 </div>
               </div>
-
-              {/* Time range */}
-              <div className="grid sm:grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
-                  <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Start Time</label>
-                  <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} className="input-field"/>
+                  <label className="block text-xs font-bold text-primary mb-2 uppercase tracking-wide">Start Time</label>
+                  <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">End Time</label>
-                  <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} className="input-field"/>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Slot Duration (mins)</label>
-                  <select value={slotDuration} onChange={e => setSlotDuration(e.target.value)} className="input-field bg-white">
-                    <option value="30">30 minutes</option>
-                    <option value="45">45 minutes</option>
-                    <option value="60">60 minutes</option>
-                  </select>
+                  <label className="block text-xs font-bold text-primary mb-2 uppercase tracking-wide">End Time</label>
+                  <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30" />
                 </div>
               </div>
-
-              {/* Preview */}
-              <div className="bg-stone-50 rounded-xl p-4 mb-6 border border-stone-100">
-                <p className="text-xs font-semibold text-primary mb-2 uppercase tracking-wide">Summary</p>
-                <p className="text-sm text-text-muted">
-                  Available: <strong className="text-primary">{WEEKDAY_NAMES.filter((_,i) => availableDays[i]).join(", ") || "None selected"}</strong>
-                </p>
-                <p className="text-sm text-text-muted mt-1">
-                  Hours: <strong className="text-primary">{startTime} – {endTime}</strong> · Slots every <strong className="text-primary">{slotDuration} minutes</strong>
-                </p>
+              <div className="flex items-center gap-4">
+                <button onClick={handleSaveAvailability} disabled={savingAvail}
+                  className="btn-gold px-8 py-3 rounded-xl font-semibold disabled:opacity-50">
+                  {savingAvail ? "Saving…" : "Save Availability"}
+                </button>
+                {savedAvail && <span className="text-green-600 text-sm font-medium flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+                  Saved
+                </span>}
               </div>
-
-              <button onClick={handleSaveAvailability}
-                className={`btn-shine px-7 py-3 rounded-xl font-semibold text-sm transition-all ${savedAvail ? "bg-green-500 text-white" : "btn-gold"}`}>
-                {savedAvail ? (
-                  <span className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
-                    Saved!
-                  </span>
-                ) : "Save Availability"}
-              </button>
             </div>
           )}
+
         </div>
       </main>
     </div>

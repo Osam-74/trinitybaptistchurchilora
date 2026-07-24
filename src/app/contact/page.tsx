@@ -3,23 +3,34 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { submitContactMessage } from "@/lib/contacts";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", subject: "General Inquiry", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const contactPhone = "08034084270 / 07086454207";
   const address = "P.O. Box 43, Ilora, Oyo State, Nigeria.";
   const contactEmail = "trinitybaptistchurchilora@gmail.com";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) {
       setError("Please fill out all required fields.");
       return;
     }
     setError("");
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      await submitContactMessage(formData);
+      setSubmitted(true);
+    } catch (err) {
+      setError("Failed to send message. Please try again or contact us directly.");
+      console.error("Contact form error:", err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -146,9 +157,10 @@ export default function ContactPage() {
 
                   <button
                     type="submit"
-                    className="w-full btn-shine btn-gold py-4 rounded-2xl font-bold text-base text-primary-dark transition-all"
+                    disabled={submitting}
+                    className="w-full btn-shine btn-gold py-4 rounded-2xl font-bold text-base text-primary-dark transition-all disabled:opacity-60"
                   >
-                    Send Message
+                    {submitting ? "Sending…" : "Send Message"}
                   </button>
                 </form>
               </>

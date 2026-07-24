@@ -1,4 +1,5 @@
 "use client";
+import PhotoCarousel from "@/components/PhotoCarousel";
 
 import { useState, useEffect, useCallback } from "react";
 import Navbar from "@/components/Navbar";
@@ -110,6 +111,13 @@ export default function GalleryPage() {
           </div>
         </div>
       </div>
+
+      {/* Photo Carousel — random picks from all albums */}
+      <section className="py-8 bg-bg overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <PhotoCarousel speed={40} rowCount={2} label="Our Church in Pictures" />
+        </div>
+      </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 

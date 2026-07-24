@@ -23,15 +23,38 @@ service cloud.firestore {
     }
 
     // Choir & Media Team members
-    // Public can read (the /team page shows approved members to visitors)
-    // and create (sign-up form). Only admins can update/delete.
     match /choir_members/{memberId} {
       allow read: if true;
       allow create: if true;
       allow update, delete: if request.auth != null;
     }
 
-    // Admin user profiles — only signed-in admins can read/write
+    // Gallery albums — public read, admin write
+    match /gallery_albums/{albumId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Gallery photos — public read, admin write
+    match /gallery_photos/{photoId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Contact messages — anyone can create (submit form), admin reads/deletes
+    match /contact_messages/{messageId} {
+      allow create: if true;
+      allow read, delete: if request.auth != null;
+      allow update: if request.auth != null;
+    }
+
+    // Bookings — anyone can create (submit booking), admin reads/updates/deletes
+    match /bookings/{bookingId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+
+    // Admin user profiles
     match /admin_users/{userId} {
       allow read: if request.auth != null;
       allow write: if request.auth != null;

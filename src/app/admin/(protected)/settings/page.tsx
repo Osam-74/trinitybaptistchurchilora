@@ -108,6 +108,46 @@ export default function AdminSettingsPage() {
               <input type="email" value={settings.gmailSenderEmail || ""} onChange={(e) => setSettings({ ...settings, gmailSenderEmail: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-accent/30" placeholder="trinitybaptistchurchilora@gmail.com" />
               <p className="text-xs text-text-muted mt-1">The Gmail address used to send confirmation and reminder emails</p>
             </div>
+
+            {/* Announcements Ticker */}
+            <div className="pt-6 border-t border-stone-100">
+              <label className="block text-sm font-bold text-primary mb-1">📢 Announcements Ticker</label>
+              <p className="text-xs text-text-muted mb-4">These scroll across the top bar of the site. Add one per line or use the + button. Each announcement is separated by a bullet in the display.</p>
+              <div className="space-y-2">
+                {(settings.announcements || []).map((ann, i) => (
+                  <div key={i} className="flex gap-2">
+                    <input
+                      value={ann}
+                      onChange={e => {
+                        const updated = [...(settings.announcements || [])];
+                        updated[i] = e.target.value;
+                        setSettings({ ...settings, announcements: updated });
+                      }}
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
+                      placeholder={`Announcement ${i + 1}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = (settings.announcements || []).filter((_, j) => j !== i);
+                        setSettings({ ...settings, announcements: updated });
+                      }}
+                      className="w-9 h-9 rounded-xl bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-500 transition-colors flex-shrink-0"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setSettings({ ...settings, announcements: [...(settings.announcements || []), ""] })}
+                className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-dashed border-stone-300 text-sm text-primary hover:border-primary/40 hover:bg-stone-50 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>
+                Add Announcement
+              </button>
+            </div>
           </div>
           {error && (
             <div className="mt-6 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>

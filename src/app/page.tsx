@@ -228,7 +228,7 @@ export default function HomePage() {
       {/* 1. Navbar */}
       <Navbar />
 
-      {/* 2. Live Banner */}
+            {/* 2. Live Banner */}
       <LiveBanner isLive={isLive} title="Sunday Morning Worship" />
 
       {/* 3. Hero Section */}

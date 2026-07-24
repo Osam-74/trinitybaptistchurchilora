@@ -33,7 +33,8 @@ const navigationGroups = [
   {
     group: "EVENTS",
     items: [
-      { href: "/admin/bookings", label: "Bookings", icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", badge: "3" },
+      { href: "/admin/bookings", label: "Bookings", icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
+      { href: "/admin/contacts", label: "Messages", icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
       { href: "/admin/calendar", label: "Calendar", icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" },
       { href: "/admin/activities", label: "Activities", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
     ]
@@ -176,9 +177,9 @@ export default function AdminSidebar() {
                         </span>
                       </div>
                       
-                      {item.badge && (
+                      {(item as { href: string; label: string; icon: string; badge?: string }).badge && (
                         <span className="bg-[#EF4444] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full md:hidden lg:inline-block">
-                          {item.badge}
+                          {(item as { href: string; label: string; icon: string; badge?: string }).badge}
                         </span>
                       )}
                     </Link>
