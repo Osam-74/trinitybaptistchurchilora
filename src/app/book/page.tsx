@@ -168,9 +168,21 @@ ${formData.notes}` : ""),
     <main className="min-h-screen bg-bg text-primary">
       <Navbar />
 
-      {/* Booking disabled notice */}
+      {/* Hero — always visible regardless of booking status */}
+      <section className="bg-primary-dark overflow-hidden pattern-overlay" style={{ paddingTop: "calc(30px + 80px + 2rem)", paddingBottom: "4rem" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <div className="reveal inline-flex items-center gap-2 glass-card rounded-full px-4 py-1 mb-4 text-accent-light text-xs font-semibold uppercase tracking-wider">
+            🤝 One-On-One Sessions
+          </div>
+          <h1 className="reveal font-display text-3xl sm:text-5xl text-white font-bold tracking-tight">
+            Book a <span className="text-gradient-gold">Session</span>
+          </h1>
+        </div>
+      </section>
+
+      {/* Booking disabled notice — body only, hero stays above */}
       {bookingEnabled === false && (
-        <div className="min-h-[70vh] flex items-center justify-center px-4">
+        <div className="py-24 flex items-center justify-center px-4">
           <div className="max-w-lg w-full bg-white rounded-3xl shadow-xl border border-stone-100 p-12 text-center">
             <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
               <svg className="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,18 +201,6 @@ ${formData.notes}` : ""),
       )}
 
       {bookingEnabled !== false && <>
-
-      {/* Hero: Compact header */}
-      <section className="bg-primary-dark overflow-hidden pattern-overlay" style={{ paddingTop: "calc(30px + 80px + 2rem)", paddingBottom: "4rem" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <div className="reveal inline-flex items-center gap-2 glass-card rounded-full px-4 py-1 mb-4 text-accent-light text-xs font-semibold uppercase tracking-wider">
-            🤝 One-On-One Sessions
-          </div>
-          <h1 className="reveal font-display text-3xl sm:text-5xl text-white font-bold tracking-tight">
-            Book a <span className="text-gradient-gold">Session</span>
-          </h1>
-        </div>
-      </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {submitted ? (
