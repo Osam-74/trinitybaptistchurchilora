@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { uploadToR2 } from "@/lib/r2";
 import { submitMembership } from "@/lib/ministryMembers";
+import MemberDirectory from "@/components/MemberDirectory";
 
 const RA_RANKS = [
   { rank: 1, name: "Rank 1 — Assistant Intern" },
@@ -199,13 +200,16 @@ export default function RoyalAmbassadorsPage() {
             </div>
           ) : (
             <>
-              <button
-                onClick={() => setShowForm(!showForm)}
-                className="btn-shine btn-gold inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-primary-dark mb-6"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>
-                Register as Royal Ambassador
-              </button>
+              <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
+                <button
+                  onClick={() => setShowForm(!showForm)}
+                  className="btn-shine btn-gold inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-primary-dark"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>
+                  Register as Royal Ambassador
+                </button>
+                <MemberDirectory ministry="royal-ambassadors" ministryLabel="Royal Ambassadors" />
+              </div>
               {showForm && (
                 <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6 text-left space-y-4 mt-4">
                   <div>
