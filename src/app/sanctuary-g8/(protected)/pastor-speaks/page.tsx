@@ -19,38 +19,21 @@ export default function PastorSpeaksAdmin() {
 
   useEffect(() => {
     getPastorSpeaks().then(d => {
-      if (d) {
-        setData({
-          ...d,
-          pastorName: d.pastorName || PASTOR_DEFAULTS.pastorName,
-          pastorImageUrl: d.pastorImageUrl || PASTOR_DEFAULTS.pastorImageUrl,
-        });
-      }
+      if (d) setData({ ...d, pastorName: d.pastorName || PASTOR_DEFAULTS.pastorName, pastorImageUrl: d.pastorImageUrl || PASTOR_DEFAULTS.pastorImageUrl });
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!data.message.trim()) {
-      setError('Please enter a message before saving.');
-      return;
-    }
-    setSaving(true);
-    setError('');
+    if (!data.message.trim()) { setError('Please enter a message before saving.'); return; }
+    setSaving(true); setError('');
     try {
-      await savePastorSpeaks({
-        ...data,
-        pastorName: PASTOR_DEFAULTS.pastorName,
-        pastorImageUrl: PASTOR_DEFAULTS.pastorImageUrl,
-      });
+      await savePastorSpeaks({ ...data, pastorName: PASTOR_DEFAULTS.pastorName, pastorImageUrl: PASTOR_DEFAULTS.pastorImageUrl });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setSaving(false);
-    }
+    } catch (err) { setError((err as Error).message); }
+    finally { setSaving(false); }
   };
 
   const handleDelete = async () => {
@@ -58,25 +41,19 @@ export default function PastorSpeaksAdmin() {
     setDeleting(true);
     try {
       await deletePastorSpeaks();
-      setData({
-        message: '',
-        pastorName: PASTOR_DEFAULTS.pastorName,
-        pastorImageUrl: PASTOR_DEFAULTS.pastorImageUrl,
-        active: true,
-        updatedAt: '',
-      });
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setDeleting(false);
-    }
+      setData({ message: '', pastorName: PASTOR_DEFAULTS.pastorName, pastorImageUrl: PASTOR_DEFAULTS.pastorImageUrl, active: true, updatedAt: '' });
+    } catch (err) { setError((err as Error).message); }
+    finally { setDeleting(false); }
   };
+
+  const dateStr = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <AdminShell>
       <div className="max-w-2xl">
         <div className="mb-6">
           <h1 className="font-serif text-2xl font-bold text-primary">Pastor&apos;s Word</h1>
+          <p className="text-text-muted text-sm mt-1">This appears as a popup on the homepage on every visit</p>
         </div>
 
         {loading ? (
@@ -85,37 +62,19 @@ export default function PastorSpeaksAdmin() {
           </div>
         ) : (
           <form onSubmit={handleSave} className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm space-y-5">
-
             {/* Active toggle */}
             <div className="flex items-center justify-between p-4 bg-stone-50 rounded-xl">
               <div>
                 <label className="block text-sm font-bold text-primary">Show on homepage</label>
                 <p className="text-xs text-text-muted mt-0.5">Toggle off to hide without deleting</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setData(d => ({ ...d, active: !d.active }))}
-                className={`relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none ${
-                  data.active ? 'bg-emerald-500' : 'bg-stone-300'
-                }`}
-              >
-                <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${
-                  data.active ? 'translate-x-6' : ''
-                }`} />
+              <button type="button" onClick={() => setData(d => ({ ...d, active: !d.active }))}
+                className={`relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none ${data.active ? 'bg-emerald-500' : 'bg-stone-300'}`}>
+                <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${data.active ? 'translate-x-6' : ''}`} />
               </button>
             </div>
 
-            {/* Pastor info — read-only */}
-            <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-100 rounded-xl">
-              <img
-                src={PASTOR_DEFAULTS.pastorImageUrl}
-                alt={PASTOR_DEFAULTS.pastorName}
-                className="w-12 h-12 rounded-full object-cover ring-2 ring-amber-200 flex-shrink-0"
-              />
-              <p className="font-semibold text-sm text-stone-800">{PASTOR_DEFAULTS.pastorName}</p>
-            </div>
-
-            {/* Message */}
+            {/* Message textarea */}
             <div>
               <label className="block text-sm font-medium text-primary mb-1.5">
                 Message <span className="text-red-400">*</span>
@@ -128,7 +87,7 @@ export default function PastorSpeaksAdmin() {
                 placeholder="Type the pastor's word, quote, or motivational message here…"
                 required
               />
-              <p className="text-xs text-text-muted mt-1">{data.message.length} characters</p>
+              <p className="text-xs text-text-muted mt-1">{data.message.length} characters · The preview below updates as you type</p>
             </div>
 
             {data.updatedAt && (
@@ -141,30 +100,19 @@ export default function PastorSpeaksAdmin() {
               <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl space-y-1">
                 <p className="font-semibold">{error.includes('permission') || error.includes('Permission') ? 'Firestore Rules Not Published Yet' : 'Error'}</p>
                 {error.includes('permission') || error.includes('Permission') ? (
-                  <p className="text-xs leading-relaxed">
-                    Go to <strong>Firebase Console → Firestore Database → Rules</strong>, paste the contents of <code>firestore.rules</code> from the project, then click <strong>Publish</strong>. This only needs to be done once.
-                  </p>
-                ) : (
-                  <p>{error}</p>
-                )}
+                  <p className="text-xs leading-relaxed">Go to <strong>Firebase Console → Firestore Database → Rules</strong>, paste the contents of <code>firestore.rules</code>, then click <strong>Publish</strong>.</p>
+                ) : <p>{error}</p>}
               </div>
             )}
 
             <div className="flex gap-3 pt-2">
-              <button
-                type="submit"
-                disabled={saving}
-                className="flex-1 py-3 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
-              >
+              <button type="submit" disabled={saving}
+                className="flex-1 py-3 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors disabled:opacity-50">
                 {saving ? 'Saving…' : saved ? '✓ Saved!' : "Save Pastor's Word"}
               </button>
               {data.message && (
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="px-5 py-3 bg-red-50 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors disabled:opacity-50"
-                >
+                <button type="button" onClick={handleDelete} disabled={deleting}
+                  className="px-5 py-3 bg-red-50 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors disabled:opacity-50">
                   {deleting ? 'Removing…' : 'Remove'}
                 </button>
               )}
@@ -172,27 +120,72 @@ export default function PastorSpeaksAdmin() {
           </form>
         )}
 
-        {/* Live Preview */}
+        {/* Live Preview — matches the frontend popup exactly */}
         {data.message && (
           <div className="mt-8">
-            <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">Preview</p>
-            <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-lg overflow-hidden border border-stone-100">
-              <div className="h-1.5 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500" />
-              <div className="px-6 pt-5 pb-6">
-                <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-3">Pastor&apos;s Word</p>
-                <svg className="w-7 h-7 text-amber-200 mb-2" fill="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center gap-2 mb-3">
+              <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Live Preview</p>
+              <span className="text-[10px] bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">Updates as you type</span>
+            </div>
+
+            {/* Card matches PastorSpeaksPopup exactly */}
+            <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-stone-100">
+              {/* Top gold accent */}
+              <div className="h-1 bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500" />
+
+              {/* Dark green header */}
+              <div className="bg-[#1B4332] px-5 py-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-9 h-9 rounded-full bg-white/10 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                    <img src="/logo/tbc-logo.png" alt="TBC" className="w-full h-full object-contain p-0.5"
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}/>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-amber-300 text-[10px] font-bold uppercase tracking-[0.18em] leading-none truncate">
+                      A Word from Pastor&apos;s Desk
+                    </p>
+                    <p className="text-white/55 text-[9px] mt-0.5 truncate">Trinity Baptist Church, Ilora</p>
+                  </div>
+                </div>
+                <p className="text-white/60 text-[9px] text-right leading-snug hidden sm:block flex-shrink-0">{dateStr}</p>
+              </div>
+              <div className="h-px bg-gradient-to-r from-transparent via-amber-300/50 to-transparent" />
+
+              {/* Body */}
+              <div className="px-6 pt-5 pb-5">
+                <svg className="w-9 h-9 text-amber-200 mb-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
                 </svg>
-                <p className="font-serif text-sm text-stone-800 leading-relaxed italic mb-4 line-clamp-6">{data.message}</p>
-                <div className="flex items-center gap-2 border-t border-stone-100 pt-3">
-                  <img
-                    src={PASTOR_DEFAULTS.pastorImageUrl}
-                    alt={PASTOR_DEFAULTS.pastorName}
-                    className="w-8 h-8 rounded-full object-cover ring-2 ring-amber-200"
-                  />
-                  <p className="font-semibold text-xs text-stone-800">{PASTOR_DEFAULTS.pastorName}</p>
+                <p className="text-stone-800 italic leading-[1.82] mb-5"
+                  style={{ fontFamily: "'Georgia', 'Palatino Linotype', serif", fontSize: '1.05rem' }}>
+                  {data.message}
+                </p>
+                <div className="border-t border-stone-100 mb-4" />
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-amber-200 bg-[#1B4332]">
+                      <img src={PASTOR_DEFAULTS.pastorImageUrl} alt="Pastor"
+                        className="w-full h-full object-cover object-top"
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}/>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-[#1B4332] whitespace-nowrap"
+                        style={{ fontFamily: "'Georgia', serif", fontSize: '0.82rem' }}>
+                        Rev. Dr S. O. Mosebolatan
+                      </p>
+                      <p className="text-stone-400 text-[11px] mt-0.5 tracking-wide">Senior Pastor</p>
+                    </div>
+                  </div>
+                  {/* WhatsApp button preview */}
+                  <div className="flex-shrink-0 flex items-center gap-1.5 bg-[#25D366] text-white text-[13px] font-bold px-3.5 py-2.5 rounded-xl opacity-80 cursor-default select-none">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    Share
+                  </div>
                 </div>
               </div>
+              <div className="h-0.5 bg-gradient-to-r from-transparent via-amber-300 to-transparent" />
             </div>
           </div>
         )}

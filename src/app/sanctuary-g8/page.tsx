@@ -110,7 +110,7 @@ export default function AdminLoginPage() {
             <div>
               <label className="block text-xs font-bold text-[#0B2C22] uppercase tracking-wider mb-2">Email Address</label>
               <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@trinitybaptistilora.org"
+                placeholder="Email address"
                 className="w-full px-4 py-3.5 rounded-xl border-2 border-stone-200 bg-white text-sm focus:outline-none focus:border-[#0D4A35] focus:ring-4 focus:ring-[#0D4A35]/10 transition-all" />
             </div>
 
@@ -118,7 +118,7 @@ export default function AdminLoginPage() {
               <label className="block text-xs font-bold text-[#0B2C22] uppercase tracking-wider mb-2">Password</label>
               <div className="relative">
                 <input type={showPass ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••"
+                  placeholder="Password"
                   className="w-full px-4 py-3.5 pr-12 rounded-xl border-2 border-stone-200 bg-white text-sm focus:outline-none focus:border-[#0D4A35] focus:ring-4 focus:ring-[#0D4A35]/10 transition-all" />
                 <button type="button" onClick={() => setShowPass(!showPass)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-[#0D4A35] transition-colors">

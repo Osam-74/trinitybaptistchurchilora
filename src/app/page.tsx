@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 import LiveBanner from "@/components/LiveBanner";
 import SideRays from "@/components/SideRays";
 import { getYouTubeThumbnail } from "@/lib/utils";
-import { sampleSermons } from "@/lib/seed-data";
+import { sampleSermons, samplePosts } from "@/lib/seed-data";
 import { doc, onSnapshot, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -172,17 +172,11 @@ export default function HomePage() {
     fetchGallery();
   }, []);
 
-  // Faith Articles — loaded from seed data (published only, max 3)
-  const [faithArticles, setFaithArticles] = useState<Array<{id: string; title: string; body: string; scripture: string; pinned: boolean; status: string; authorName: string}>>([]);
-  useEffect(() => {
-    import('@/lib/seed-data').then(({ samplePosts }) => {
-      const articles = (samplePosts as Array<{title: string; body: string; scripture: string; pinned: boolean; status: string; mediaType: string; mediaUrl?: string; amenCount: number; createdAt: string; authorUid: string; authorName: string}>)
-        .filter(p => p.status === 'published')
-        .slice(0, 3)
-        .map((p, i) => ({ ...p, id: `article-${i}` }));
-      setFaithArticles(articles);
-    });
-  }, []);
+  // Faith Articles — from seed data (published only, max 3)
+  const faithArticles = samplePosts
+    .filter(p => p.status === 'published')
+    .slice(0, 3)
+    .map((p, i) => ({ ...p, id: `article-${i}` }));
 
   // Helper function to format timestamp/date for overlay
   const formatPhotoDate = (createdAt: { seconds: number } | string | null | undefined) => {
