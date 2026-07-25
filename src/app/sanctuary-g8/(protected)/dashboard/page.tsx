@@ -5,9 +5,13 @@ import Link from "next/link";
 import AdminShell from "@/components/AdminShell";
 import { getSiteSettings, updateSiteSettings } from "@/lib/settings";
 import { samplePosts, sampleSermons, sampleAlbums } from "@/lib/seed-data";
+import { auth, db } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function AdminDashboardPage() {
   const [greeting, setGreeting] = useState("Hello");
+  const [displayName, setDisplayName] = useState("Admin");
   const [currentDate, setCurrentDate] = useState("");
 
   // Live stream state — persisted to Firestore
@@ -33,6 +37,23 @@ export default function AdminDashboardPage() {
       setIsLive(!!(s as { liveEnabled?: boolean }).liveEnabled);
       setAnnouncements(s.announcements || []);
     }).catch(() => {});
+
+    // Fetch the current user's display name from Firestore
+    if (auth) {
+      const unsub = onAuthStateChanged(auth, async (user) => {
+        if (!user) return;
+        try {
+          if (db) {
+            const snap = await getDoc(doc(db, "admin_users", user.uid));
+            if (snap.exists()) {
+              const data = snap.data() as { displayName?: string };
+              if (data.displayName) setDisplayName(data.displayName);
+            }
+          }
+        } catch { /* ignore */ }
+      });
+      return () => unsub();
+    }
   }, []);
 
   const toggleLive = async () => {
@@ -95,7 +116,7 @@ export default function AdminDashboardPage() {
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-[#E8EDE8] shadow-sm">
             <div>
-              <h1 className="font-serif text-3xl font-extrabold text-[#0B2C22] tracking-tight">{greeting}, Admin</h1>
+              <h1 className="font-serif text-2xl sm:text-3xl font-extrabold text-[#0B2C22] tracking-tight">{greeting}, {displayName}</h1>
               <p className="text-stone-500 text-sm mt-1 font-medium">{currentDate}</p>
             </div>
             <div className="flex items-center gap-3">

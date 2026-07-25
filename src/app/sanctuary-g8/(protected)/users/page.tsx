@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import AdminShell from "@/components/AdminShell";
 import PermissionGuard from "@/components/PermissionGuard";
 import { PERMISSIONS, ROLE_DEFAULTS, Permission } from "@/types";
-import { auth, db } from "@/lib/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, db, firebaseConfig } from "@/lib/firebase";
+import { createUserWithEmailAndPassword, getAuth, signOut as fbSignOut } from "firebase/auth";
+import { initializeApp, deleteApp } from "firebase/app";
 import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 
 interface AdminUser {
@@ -97,12 +98,23 @@ export default function AdminUsersPage() {
           setError("Password changes for existing users must be done from the Firebase Console → Authentication → Users.");
         }
       } else {
-        // Create new Firebase Auth user with email/password
-        if (!auth) throw new Error("Firebase Auth not configured");
+        // Create new Firebase Auth user using a SECONDARY app instance
+        // so the admin's own session is NOT affected (createUserWithEmailAndPassword
+        // on the primary auth would auto-sign-in the new user, kicking out the admin).
         if (!form.password || form.password.length < 6) { setError("Password must be at least 6 characters."); setSaving(false); return; }
 
-        const cred = await createUserWithEmailAndPassword(auth, form.email.trim(), form.password);
-        const uid = cred.user.uid;
+        const secondaryApp = initializeApp(firebaseConfig, "secondary-" + Date.now());
+        let uid: string;
+        try {
+          const secondaryAuth = getAuth(secondaryApp);
+          const cred = await createUserWithEmailAndPassword(secondaryAuth, form.email.trim(), form.password);
+          uid = cred.user.uid;
+          // Sign out the new user from the secondary instance immediately
+          await fbSignOut(secondaryAuth);
+        } finally {
+          // Clean up the secondary app instance
+          deleteApp(secondaryApp).catch(() => {});
+        }
 
         // Store profile in Firestore
         if (db) {
@@ -117,11 +129,6 @@ export default function AdminUsersPage() {
             createdAt: new Date().toISOString(),
           });
         }
-
-        // Sign out the newly created user so the admin stays logged in
-        // (createUserWithEmailAndPassword auto-signs in the new user)
-        // We need to re-sign-in the admin — but we can't store their password.
-        // Best approach: tell admin they'll need to re-login after creating a user.
       }
 
       setShowForm(false);
