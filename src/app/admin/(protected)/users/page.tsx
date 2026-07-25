@@ -232,7 +232,19 @@ export default function AdminUsersPage() {
                           <input type="checkbox" checked={form.permissions.includes(perm)} onChange={() => togglePermission(perm)}
                             className="w-4 h-4 rounded accent-amber-600"/>
                           <div>
-                            <p className="text-sm font-medium text-primary">{perm.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</p>
+                            <p className="text-sm font-medium text-primary">{({
+                              manage_pastor_speaks: "Pastor\'s Word",
+                              manage_users: "Users & Permissions",
+                              manage_posts: "Blog Posts",
+                              manage_bookings: "Bookings",
+                              manage_availability: "Availability",
+                              manage_streams: "Live Stream",
+                              manage_gallery: "Gallery",
+                              manage_sermons: "Sermons",
+                              manage_activities: "Activities",
+                              manage_settings: "Site Settings",
+                              manage_calendar: "Calendar",
+                            } as Record<string, string>)[perm] || perm.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</p>
                             <p className="text-xs text-text-muted">{perm}</p>
                           </div>
                         </label>
