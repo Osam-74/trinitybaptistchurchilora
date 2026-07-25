@@ -9,6 +9,12 @@ export interface PastorSpeak {
   updatedAt: string;
 }
 
+
+export const PASTOR_DEFAULTS = {
+  pastorName: "Rev. Solomon Olugbenga Mosebolatan",
+  pastorImageUrl: "/images/pastor-mosebolatan.jpg",
+} as const;
+
 const REF = () => doc(db!, 'site_config', 'pastor_speaks');
 
 export async function getPastorSpeaks(): Promise<PastorSpeak | null> {

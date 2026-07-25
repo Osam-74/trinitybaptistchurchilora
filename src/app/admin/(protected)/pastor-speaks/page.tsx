@@ -1,14 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
 import AdminShell from '@/components/AdminShell';
-import R2Uploader from '@/components/R2Uploader';
-import { getPastorSpeaks, savePastorSpeaks, deletePastorSpeaks, PastorSpeak } from '@/lib/pastorSpeaks';
+import { getPastorSpeaks, savePastorSpeaks, deletePastorSpeaks, PASTOR_DEFAULTS, PastorSpeak } from '@/lib/pastorSpeaks';
 
 export default function PastorSpeaksAdmin() {
   const [data, setData] = useState<PastorSpeak>({
     message: '',
-    pastorName: '',
-    pastorImageUrl: '',
+    pastorName: PASTOR_DEFAULTS.pastorName,
+    pastorImageUrl: PASTOR_DEFAULTS.pastorImageUrl,
     active: true,
     updatedAt: '',
   });
@@ -20,21 +19,32 @@ export default function PastorSpeaksAdmin() {
 
   useEffect(() => {
     getPastorSpeaks().then(d => {
-      if (d) setData(d);
+      if (d) {
+        // Always keep defaults for name/image unless explicitly overridden
+        setData({
+          ...d,
+          pastorName: d.pastorName || PASTOR_DEFAULTS.pastorName,
+          pastorImageUrl: d.pastorImageUrl || PASTOR_DEFAULTS.pastorImageUrl,
+        });
+      }
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!data.message.trim() || !data.pastorName.trim()) {
-      setError('Message and pastor name are required.');
+    if (!data.message.trim()) {
+      setError('Please enter a message before saving.');
       return;
     }
     setSaving(true);
     setError('');
     try {
-      await savePastorSpeaks(data);
+      await savePastorSpeaks({
+        ...data,
+        pastorName: PASTOR_DEFAULTS.pastorName,
+        pastorImageUrl: PASTOR_DEFAULTS.pastorImageUrl,
+      });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
@@ -49,7 +59,13 @@ export default function PastorSpeaksAdmin() {
     setDeleting(true);
     try {
       await deletePastorSpeaks();
-      setData({ message: '', pastorName: '', pastorImageUrl: '', active: true, updatedAt: '' });
+      setData({
+        message: '',
+        pastorName: PASTOR_DEFAULTS.pastorName,
+        pastorImageUrl: PASTOR_DEFAULTS.pastorImageUrl,
+        active: true,
+        updatedAt: '',
+      });
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -63,7 +79,7 @@ export default function PastorSpeaksAdmin() {
         <div className="mb-6">
           <h1 className="font-serif text-2xl font-bold text-primary">Pastor&apos;s Word</h1>
           <p className="text-text-muted text-sm mt-1">
-            This message pops up on the homepage once per visitor session. Update it each Sunday.
+            This message pops up on the homepage once per visitor session. Just type the message — the pastor&apos;s name and photo are pulled automatically from the site.
           </p>
         </div>
 
@@ -93,48 +109,28 @@ export default function PastorSpeaksAdmin() {
               </button>
             </div>
 
-            {/* Pastor name */}
-            <div>
-              <label className="block text-sm font-medium text-primary mb-1.5">Pastor&apos;s Name *</label>
-              <input
-                type="text"
-                value={data.pastorName}
-                onChange={e => setData(d => ({ ...d, pastorName: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm"
-                placeholder="e.g. Rev. Emmanuel Adeyemi"
-                required
+            {/* Pastor info — read-only, pulled from site */}
+            <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-100 rounded-xl">
+              <img
+                src={PASTOR_DEFAULTS.pastorImageUrl}
+                alt={PASTOR_DEFAULTS.pastorName}
+                className="w-12 h-12 rounded-full object-cover ring-2 ring-amber-200 flex-shrink-0"
               />
-            </div>
-
-            {/* Pastor photo */}
-            <div>
-              <label className="block text-sm font-medium text-primary mb-1.5">Pastor&apos;s Photo (optional)</label>
-              {data.pastorImageUrl && (
-                <div className="flex items-center gap-3 mb-3">
-                  <img src={data.pastorImageUrl} alt="Pastor" className="w-14 h-14 rounded-full object-cover ring-2 ring-amber-200" />
-                  <button
-                    type="button"
-                    onClick={() => setData(d => ({ ...d, pastorImageUrl: '' }))}
-                    className="text-xs text-red-500 hover:text-red-700"
-                  >
-                    Remove photo
-                  </button>
-                </div>
-              )}
-              <R2Uploader
-                folder="pastor"
-                label="Upload Pastor Photo"
-                onUploaded={url => setData(d => ({ ...d, pastorImageUrl: url }))}
-              />
+              <div>
+                <p className="font-semibold text-sm text-stone-800">{PASTOR_DEFAULTS.pastorName}</p>
+                <p className="text-xs text-text-muted mt-0.5">Senior Pastor — pulled automatically from the site</p>
+              </div>
             </div>
 
             {/* Message */}
             <div>
-              <label className="block text-sm font-medium text-primary mb-1.5">Message / Quote / Motivation *</label>
+              <label className="block text-sm font-medium text-primary mb-1.5">
+                Message / Quote / Motivation <span className="text-red-400">*</span>
+              </label>
               <textarea
                 value={data.message}
                 onChange={e => setData(d => ({ ...d, message: e.target.value }))}
-                rows={7}
+                rows={8}
                 className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm resize-none font-serif italic"
                 placeholder="Type the pastor's word, quote, or motivational message here…"
                 required
@@ -176,10 +172,10 @@ export default function PastorSpeaksAdmin() {
           </form>
         )}
 
-        {/* Preview */}
+        {/* Live Preview */}
         {data.message && (
-          <div className="mt-6">
-            <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">Preview</p>
+          <div className="mt-8">
+            <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">Live Preview</p>
             <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-lg overflow-hidden border border-stone-100">
               <div className="h-1.5 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500" />
               <div className="px-6 pt-5 pb-6">
@@ -187,12 +183,14 @@ export default function PastorSpeaksAdmin() {
                 <svg className="w-7 h-7 text-amber-200 mb-2" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
                 </svg>
-                <p className="font-serif text-sm text-stone-800 leading-relaxed italic mb-4 line-clamp-5">{data.message}</p>
+                <p className="font-serif text-sm text-stone-800 leading-relaxed italic mb-4 line-clamp-6">{data.message}</p>
                 <div className="flex items-center gap-2 border-t border-stone-100 pt-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-700 flex items-center justify-center text-white text-xs font-bold">
-                    {data.pastorName?.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() || 'PS'}
-                  </div>
-                  <p className="font-semibold text-xs text-stone-800">{data.pastorName || 'Pastor Name'}</p>
+                  <img
+                    src={PASTOR_DEFAULTS.pastorImageUrl}
+                    alt={PASTOR_DEFAULTS.pastorName}
+                    className="w-8 h-8 rounded-full object-cover ring-2 ring-amber-200"
+                  />
+                  <p className="font-semibold text-xs text-stone-800">{PASTOR_DEFAULTS.pastorName}</p>
                 </div>
               </div>
             </div>

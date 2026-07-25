@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
-import { getPastorSpeaks, PastorSpeak } from '@/lib/pastorSpeaks';
+import { getPastorSpeaks, PASTOR_DEFAULTS, PastorSpeak } from '@/lib/pastorSpeaks';
 
 const SESSION_KEY = 'tbc_pastors_word_shown';
 
@@ -40,13 +40,6 @@ export default function PastorSpeaksPopup() {
   }, [visible, close]);
 
   if (!mounted) return null;
-
-  const initials = data?.pastorName
-    ?.split(' ')
-    .map(w => w[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase() || 'PS';
 
   return (
     <div
@@ -98,18 +91,12 @@ export default function PastorSpeaksPopup() {
 
           {/* Pastor info */}
           <div className="flex items-center gap-3 border-t border-stone-100 pt-4">
-            {data?.pastorImageUrl ? (
-              <img
-                src={data.pastorImageUrl}
-                alt={data.pastorName}
-                className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-amber-200"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-700 flex items-center justify-center flex-shrink-0 text-white text-xs font-bold">
-                {initials}
-              </div>
-            )}
-            <p className="font-semibold text-sm text-stone-800">{data?.pastorName}</p>
+            <img
+              src={data?.pastorImageUrl || PASTOR_DEFAULTS.pastorImageUrl}
+              alt={data?.pastorName || PASTOR_DEFAULTS.pastorName}
+              className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-amber-200"
+            />
+            <p className="font-semibold text-sm text-stone-800">{data?.pastorName || PASTOR_DEFAULTS.pastorName}</p>
           </div>
         </div>
       </div>
