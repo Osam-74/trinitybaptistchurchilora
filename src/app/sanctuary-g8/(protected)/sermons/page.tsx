@@ -137,16 +137,15 @@ export default function AdminSermonsPage() {
   const handleUploadRecording = async () => {
     if (!rec.audioBlob) return;
     setUploading(true);
-    setUploadProgress("Uploading…");
+    setUploadProgress("Uploading to cloud… (this may take a moment for large files)");
     try {
       const { uploadToR2 } = await import("@/lib/r2");
       const blobFile = new File([rec.audioBlob], `recording-${Date.now()}.webm`, { type: "audio/webm" });
       const url = await uploadToR2(blobFile, "sermons");
       setForm(f => ({ ...f, audioUrl: url, type: "audio" }));
-      setUploadProgress("✓ Uploaded to cloud");
+      setUploadProgress("✓ Uploaded! Audio saved to cloud — now click 'Save Sermon' to publish.");
     } catch (err) {
-      alert(`Upload failed: ${(err as Error).message}`);
-      setUploadProgress("");
+      setUploadProgress(`✗ Upload failed: ${(err as Error).message}`);
     } finally { setUploading(false); }
   };
 
