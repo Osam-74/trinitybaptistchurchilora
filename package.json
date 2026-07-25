@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "dom-to-image-more": "^3.10.2",
     "firebase": "^11.0.0",
     "html2canvas": "^1.4.1",
     "next": "^15.5.20",

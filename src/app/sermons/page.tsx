@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Sermon } from "@/types";
 import { sampleSermons } from "@/lib/seed-data";
 import { formatDate, getYouTubeThumbnail } from "@/lib/utils";
+import { db } from "@/lib/firebase";
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 
 function formatDuration(sec?: number) {
   if (!sec) return null;
@@ -15,7 +17,19 @@ function formatDuration(sec?: number) {
 }
 
 export default function SermonsPage() {
-  const [sermons] = useState<Sermon[]>(sampleSermons.map((s, i) => ({ ...s, id: `sermon-${i}` })));
+  const [sermons, setSermons] = useState<Sermon[]>(sampleSermons.map((s, i) => ({ ...s, id: `sermon-${i}` })));
+
+  // Live sync from Firestore (falls back to seed data if not connected)
+  useEffect(() => {
+    if (!db) return;
+    const q = query(collection(db, "sermons"), orderBy("createdAt", "desc"));
+    const unsub = onSnapshot(q, snap => {
+      if (!snap.empty) {
+        setSermons(snap.docs.map(d => ({ id: d.id, ...d.data() } as Sermon)));
+      }
+    }, () => {}); // silently fall back to seed data on error
+    return unsub;
+  }, []);
   const [filter, setFilter] = useState<"all" | "audio" | "video">("all");
   const [search, setSearch] = useState("");
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);

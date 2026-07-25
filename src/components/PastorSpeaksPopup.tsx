@@ -39,32 +39,78 @@ export default function PastorSpeaksPopup() {
 
   const pastorImage = data?.pastorImageUrl || PASTOR_DEFAULTS.pastorImageUrl;
   const message = data?.message || '';
-
   const dateStr = new Date().toLocaleDateString('en-GB', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   });
 
-  // Download: capture the actual rendered card using html2canvas
+  /**
+   * Download the card at high quality.
+   * Strategy: render a hidden offscreen clone at a fixed mobile-friendly width (390px),
+   * then capture with dom-to-image-more at 3× scale for crisp output.
+   * This avoids CORS issues with html2canvas and renders border-radius correctly.
+   */
   const handleDownload = async () => {
     if (downloading || !cardRef.current) return;
     setDownloading(true);
     try {
-      // Dynamically import html2canvas (avoids SSR issues)
-      const html2canvas = (await import('html2canvas')).default;
+      // Build an offscreen clone at exactly 390px width (standard mobile width)
+      const CARD_WIDTH = 390;
+      const scale = 3; // 3× = 1170px output — very high quality
 
-      const canvas = await html2canvas(cardRef.current, {
-        useCORS: true,
-        allowTaint: false,
-        scale: 2,            // 2× for crisp retina quality
-        backgroundColor: null,
-        logging: false,
-        // Capture at exact rendered size — no stretching
-        width: cardRef.current.offsetWidth,
-        height: cardRef.current.offsetHeight,
+      const clone = cardRef.current.cloneNode(true) as HTMLElement;
+      // Remove the download button and close button from the clone
+      clone.querySelectorAll('[data-no-capture]').forEach(el => el.remove());
+
+      // Style the clone
+      clone.style.cssText = `
+        position: fixed;
+        top: -9999px;
+        left: -9999px;
+        width: ${CARD_WIDTH}px;
+        border-radius: 24px;
+        overflow: hidden;
+        background: white;
+        box-shadow: none;
+        font-family: inherit;
+      `;
+      document.body.appendChild(clone);
+
+      // Wait one frame so layout settles
+      await new Promise(r => requestAnimationFrame(r));
+      await new Promise(r => setTimeout(r, 150));
+
+      const domToImage = (await import('dom-to-image-more')).default;
+      const blob = await domToImage.toBlob(clone, {
+        width: CARD_WIDTH,
+        height: clone.scrollHeight,
+        style: { transform: 'none', borderRadius: '24px', overflow: 'hidden' },
+        quality: 1,
+        scale,
+        bgcolor: '#ffffff',
       });
 
-      canvas.toBlob((blob) => {
-        if (!blob) return;
+      document.body.removeChild(clone);
+
+      // Download
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = `pastors-word-${new Date().toISOString().slice(0, 10)}.png`;
+      link.href = blobUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 8000);
+
+    } catch (err) {
+      console.error('Download failed:', err);
+      // Fallback: try capturing directly
+      try {
+        const domToImage = (await import('dom-to-image-more')).default;
+        const blob = await domToImage.toBlob(cardRef.current!, {
+          quality: 1,
+          scale: 2,
+          bgcolor: '#ffffff',
+        });
         const blobUrl = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.download = `pastors-word-${new Date().toISOString().slice(0, 10)}.png`;
@@ -72,12 +118,11 @@ export default function PastorSpeaksPopup() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-      }, 'image/png');
-
-    } catch (err) {
-      console.error('Download failed:', err);
-      alert('Download failed. Please try again.');
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 8000);
+      } catch (e2) {
+        console.error('Fallback failed:', e2);
+        alert('Download failed on this device. Please take a screenshot instead.');
+      }
     } finally {
       setDownloading(false);
     }
@@ -103,24 +148,18 @@ export default function PastorSpeaksPopup() {
         }}
         className="relative w-full max-w-lg"
       >
-        {/* ── THE CARD — this exact element gets captured and downloaded ── */}
-        <div
-          ref={cardRef}
-          className="bg-white rounded-3xl shadow-2xl overflow-hidden"
-        >
+        {/* ── CARD — this gets captured ── */}
+        <div ref={cardRef} className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+
           {/* Top gold accent */}
           <div className="h-1 bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500" />
 
           {/* Dark green header */}
           <div className="bg-[#1B4332] px-5 py-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
-              {/* Logo circle */}
               <div className="w-9 h-9 rounded-full bg-white/10 flex-shrink-0 overflow-hidden flex items-center justify-center">
-                <img
-                  src="/logo/trinity-logo.png"
-                  alt="TBC"
+                <img src="/logo/trinity-logo.png" alt="TBC"
                   className="w-full h-full object-contain p-0.5"
-                  crossOrigin="anonymous"
                   onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                 />
               </div>
@@ -133,13 +172,10 @@ export default function PastorSpeaksPopup() {
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               <p className="text-white/60 text-[9px] text-right leading-snug hidden sm:block">{dateStr}</p>
-              {/* Close button — excluded from download via pointer-events but still rendered */}
-              <button
-                onClick={close}
+              {/* Close — excluded from capture */}
+              <button onClick={close} data-no-capture
                 className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-                aria-label="Close"
-                data-html2canvas-ignore="true"
-              >
+                aria-label="Close">
                 <svg className="w-3.5 h-3.5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -153,62 +189,59 @@ export default function PastorSpeaksPopup() {
           <div className="px-6 pt-5 pb-5">
             {/* Open quote */}
             <svg className="w-9 h-9 text-amber-200 mb-2" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
             </svg>
 
             {/* Message */}
-            <p
-              className="text-stone-800 italic leading-[1.82] mb-5"
-              style={{ fontFamily: "'Georgia', 'Palatino Linotype', serif", fontSize: '1.05rem' }}
-            >
+            <p className="text-stone-800 italic leading-[1.82] mb-5"
+              style={{ fontFamily: "'Georgia', 'Palatino Linotype', serif", fontSize: '1.05rem' }}>
               {message}
             </p>
 
             <div className="border-t border-stone-100 mb-4" />
 
-            {/* Bottom row: pastor info + download button */}
+            {/* Bottom row */}
             <div className="flex items-end justify-between gap-2">
               {/* Pastor */}
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-amber-200 bg-[#1B4332]">
-                  <img
-                    src={pastorImage}
-                    alt="Pastor"
-                    crossOrigin="anonymous"
+                  <img src={pastorImage} alt="Pastor"
                     className="w-full h-full object-cover object-top"
                     onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                   />
                 </div>
                 <div className="min-w-0">
-                  <p
-                    className="font-bold text-[#1B4332] truncate"
-                    style={{ fontFamily: "'Georgia', serif", fontSize: '0.78rem' }}
-                  >
+                  <p className="font-bold text-[#1B4332] truncate"
+                    style={{ fontFamily: "'Georgia', serif", fontSize: '0.78rem' }}>
                     Rev. Dr S. O. Mosebolatan
                   </p>
                   <p className="text-stone-400 text-[10px] mt-0.5 tracking-wide">Senior Pastor</p>
                 </div>
               </div>
 
-              {/* Download button — ignored by html2canvas so it won't appear in the image */}
-              <button
+              {/* Download button — excluded from capture */}
+              <button data-no-capture
                 onClick={handleDownload}
                 disabled={downloading}
-                data-html2canvas-ignore="true"
                 className="flex-shrink-0 flex items-center gap-1.5 bg-stone-100 hover:bg-stone-200 disabled:opacity-60 text-stone-700 text-[11px] font-semibold px-3 py-2 rounded-lg transition-colors"
-                title="Download this card as an image"
+                title="Download this card as image"
               >
                 {downloading ? (
-                  <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                  </svg>
+                  <>
+                    <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                    Saving…
+                  </>
                 ) : (
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                  </svg>
+                  <>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download
+                  </>
                 )}
-                {downloading ? 'Saving…' : 'Download'}
               </button>
             </div>
           </div>
