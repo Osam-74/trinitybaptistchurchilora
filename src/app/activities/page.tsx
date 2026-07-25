@@ -205,8 +205,8 @@ export default function ActivitiesPage() {
           </div>
         </section>
 
-        {/* Monthly Saturday note */}
-        <section className="reveal max-w-4xl mx-auto">
+        {/* Monthly notes */}
+        <section className="reveal max-w-4xl mx-auto space-y-3">
           <div className="bg-white border border-stone-200 rounded-2xl p-5 flex items-start gap-4 shadow-sm">
             <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
               <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -217,6 +217,19 @@ export default function ActivitiesPage() {
               <h4 className="font-serif font-bold text-primary-dark text-sm mb-1">Monthly Saturday Service</h4>
               <p className="text-text-muted text-sm">
                 <span className="font-semibold text-primary">Convenient Service</span> — Every <span className="font-semibold">1st Saturday</span> of the month, <span className="font-semibold">6:00 AM – 7:00 AM</span> at the Main Sanctuary.
+              </p>
+            </div>
+          </div>
+          <div className="bg-white border border-stone-200 rounded-2xl p-5 flex items-start gap-4 shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-serif font-bold text-primary-dark text-sm mb-1">Church Executive Meeting</h4>
+              <p className="text-text-muted text-sm">
+                Held on the <span className="font-semibold text-primary">1st &amp; 3rd Friday</span> of every month, <span className="font-semibold">6:00 – 7:00 PM</span> at the Main Sanctuary.
               </p>
             </div>
           </div>

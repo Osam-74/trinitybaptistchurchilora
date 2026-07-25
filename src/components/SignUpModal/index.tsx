@@ -21,7 +21,7 @@ export default function SignUpModal({ dept, onClose }: { dept: string; onClose: 
         fullName: form.name.trim(),
         email: form.email.trim(),
         phone: form.phone || undefined,
-        department: form.department,
+        department: [form.department],
         section: form.section || undefined,
         photoUrl: photoUrl || undefined,
         bio: form.bio || undefined,

@@ -19,7 +19,7 @@ const quickLinks = [
 
 const serviceTimes = [
   { day: "Sunday 1st Service", time: "7:30 AM" },
-  { day: "Sunday 2nd Service", time: "10:15 AM" },
+  { day: "Sunday 2nd Service", time: "10:00 AM" },
   { day: "Wednesday — Prayer Meeting", time: "5:00 PM" },
   { day: "Wednesday — Bible Study", time: "6:00 PM" },
 ];

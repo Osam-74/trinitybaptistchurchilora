@@ -1,5 +1,4 @@
 "use client";
-import PastorSpeaksPopup from '@/components/PastorSpeaksPopup';
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -8,7 +7,7 @@ import Footer from "@/components/Footer";
 import LiveBanner from "@/components/LiveBanner";
 import SideRays from "@/components/SideRays";
 import { getYouTubeThumbnail } from "@/lib/utils";
-import { sampleSermons } from "@/lib/seed-data";
+import { sampleSermons, samplePosts } from "@/lib/seed-data";
 import { doc, onSnapshot, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -186,10 +185,32 @@ export default function HomePage() {
     return "Recent";
   };
 
+  // PASTOR WORD MODAL - shows on every homepage load
+  const [showPastorWord, setShowPastorWord] = useState(true);
+  const [pastorWord, setPastorWord] = useState("Walk faithfully with God today, and trust Him with your tomorrow.");
+
+  useEffect(() => {
+    if (!db) return;
+    try {
+      const ref = doc(db, "settings", "main");
+      const unsub = onSnapshot(ref, (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.pastorWord) setPastorWord(data.pastorWord);
+        }
+      });
+      return () => unsub();
+    } catch { /* fallback to default */ }
+  }, []);
+
+  // FAITH ARTICLES
+  const faithArticles = samplePosts.map((p, i) => ({ ...p, id: `article-${i}` })).filter((p) => p.status === "published").slice(0, 3);
+
   // 2. Hero Background Image Rotation
   const [currentBg, setCurrentBg] = useState(0);
   const heroBackgrounds = [
     "/church-building.jpg",
+    "/church-front.jpg",
     "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1920&q=80",
   ];
 
@@ -341,10 +362,10 @@ export default function HomePage() {
               Plan Your Visit
             </Link>
             <Link
-              href="/activities"
+              href="/about"
               className="bg-transparent hover:bg-white/10 text-white font-semibold py-4 px-8 rounded-2xl border border-white/30 flex items-center justify-center gap-2 hover:scale-[1.04] transition-all duration-300"
             >
-              Worship With Us
+              Learn More
             </Link>
           </div>
         </div>
@@ -903,6 +924,37 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Faith Articles */}
+      <section className="py-20 bg-stone-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 reveal">
+            <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-4 py-1.5 mb-4 text-primary text-xs font-bold uppercase tracking-widest">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+              Faith Articles
+            </div>
+            <h2 className="font-serif text-4xl lg:text-5xl text-primary font-bold mb-3">A Word for the Week</h2>
+            <p className="text-stone-500 max-w-xl mx-auto text-lg">Inspiration, scripture, and reflections from our pastor&apos;s desk.</p>
+          </div>
+          {faithArticles.length === 0 ? (
+            <p className="text-center text-stone-400 py-8">No articles published yet. Check back soon.</p>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {faithArticles.map((article, i) => (
+                <div key={article.id} className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 flex flex-col reveal" style={{ transitionDelay: `${i * 0.08}s` }}>
+                  {article.pinned && (
+                    <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full mb-3 self-start">Pinned</span>
+                  )}
+                  <h3 className="font-serif text-xl font-bold text-primary mb-2 leading-tight">{article.title}</h3>
+                  {article.scripture && <p className="text-amber-600 text-xs font-semibold italic mb-3 border-l-2 border-amber-300 pl-2">{article.scripture}</p>}
+                  <p className="text-stone-500 text-sm leading-relaxed flex-1 line-clamp-4">{article.body}</p>
+                  <p className="text-xs text-stone-300 mt-4 pt-4 border-t border-stone-50">{article.createdAt ? new Date(article.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" }) : ""}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* 9. Contact / Action CTA section */}
       <section className="bg-primary-dark text-white py-20 relative overflow-hidden">
         {/* Subtle decorative background pattern */}
@@ -935,7 +987,93 @@ export default function HomePage() {
 
       {/* 10. Footer */}
       <Footer />
-    <PastorSpeaksPopup />
-  </div>
+
+      {/* Pastor Word Modal - every page load */}
+      {showPastorWord && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)" }} onClick={() => setShowPastorWord(false)}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            {/* TOP HEADER */}
+            <div className="bg-primary px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <img src="/logo/trinity-logo.png" alt="Trinity Logo" className="w-12 h-12 rounded-full object-cover border-2 border-white/30" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                <div>
+                  <p className="text-white font-bold text-sm leading-tight">A Word from Pastor&apos;s Desk</p>
+                  <p className="text-white/60 text-xs">Trinity Baptist Church, Ilora</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-accent text-sm font-semibold">
+                  {new Date().toLocaleDateString("en-NG", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                </p>
+              </div>
+            </div>
+            <div className="h-px bg-stone-100" />
+            {/* QUOTE */}
+            <div className="px-8 py-10 relative">
+              <span className="absolute top-2 left-6 text-7xl text-primary/10 font-serif leading-none select-none">&ldquo;</span>
+              <p className="font-serif text-xl lg:text-2xl text-stone-800 italic text-center leading-relaxed relative z-10">
+                {pastorWord}
+              </p>
+              <span className="absolute bottom-2 right-6 text-7xl text-primary/10 font-serif leading-none select-none">&rdquo;</span>
+            </div>
+            <div className="h-px bg-stone-100 mx-6" />
+            {/* BOTTOM */}
+            <div className="px-6 py-5 flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-3">
+                <img src="/pastor-mosebolatan.jpg" alt="Rev. Dr Mosebolatan" className="w-16 h-16 rounded-full object-cover border-2 border-primary/20 flex-shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                <div>
+                  <p className="font-bold text-primary text-sm leading-tight">Rev. Dr S. O.</p>
+                  <p className="font-bold text-primary text-sm leading-tight">Mosebolatan</p>
+                  <p className="text-xs text-stone-400 mt-0.5">Senior Pastor</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-2">
+                <button
+                  onClick={() => {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = 900; canvas.height = 480;
+                    const ctx = canvas.getContext("2d");
+                    if (!ctx) return;
+                    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, 900, 480);
+                    ctx.fillStyle = "#1B4332"; ctx.fillRect(0, 0, 900, 80);
+                    ctx.fillStyle = "#ffffff"; ctx.font = "bold 18px Georgia, serif";
+                    ctx.fillText("A Word from Pastor's Desk", 80, 34);
+                    ctx.fillStyle = "#D4AF37"; ctx.font = "13px Arial, sans-serif";
+                    ctx.fillText("Trinity Baptist Church, Ilora", 80, 58);
+                    const dateStr = new Date().toLocaleDateString("en-NG", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+                    ctx.fillStyle = "#ffffff"; ctx.font = "12px Arial, sans-serif"; ctx.textAlign = "right";
+                    ctx.fillText(dateStr, 880, 46); ctx.textAlign = "left";
+                    ctx.strokeStyle = "#e7e5e4"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(40, 90); ctx.lineTo(860, 90); ctx.stroke();
+                    ctx.fillStyle = "rgba(27,67,50,0.12)"; ctx.font = "bold 100px Georgia, serif"; ctx.fillText("“", 30, 210);
+                    ctx.fillStyle = "#1c1917"; ctx.font = "italic 24px Georgia, serif"; ctx.textAlign = "center";
+                    const words = pastorWord.split(" "); let line = ""; let y = 185;
+                    for (const w of words) { const test = line + w + " "; if (ctx.measureText(test).width > 720 && line) { ctx.fillText(line.trim(), 450, y); line = w + " "; y += 38; } else { line = test; } }
+                    ctx.fillText(line.trim(), 450, y);
+                    ctx.strokeStyle = "#f5f5f4"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(40, 390); ctx.lineTo(860, 390); ctx.stroke();
+                    ctx.textAlign = "left"; ctx.fillStyle = "#1B4332"; ctx.font = "bold 15px Arial, sans-serif";
+                    ctx.fillText("Rev. Dr S. O.", 120, 415); ctx.fillText("Mosebolatan", 120, 435);
+                    ctx.fillStyle = "#78716c"; ctx.font = "12px Arial, sans-serif"; ctx.fillText("Senior Pastor", 120, 455);
+                    ctx.fillStyle = "rgba(27,67,50,0.3)"; ctx.font = "10px Arial, sans-serif"; ctx.textAlign = "right";
+                    ctx.fillText("trinitybaptistchurchilora.org", 880, 470);
+                    const link = document.createElement("a"); link.download = "pastors-word.png"; link.href = canvas.toDataURL("image/png"); link.click();
+                    setTimeout(() => {
+                      const msg = "A Word from Pastor's Desk\n\n\u201C" + pastorWord + "\u201D\n\n\u2014 Rev. Dr S. O. Mosebolatan\nSenior Pastor, Trinity Baptist Church, Ilora\n\nVisit: trinitybaptistchurchilora.org";
+                      window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
+                    }, 600);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-green-500 text-white rounded-xl text-xs font-bold hover:bg-green-600 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  Share to WhatsApp
+                </button>
+                <button onClick={() => setShowPastorWord(false)} className="text-xs text-stone-400 hover:text-stone-600 transition-colors">
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

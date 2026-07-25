@@ -7,13 +7,21 @@ export const metadata: Metadata = {
   keywords: ["Trinity Baptist Church", "Ilora", "Oyo State", "Nigeria", "church", "worship", "sermon", "pastor", "Sanctuary of Praise"],
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.ico", sizes: "any", type: "image/x-icon" },
+      { url: "/favicon.ico", sizes: "16x16", type: "image/x-icon" },
+      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
-    apple: { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-    shortcut: "/favicon.ico",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: [{ url: "/favicon.ico", type: "image/x-icon" }],
+    other: [
+      { rel: "mask-icon", url: "/logo/trinity-logo.png", color: "#1B4332" },
+    ],
   },
+  manifest: "/site.webmanifest",
   openGraph: {
     title: "Trinity Baptist Church, Ilora",
     description: "Sanctuary of Praise — A place of worship, fellowship, and spiritual growth in Ilora, Oyo State.",
@@ -26,6 +34,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>

@@ -1,6 +1,7 @@
 import { Post, Sermon, Album, Activity, LiveStream, SiteSettings, CalendarEvent } from "@/types";
 
 export const defaultSettings: SiteSettings = {
+  pastorWord: "Walk faithfully with God today, and trust Him with your tomorrow.",
   logoUrl: "/logo/trinity-logo.png",
   churchName: "Trinity Baptist Church",
   tagline: "A Place of Grace, Faith & Community",
@@ -169,7 +170,7 @@ export const sampleActivities: Omit<Activity, "id">[] = [
   // MONDAY
   { title: "Early Morning Prayer", weekday: 1, startTime: "05:30", endTime: "06:00", location: "Church Premises", description: "Early morning prayer to start the week.", active: true },
   { title: "MMU / WMU Meeting", weekday: 1, startTime: "17:30", endTime: "18:30", location: "Fellowship Hall", description: "Men's Missionary Union & Women's Missionary Union meeting.", active: true },
-  { title: "G.A. / R.A. / Sunbeam / Lydia", weekday: 1, startTime: "17:00", endTime: "18:00", location: "Church Premises", description: "Girls' Auxiliaries, Royal Ambassadors, Sunbeam, and Lydia Band meeting.", active: true },
+  { title: "G.A. / R.A. / Sunbeam / Lydia", weekday: 1, startTime: "17:00", endTime: "18:00", location: "Church Premises", description: "Girls' Auxiliaries, Royal Ambassadors, Sunbeam, and Lydia Auxiliary meeting.", active: true },
   // TUESDAY
   { title: "Business Men's Fellowship", weekday: 2, startTime: "17:30", endTime: "18:30", location: "Fellowship Hall", description: "Fellowship and prayer for businessmen.", active: true },
   // WEDNESDAY

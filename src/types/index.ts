@@ -117,6 +117,7 @@ export interface ReminderSubscriber {
 }
 
 export interface SiteSettings {
+  pastorWord?: string;
   churchName: string;
   tagline: string;
   logoUrl?: string;
@@ -175,7 +176,7 @@ export interface ChoirMember {
   fullName: string;
   email: string;
   phone?: string;
-  department: string; // e.g. "Choir", "Media Team", "Instrumentalist"
+  department: string[]; // e.g. ["Senior Choir", "Youth Choir"]
   section?: string;   // e.g. "Soprano", "Alto", "Tenor", "Bass", or instrument
   photoUrl?: string;
   bio?: string;
@@ -195,7 +196,7 @@ export const PERMISSIONS = [
   "manage_activities",
   "manage_settings",
   "manage_calendar",
-  "manage_pastor_speaks",
+  "manage_announcements",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -204,11 +205,11 @@ export const ROLE_DEFAULTS: Record<string, Permission[]> = {
   master_admin: [
     "manage_users", "manage_posts", "manage_bookings", "manage_availability",
     "manage_streams", "manage_gallery", "manage_sermons", "manage_activities",
-    "manage_settings", "manage_calendar", "manage_pastor_speaks",
+    "manage_settings", "manage_calendar", "manage_announcements",
   ],
   pastor: [
     "manage_posts", "manage_bookings", "manage_availability",
-    "manage_streams", "manage_sermons", "manage_pastor_speaks",
+    "manage_streams", "manage_sermons", "manage_announcements",
   ],
   media_team: [
     "manage_gallery", "manage_sermons", "manage_streams",

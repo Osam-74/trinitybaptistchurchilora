@@ -11,7 +11,7 @@
 
 const WORKER_URL = process.env.NEXT_PUBLIC_CF_WORKER_URL ?? "";
 
-export type UploadFolder = "gallery" | "sermons" | "headshots" | "posts" | "logos" | "leaders" | "choir" | "members" | "pastor";
+export type UploadFolder = "gallery" | "sermons" | "headshots" | "posts" | "logos" | "leaders" | "choir" | "members";
 
 /**
  * Upload a file to R2 via the Cloudflare Worker.
