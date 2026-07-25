@@ -142,7 +142,7 @@ export default function PastorSpeaksAdmin() {
                   </div>
                   <div className="min-w-0">
                     <p className="text-amber-300 text-[10px] font-bold uppercase tracking-[0.18em] leading-none truncate">
-                      A Word from Pastor&apos;s Desk
+                      Pastor&apos;s Desk
                     </p>
                     <p className="text-white/55 text-[9px] mt-0.5 truncate">Trinity Baptist Church, Ilora</p>
                   </div>
