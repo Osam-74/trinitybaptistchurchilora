@@ -197,6 +197,11 @@ export const PERMISSIONS = [
   "manage_calendar",
   "manage_pastor_speaks",
   "manage_announcements",
+  "manage_hymns",
+  "manage_leadership",
+  "manage_members",
+  "manage_ministry_members",
+  "manage_contacts",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -206,15 +211,18 @@ export const ROLE_DEFAULTS: Record<string, Permission[]> = {
     "manage_users", "manage_posts", "manage_bookings", "manage_availability",
     "manage_streams", "manage_gallery", "manage_sermons", "manage_activities",
     "manage_settings", "manage_calendar", "manage_pastor_speaks", "manage_announcements",
+    "manage_hymns", "manage_leadership", "manage_members", "manage_ministry_members",
+    "manage_contacts",
   ],
   pastor: [
     "manage_posts", "manage_bookings", "manage_availability",
     "manage_streams", "manage_sermons", "manage_pastor_speaks",
+    "manage_leadership", "manage_members", "manage_contacts", "manage_calendar",
   ],
   media_team: [
-    "manage_gallery", "manage_sermons", "manage_streams",
+    "manage_gallery", "manage_sermons", "manage_streams", "manage_hymns",
   ],
   editor: [
-    "manage_posts", "manage_activities", "manage_announcements",
+    "manage_posts", "manage_activities", "manage_announcements", "manage_hymns",
   ],
 };
