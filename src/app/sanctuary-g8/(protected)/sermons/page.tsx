@@ -5,12 +5,11 @@ import R2Uploader from "@/components/R2Uploader";
 import AdminShell from "@/components/AdminShell";
 import { Sermon } from "@/types";
 import { formatDate } from "@/lib/utils";
-import { db, storage } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import {
   collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot,
   orderBy, query, serverTimestamp,
 } from "firebase/firestore";
-import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
 /* ─── Recorder hook ─── */
 function useRecorder() {
@@ -131,28 +130,21 @@ export default function AdminSermonsPage() {
   };
 
   /**
-   * Upload recording to Firebase Storage.
-   * Falls back gracefully if Storage isn't configured.
+   * Upload recording to Cloudflare R2 (permanent storage) via the shared
+   * consultdrfat Worker — same upload path the gallery already uses.
    */
   const handleUploadRecording = async () => {
     if (!rec.audioBlob) return;
-    if (!storage) { alert("Firebase Storage is not configured. Please check your environment variables."); return; }
     setUploading(true);
     setUploadProgress("Uploading…");
     try {
-      const filename = `sermons/recording-${Date.now()}.webm`;
-      const sRef = storageRef(storage, filename);
-      await uploadBytes(sRef, rec.audioBlob, { contentType: "audio/webm" });
-      const url = await getDownloadURL(sRef);
+      const { uploadToR2 } = await import("@/lib/r2");
+      const blobFile = new File([rec.audioBlob], `recording-${Date.now()}.webm`, { type: "audio/webm" });
+      const url = await uploadToR2(blobFile, "sermons");
       setForm(f => ({ ...f, audioUrl: url, type: "audio" }));
       setUploadProgress("✓ Uploaded to cloud");
     } catch (err) {
-      const msg = (err as Error).message;
-      if (msg.includes("storage/unknown") || msg.includes("bucket")) {
-        alert("Firebase Storage not enabled. Please enable Storage in your Firebase console (Build → Storage → Get started), then update Firestore & Storage rules.");
-      } else {
-        alert(`Upload failed: ${msg}`);
-      }
+      alert(`Upload failed: ${(err as Error).message}`);
       setUploadProgress("");
     } finally { setUploading(false); }
   };
@@ -265,7 +257,7 @@ export default function AdminSermonsPage() {
                     </div>
 
                     {audioTab === "upload" && (
-                      <R2Uploader folder="sermons" label="Choose Audio File (.mp3, .m4a, .wav)"
+                      <R2Uploader folder="sermons" accept="audio/*" maxMB={100} label="Choose Audio File (.mp3, .m4a, .wav)"
                         onUploaded={url => setForm(p => ({ ...p, audioUrl: url }))} />
                     )}
 

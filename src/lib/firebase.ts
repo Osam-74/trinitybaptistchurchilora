@@ -3,7 +3,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -26,7 +25,7 @@ if (typeof window !== "undefined") {
     apiKey: c.apiKey ? `${c.apiKey.slice(0, 8)}...` : "❌ MISSING",
     authDomain: c.authDomain || "❌ MISSING",
     projectId: c.projectId || "❌ MISSING",
-    storageBucket: c.storageBucket || "❌ MISSING (needed for audio uploads)",
+    storageBucket: c.storageBucket || "(unused — uploads now via Vercel Blob)",
     configured: isFirebaseConfigured,
   });
 }
@@ -34,19 +33,17 @@ if (typeof window !== "undefined") {
 let _app: ReturnType<typeof initializeApp> | null = null;
 let _auth: ReturnType<typeof getAuth> | null = null;
 let _db: ReturnType<typeof getFirestore> | null = null;
-let _storage: ReturnType<typeof getStorage> | null = null;
 
 if (typeof window !== "undefined") {
   try {
     _app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
     _auth = getAuth(_app);
     _db = getFirestore(_app);
-    _storage = getStorage(_app);
-  } catch (err) {
+    } catch (err) {
     console.error("[Firebase] Initialization failed:", err);
   }
 }
 
 export const auth = _auth as ReturnType<typeof getAuth>;
 export const db = _db as ReturnType<typeof getFirestore>;
-export const storage = _storage as ReturnType<typeof getStorage>;
+// Storage moved to Vercel Blob — see src/lib/r2.ts and /api/upload
