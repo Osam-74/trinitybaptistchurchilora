@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import AdminShell from "@/components/AdminShell";
+import PermissionGuard from "@/components/PermissionGuard";
 import { LiveStream } from "@/types";
 import { sampleStreams } from "@/lib/seed-data";
 import { formatDate } from "@/lib/utils";
@@ -22,7 +23,8 @@ export default function AdminLivePage() {
   };
 
   return (
-    <AdminShell><div className="max-w-5xl mx-auto">
+    <AdminShell>
+      <PermissionGuard required="manage_streams"><div className="max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <p className="text-text-muted text-sm">Manage live stream schedule</p>
         <button onClick={() => setShowForm(true)} className="btn-shine px-5 py-2.5 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-dark transition-colors flex items-center gap-2">
@@ -72,6 +74,7 @@ export default function AdminLivePage() {
         ))}
       </div>
     </div>
-</AdminShell>
+      </PermissionGuard>
+    </AdminShell>
   );
 }

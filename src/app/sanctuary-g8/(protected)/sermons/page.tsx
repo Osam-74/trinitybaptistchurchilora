@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import R2Uploader from "@/components/R2Uploader";
 import AdminShell from "@/components/AdminShell";
+import PermissionGuard from "@/components/PermissionGuard";
 import { Sermon } from "@/types";
 import { formatDate } from "@/lib/utils";
 import { db } from "@/lib/firebase";
@@ -162,6 +163,7 @@ export default function AdminSermonsPage() {
 
   return (
     <AdminShell>
+      <PermissionGuard required="manage_sermons">
       <div className="max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -414,6 +416,7 @@ export default function AdminSermonsPage() {
           </div>
         )}
       </div>
+          </PermissionGuard>
     </AdminShell>
   );
 }

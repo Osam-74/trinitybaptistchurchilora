@@ -1,6 +1,7 @@
 "use client";
 
 import AdminShell from "@/components/AdminShell";
+import PermissionGuard from "@/components/PermissionGuard";
 import { useState, useEffect, useCallback } from "react";
 import {
   listAllMembers, updateMemberStatus, deleteMember,
@@ -217,7 +218,8 @@ export default function MinistryMembersAdmin() {
   };
 
   return (
-    <AdminShell><div className="p-5 max-w-7xl mx-auto">
+    <AdminShell>
+      <PermissionGuard required="manage_ministry_members"><div className="p-5 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
         <div>
@@ -415,6 +417,7 @@ export default function MinistryMembersAdmin() {
       )}
     </div>
   
-</AdminShell>
+      </PermissionGuard>
+    </AdminShell>
 );
 }

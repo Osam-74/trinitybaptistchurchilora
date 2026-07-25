@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminShell from "@/components/AdminShell";
+import PermissionGuard from "@/components/PermissionGuard";
 import { PERMISSIONS, ROLE_DEFAULTS, Permission } from "@/types";
 import { auth, db } from "@/lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -162,7 +163,8 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <AdminShell><div className="max-w-5xl mx-auto">
+    <AdminShell>
+      <PermissionGuard required="manage_users"><div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="font-serif text-2xl font-bold text-primary">Users &amp; Permissions</h1>
@@ -344,6 +346,7 @@ export default function AdminUsersPage() {
             </div>
           )}
         </div>
-</AdminShell>
+      </PermissionGuard>
+    </AdminShell>
   );
 }

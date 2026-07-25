@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import R2Uploader from "@/components/R2Uploader";
 import AdminShell from "@/components/AdminShell";
+import PermissionGuard from "@/components/PermissionGuard";
 import {
   listAlbums, createAlbum, updateAlbum, deleteAlbum,
   listPhotos, addPhoto, deletePhoto,
@@ -151,6 +152,7 @@ export default function AdminGalleryPage() {
 
   return (
     <AdminShell>
+      <PermissionGuard required="manage_gallery">
         <div className="max-w-6xl mx-auto">
 
           {/* Header */}
@@ -385,6 +387,7 @@ export default function AdminGalleryPage() {
           </div>
         </div>
       )}
+          </PermissionGuard>
     </AdminShell>
   );
 }

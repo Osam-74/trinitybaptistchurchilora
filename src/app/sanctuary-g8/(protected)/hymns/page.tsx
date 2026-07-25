@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AdminShell from "@/components/AdminShell";
+import PermissionGuard from "@/components/PermissionGuard";
 import { Hymn } from "@/types";
 import { listHymnsFromFirestore, addHymn, updateHymn, deleteHymn, parseBulkHymns } from "@/lib/hymns";
 
@@ -89,7 +90,8 @@ export default function AdminHymnsPage() {
   };
 
   return (
-    <AdminShell><div className="max-w-5xl mx-auto">
+    <AdminShell>
+      <PermissionGuard required="manage_hymns"><div className="max-w-5xl mx-auto">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div>
               <h1 className="font-serif text-2xl font-bold text-primary">Hymns</h1>
@@ -229,6 +231,7 @@ God is so good, He's so good to me.
         </div>
       )}
 
-</AdminShell>
+      </PermissionGuard>
+    </AdminShell>
   );
 }

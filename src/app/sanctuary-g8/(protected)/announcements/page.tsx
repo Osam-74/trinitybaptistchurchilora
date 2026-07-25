@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminShell from "@/components/AdminShell";
+import PermissionGuard from "@/components/PermissionGuard";
 import { getSiteSettings, updateSiteSettings } from "@/lib/settings";
 
 export default function AnnouncementsPage() {
@@ -88,6 +89,7 @@ export default function AnnouncementsPage() {
 
   return (
     <AdminShell>
+      <PermissionGuard required="manage_announcements">
         <div className="max-w-3xl mx-auto space-y-6">
 
           {/* Header */}
@@ -199,6 +201,7 @@ export default function AnnouncementsPage() {
 
         </div>
       
-</AdminShell>
+      </PermissionGuard>
+    </AdminShell>
 );
 }

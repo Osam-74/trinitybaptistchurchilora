@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AdminShell from "@/components/AdminShell";
+import PermissionGuard from "@/components/PermissionGuard";
 import { listAllMembers, updateMember, deleteMember } from "@/lib/choir";
 import { ChoirMember } from "@/types";
 
@@ -85,7 +86,8 @@ export default function AdminMembersPage() {
   };
 
   return (
-    <AdminShell><div className="max-w-5xl mx-auto">
+    <AdminShell>
+      <PermissionGuard required="manage_members"><div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="font-serif text-2xl font-bold text-primary">Choir &amp; Media Team</h1>
@@ -211,6 +213,7 @@ export default function AdminMembersPage() {
             </div>
           )}
         </div>
-</AdminShell>
+      </PermissionGuard>
+    </AdminShell>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import AdminShell from "@/components/AdminShell";
+import PermissionGuard from "@/components/PermissionGuard";
 import { Activity } from "@/types";
 import { sampleActivities } from "@/lib/seed-data";
 import { formatTime, getWeekdayName } from "@/lib/utils";
@@ -18,7 +19,8 @@ export default function AdminActivitiesPage() {
   };
 
   return (
-    <AdminShell><div className="max-w-5xl mx-auto">
+    <AdminShell>
+      <PermissionGuard required="manage_activities"><div className="max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <p className="text-text-muted text-sm">Manage weekly activities and programs</p>
         <button onClick={() => setShowForm(true)} className="btn-shine px-5 py-2.5 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-dark transition-colors flex items-center gap-2">
@@ -65,6 +67,7 @@ export default function AdminActivitiesPage() {
         ))}
       </div>
     </div>
-</AdminShell>
+      </PermissionGuard>
+    </AdminShell>
   );
 }

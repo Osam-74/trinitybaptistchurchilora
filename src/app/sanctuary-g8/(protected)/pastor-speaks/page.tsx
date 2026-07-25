@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import AdminShell from '@/components/AdminShell';
+import PermissionGuard from "@/components/PermissionGuard";
 import { getPastorSpeaks, savePastorSpeaks, deletePastorSpeaks, PASTOR_DEFAULTS, PastorSpeak } from '@/lib/pastorSpeaks';
 
 export default function PastorSpeaksAdmin() {
@@ -50,6 +51,7 @@ export default function PastorSpeaksAdmin() {
 
   return (
     <AdminShell>
+      <PermissionGuard required="manage_pastor_speaks">
       <div className="max-w-2xl">
         <div className="mb-6">
           <h1 className="font-serif text-2xl font-bold text-primary">Pastor&apos;s Word</h1>
@@ -190,6 +192,7 @@ export default function PastorSpeaksAdmin() {
           </div>
         )}
       </div>
+          </PermissionGuard>
     </AdminShell>
   );
 }

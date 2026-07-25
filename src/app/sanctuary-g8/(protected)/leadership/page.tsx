@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AdminShell from "@/components/AdminShell";
+import PermissionGuard from "@/components/PermissionGuard";
 import R2Uploader from "@/components/R2Uploader";
 import { listAllLeaders, createLeader, updateLeader, deleteLeader } from "@/lib/leaders";
 import { Leader } from "@/types";
@@ -68,7 +69,8 @@ export default function AdminLeadershipPage() {
   };
 
   return (
-    <AdminShell><div className="max-w-5xl mx-auto">
+    <AdminShell>
+      <PermissionGuard required="manage_leadership"><div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="font-serif text-2xl font-bold text-primary">Church Leadership</h1>
@@ -173,6 +175,7 @@ export default function AdminLeadershipPage() {
             </div>
           )}
         </div>
-</AdminShell>
+      </PermissionGuard>
+    </AdminShell>
   );
 }

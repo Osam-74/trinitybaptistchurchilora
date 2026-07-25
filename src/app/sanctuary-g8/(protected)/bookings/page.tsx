@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminShell from "@/components/AdminShell";
+import PermissionGuard from "@/components/PermissionGuard";
 import { listBookings, updateBookingStatus, deleteBooking, BookingRecord } from "@/lib/bookings";
 import { getSiteSettings, updateSiteSettings } from "@/lib/settings";
 
@@ -119,7 +120,8 @@ export default function AdminBookingsPage() {
   };
 
   return (
-    <AdminShell><div className="max-w-5xl mx-auto">
+    <AdminShell>
+      <PermissionGuard required="manage_bookings"><div className="max-w-5xl mx-auto">
 
           {/* Header with booking toggle */}
           <div className="flex items-start justify-between mb-8">
@@ -269,6 +271,7 @@ export default function AdminBookingsPage() {
           )}
 
         </div>
-</AdminShell>
+      </PermissionGuard>
+    </AdminShell>
   );
 }

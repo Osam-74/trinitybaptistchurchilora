@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import AdminShell from "@/components/AdminShell";
+import PermissionGuard from "@/components/PermissionGuard";
 import { CalendarEvent } from "@/types";
 import { sampleCalendarEvents } from "@/lib/seed-data";
 import { formatDate } from "@/lib/utils";
@@ -25,7 +26,8 @@ export default function AdminCalendarPage() {
   const sorted = [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (
-    <AdminShell><div className="max-w-5xl mx-auto">
+    <AdminShell>
+      <PermissionGuard required="manage_calendar"><div className="max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <p className="text-text-muted text-sm">Manage church calendar events</p>
         <button onClick={() => setShowForm(true)} className="btn-shine px-5 py-2.5 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-dark transition-colors flex items-center gap-2">
@@ -77,6 +79,7 @@ export default function AdminCalendarPage() {
         ))}
       </div>
     </div>
-</AdminShell>
+      </PermissionGuard>
+    </AdminShell>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminShell from "@/components/AdminShell";
+import PermissionGuard from "@/components/PermissionGuard";
 import { listContactMessages, deleteContactMessage, ContactMessage } from "@/lib/contacts";
 
 function timeAgo(iso: string) {
@@ -37,6 +38,7 @@ export default function AdminContactsPage() {
 
   return (
     <AdminShell>
+      <PermissionGuard required="manage_contacts">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="font-serif text-2xl font-bold text-primary">Contact Messages</h1>
@@ -105,6 +107,7 @@ export default function AdminContactsPage() {
             </div>
           )}
                 </div>
+          </PermissionGuard>
     </AdminShell>
   );
 }

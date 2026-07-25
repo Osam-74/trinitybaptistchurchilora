@@ -56,10 +56,16 @@ export default function PastorSpeaksPopup() {
     if (downloading || !cardRef.current) return;
     setDownloading(true);
     try {
+      // Square corners in the downloaded image (rounded corners leave white gaps
+      // outside the curve). The popup keeps its rounded look on the website.
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,        // crisp output
         cacheBust: true,       // force fresh image fetches (logo, pastor photo)
         backgroundColor: '#ffffff',
+        style: {
+          borderRadius: '0',
+          overflow: 'visible',
+        },
         filter: (node: Node) => {
           if (node === cardRef.current) return true;
           if (node instanceof HTMLElement) return !node.closest('[data-no-capture]');
@@ -76,7 +82,11 @@ export default function PastorSpeaksPopup() {
       console.error('Download failed:', err);
       // Fallback: lower pixel ratio
       try {
-        const dataUrl = await toPng(cardRef.current!, { pixelRatio: 2, backgroundColor: '#ffffff' });
+        const dataUrl = await toPng(cardRef.current!, {
+          pixelRatio: 2,
+          backgroundColor: '#ffffff',
+          style: { borderRadius: '0', overflow: 'visible' },
+        });
         const link = document.createElement('a');
         link.download = `pastors-desk-${new Date().toISOString().slice(0, 10)}.png`;
         link.href = dataUrl;

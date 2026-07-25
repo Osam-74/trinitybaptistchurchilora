@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import AdminShell from "@/components/AdminShell";
+import PermissionGuard from "@/components/PermissionGuard";
 import { Post } from "@/types";
 import { samplePosts } from "@/lib/seed-data";
 import { formatDate } from "@/lib/utils";
@@ -48,7 +49,8 @@ export default function AdminPostsPage() {
   };
 
   return (
-    <AdminShell><div className="max-w-5xl mx-auto">
+    <AdminShell>
+      <PermissionGuard required="manage_posts"><div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="font-serif text-2xl font-bold text-primary">Faith Articles</h1>
@@ -165,6 +167,7 @@ export default function AdminPostsPage() {
             </div>
           </div>
         </div>
-</AdminShell>
+      </PermissionGuard>
+    </AdminShell>
   );
 }
