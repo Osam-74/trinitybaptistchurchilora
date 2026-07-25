@@ -20,7 +20,7 @@ const navLinks = [
 const ministries = [
   { name: "Royal Ambassadors (RA)", slug: "royal-ambassadors", href: "/ministries/royal-ambassadors" },
   { name: "Girls' Auxiliaries (GA)", slug: "girls-auxiliary", href: "/ministries/girls-auxiliary" },
-  { name: "Lydia Band", slug: "lydia-auxiliary", href: "/ministries/lydia-auxiliary" },
+  { name: "Lydia Auxiliary", slug: "lydia-auxiliary", href: "/ministries/lydia-auxiliary" },
   { name: "Men's Missionary Union (MMU)", slug: "mmu", href: "/ministries/mmu" },
   { name: "Women Missionary Union (WMU)", slug: "wmu", href: "/ministries/wmu" },
   { name: "Youth Fellowship (BYF)", slug: "youth-fellowship", href: "/ministries/youth-fellowship" },
