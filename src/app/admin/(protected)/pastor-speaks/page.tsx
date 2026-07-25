@@ -20,7 +20,6 @@ export default function PastorSpeaksAdmin() {
   useEffect(() => {
     getPastorSpeaks().then(d => {
       if (d) {
-        // Always keep defaults for name/image unless explicitly overridden
         setData({
           ...d,
           pastorName: d.pastorName || PASTOR_DEFAULTS.pastorName,
@@ -78,9 +77,6 @@ export default function PastorSpeaksAdmin() {
       <div className="max-w-2xl">
         <div className="mb-6">
           <h1 className="font-serif text-2xl font-bold text-primary">Pastor&apos;s Word</h1>
-          <p className="text-text-muted text-sm mt-1">
-            This message pops up on the homepage once per visitor session. Just type the message — the pastor&apos;s name and photo are pulled automatically from the site.
-          </p>
         </div>
 
         {loading ? (
@@ -94,7 +90,7 @@ export default function PastorSpeaksAdmin() {
             <div className="flex items-center justify-between p-4 bg-stone-50 rounded-xl">
               <div>
                 <label className="block text-sm font-bold text-primary">Show on homepage</label>
-                <p className="text-xs text-text-muted mt-0.5">Toggle off to hide the popup without deleting it</p>
+                <p className="text-xs text-text-muted mt-0.5">Toggle off to hide without deleting</p>
               </div>
               <button
                 type="button"
@@ -109,23 +105,20 @@ export default function PastorSpeaksAdmin() {
               </button>
             </div>
 
-            {/* Pastor info — read-only, pulled from site */}
+            {/* Pastor info — read-only */}
             <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-100 rounded-xl">
               <img
                 src={PASTOR_DEFAULTS.pastorImageUrl}
                 alt={PASTOR_DEFAULTS.pastorName}
                 className="w-12 h-12 rounded-full object-cover ring-2 ring-amber-200 flex-shrink-0"
               />
-              <div>
-                <p className="font-semibold text-sm text-stone-800">{PASTOR_DEFAULTS.pastorName}</p>
-                <p className="text-xs text-text-muted mt-0.5">Senior Pastor — pulled automatically from the site</p>
-              </div>
+              <p className="font-semibold text-sm text-stone-800">{PASTOR_DEFAULTS.pastorName}</p>
             </div>
 
             {/* Message */}
             <div>
               <label className="block text-sm font-medium text-primary mb-1.5">
-                Message / Quote / Motivation <span className="text-red-400">*</span>
+                Message <span className="text-red-400">*</span>
               </label>
               <textarea
                 value={data.message}
@@ -175,7 +168,7 @@ export default function PastorSpeaksAdmin() {
         {/* Live Preview */}
         {data.message && (
           <div className="mt-8">
-            <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">Live Preview</p>
+            <p className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">Preview</p>
             <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-lg overflow-hidden border border-stone-100">
               <div className="h-1.5 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500" />
               <div className="px-6 pt-5 pb-6">
