@@ -177,11 +177,18 @@ export default function PastorSpeaksPopup() {
 
       drawText();
 
-      // Download
-      const link = document.createElement('a');
-      link.download = `pastors-word-${new Date().toISOString().slice(0, 10)}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+      // Download — mobile-safe: convert to Blob URL first
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `pastors-word-${new Date().toISOString().slice(0, 10)}.png`;
+        link.href = blobUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+      }, 'image/png');
 
       // Open WhatsApp after short delay (so download triggers first)
       setTimeout(() => {
@@ -220,7 +227,7 @@ export default function PastorSpeaksPopup() {
         <div className="bg-[#1B4332] px-5 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-9 h-9 rounded-full bg-white/10 flex-shrink-0 overflow-hidden flex items-center justify-center">
-              <img src="/logo/tbc-logo.png" alt="TBC"
+              <img src="/logo/trinity-logo.png" alt="TBC"
                 className="w-full h-full object-contain p-0.5"
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
               />
@@ -261,28 +268,29 @@ export default function PastorSpeaksPopup() {
 
           <div className="border-t border-stone-100 mb-4" />
 
-          {/* Bottom: pastor + share */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-amber-200 bg-[#1B4332]">
+          {/* Bottom: pastor row + WhatsApp btn shifted down */}
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-amber-200 bg-[#1B4332]">
                 <img src={pastorImage} alt="Pastor"
                   className="w-full h-full object-cover object-top"
                   onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                 />
               </div>
               <div className="min-w-0">
-                {/* Full name on ONE line as requested */}
-                <p className="font-bold text-[#1B4332] whitespace-nowrap"
-                  style={{ fontFamily: "'Georgia', serif", fontSize: '0.82rem' }}>
+                {/* Full name on ONE line */}
+                <p className="font-bold text-[#1B4332] truncate"
+                  style={{ fontFamily: "'Georgia', serif", fontSize: '0.78rem' }}>
                   Rev. Dr S. O. Mosebolatan
                 </p>
-                <p className="text-stone-400 text-[11px] mt-0.5 tracking-wide">Senior Pastor</p>
+                <p className="text-stone-400 text-[10px] mt-0.5 tracking-wide">Senior Pastor</p>
               </div>
             </div>
 
-            {/* WhatsApp Share — downloads card image then opens WhatsApp */}
+            {/* WhatsApp Share — smaller, shifted down 20px to stay clear of pastor name */}
             <button onClick={handleShare} disabled={downloading}
-              className="flex-shrink-0 flex items-center gap-1.5 bg-[#25D366] hover:bg-[#1ebe5d] disabled:opacity-60 text-white text-[13px] font-bold px-3.5 py-2.5 rounded-xl transition-colors"
+              className="flex-shrink-0 flex items-center gap-1 bg-[#25D366] hover:bg-[#1ebe5d] disabled:opacity-60 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg transition-colors"
+              style={{ marginTop: '20px' }}
               title="Download card &amp; Share on WhatsApp">
               {downloading ? (
                 <span className="flex items-center gap-1.5">

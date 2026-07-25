@@ -143,7 +143,7 @@ export default function Navbar() {
                 position: 'absolute',
                 left: '50%',
                 top: '50%',
-                transform: 'translateX(-50%) translateY(-2px)',
+                transform: 'translateX(-50%) translateY(-22px)',
                 opacity: scrolled && !isOpen ? 1 : 0,
                 pointerEvents: scrolled && !isOpen ? 'auto' : 'none',
                 transition: 'opacity 0.35s ease',

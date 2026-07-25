@@ -83,6 +83,56 @@ function StatCounter({ target, suffix = "" }: { target: number; suffix?: string 
   );
 }
 
+
+// FaithArticlesSection — expandable cards, auto-collapse on new open
+function FaithArticlesSection({ articles }: { articles: Array<{id: string; title: string; body: string; scripture: string; pinned: boolean; status: string; authorName?: string}> }) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const handleToggle = (id: string) => setExpandedId(prev => prev === id ? null : id);
+  return (
+    <section className="bg-stone-50 py-16 sm:py-20">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="text-center mb-10 reveal">
+          <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-2">The Word</p>
+          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-primary-dark mb-3">Faith Articles</h2>
+          <div className="gold-divider mx-auto" />
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {articles.map((article, i) => {
+            const isExpanded = expandedId === article.id;
+            return (
+              <div key={article.id} className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 flex flex-col reveal transition-all duration-300" style={{ transitionDelay: `${i * 0.08}s` }}>
+                {article.pinned && (
+                  <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full mb-3 self-start">Pinned</span>
+                )}
+                <h3 className="font-serif text-xl font-bold text-primary mb-2 leading-tight">{article.title}</h3>
+                {article.scripture && (
+                  <p className="text-amber-600 text-xs font-semibold italic mb-3 border-l-2 border-amber-300 pl-2">{article.scripture}</p>
+                )}
+                <p className={"text-stone-600 text-sm leading-relaxed flex-1 " + (isExpanded ? "" : "line-clamp-4")}>
+                  {article.body}
+                </p>
+                <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between">
+                  <span className="text-xs text-stone-400">{article.authorName ?? ""}</span>
+                  <button
+                    onClick={() => handleToggle(article.id)}
+                    className="text-xs font-bold text-primary hover:text-primary/70 transition-colors flex items-center gap-1 ml-2"
+                  >
+                    {isExpanded ? (
+                      <span className="flex items-center gap-1">Read less <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7"/></svg></span>
+                    ) : (
+                      <span className="flex items-center gap-1">Read more <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7"/></svg></span>
+                    )}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function HomePage() {
   useScrollReveal();
 
@@ -911,32 +961,7 @@ export default function HomePage() {
 
       {/* Faith Articles */}
       {faithArticles.length > 0 && (
-        <section className="bg-stone-50 py-16 sm:py-20">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="text-center mb-10 reveal">
-              <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-2">The Word</p>
-              <h2 className="font-serif text-3xl sm:text-4xl font-bold text-primary-dark mb-3">Faith Articles</h2>
-              <div className="gold-divider mx-auto" />
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {faithArticles.map((article, i) => (
-                <div key={article.id} className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 flex flex-col reveal" style={{ transitionDelay: `${i * 0.08}s` }}>
-                  {article.pinned && (
-                    <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full mb-3 self-start">Pinned</span>
-                  )}
-                  <h3 className="font-serif text-xl font-bold text-primary mb-2 leading-tight">{article.title}</h3>
-                  {article.scripture && (
-                    <p className="text-amber-600 text-xs font-semibold italic mb-3 border-l-2 border-amber-300 pl-2">{article.scripture}</p>
-                  )}
-                  <p className="text-stone-600 text-sm leading-relaxed flex-1 line-clamp-4">{article.body}</p>
-                  <div className="mt-4 pt-3 border-t border-stone-100">
-                    <span className="text-xs text-stone-400">{article.authorName}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <FaithArticlesSection articles={faithArticles} />
       )}
 
       {/* 9. Contact / Action CTA section */}
