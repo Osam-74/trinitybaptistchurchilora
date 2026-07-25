@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminShell from "@/components/AdminShell";
 import { listBookings, updateBookingStatus, deleteBooking, BookingRecord } from "@/lib/bookings";
 import { getSiteSettings, updateSiteSettings } from "@/lib/settings";
 
@@ -119,10 +119,7 @@ export default function AdminBookingsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-stone-50">
-      <AdminSidebar />
-      <main className="flex-1 p-6 lg:p-8 ml-0 lg:ml-64 pr-16 lg:pr-8">
-        <div className="max-w-5xl mx-auto">
+    <AdminShell><div className="max-w-5xl mx-auto">
 
           {/* Header with booking toggle */}
           <div className="flex items-start justify-between mb-8">
@@ -272,7 +269,6 @@ export default function AdminBookingsPage() {
           )}
 
         </div>
-      </main>
-    </div>
+</AdminShell>
   );
 }

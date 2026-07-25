@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminShell from "@/components/AdminShell";
 import { getSiteSettings, updateSiteSettings } from "@/lib/settings";
 import { samplePosts, sampleSermons, sampleAlbums } from "@/lib/seed-data";
 
@@ -89,9 +89,7 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#F4F6F3]">
-      <AdminSidebar />
-      <main className="flex-1 p-6 lg:p-8 ml-0 md:ml-[72px] lg:ml-[260px] pt-20 lg:pt-8 pr-6 lg:pr-8">
+    <AdminShell>
         <div className="max-w-7xl mx-auto space-y-8">
 
           {/* Header */}
@@ -272,7 +270,7 @@ export default function AdminDashboardPage() {
           </div>
 
         </div>
-      </main>
-    </div>
-  );
+      
+</AdminShell>
+);
 }

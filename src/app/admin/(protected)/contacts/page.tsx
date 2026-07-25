@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminShell from "@/components/AdminShell";
 import { listContactMessages, deleteContactMessage, ContactMessage } from "@/lib/contacts";
 
 function timeAgo(iso: string) {
@@ -36,9 +36,7 @@ export default function AdminContactsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-stone-50">
-      <AdminSidebar />
-      <main className="flex-1 p-6 lg:p-8 ml-0 lg:ml-64 pr-16 lg:pr-8">
+    <AdminShell>
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="font-serif text-2xl font-bold text-primary">Contact Messages</h1>
@@ -106,8 +104,7 @@ export default function AdminContactsPage() {
               ))}
             </div>
           )}
-        </div>
-      </main>
-    </div>
+                </div>
+    </AdminShell>
   );
 }

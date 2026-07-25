@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminShell from "@/components/AdminShell";
 import { Post } from "@/types";
 import { samplePosts } from "@/lib/seed-data";
 import { formatDate } from "@/lib/utils";
@@ -48,10 +48,7 @@ export default function AdminPostsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-stone-50">
-      <AdminSidebar />
-      <main className="flex-1 p-6 lg:p-8 ml-0 lg:ml-64 pr-16 lg:pr-8">
-        <div className="max-w-5xl mx-auto">
+    <AdminShell><div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="font-serif text-2xl font-bold text-primary">Posts</h1>
@@ -186,7 +183,6 @@ export default function AdminPostsPage() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+</AdminShell>
   );
 }

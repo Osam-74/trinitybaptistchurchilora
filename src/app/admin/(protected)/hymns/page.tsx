@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminShell from "@/components/AdminShell";
 import { Hymn } from "@/types";
 import { listHymnsFromFirestore, addHymn, updateHymn, deleteHymn, parseBulkHymns } from "@/lib/hymns";
 
@@ -89,10 +89,7 @@ export default function AdminHymnsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-stone-50">
-      <AdminSidebar />
-      <main className="flex-1 p-6 lg:p-8 ml-0 lg:ml-64 pr-16 lg:pr-8">
-        <div className="max-w-5xl mx-auto">
+    <AdminShell><div className="max-w-5xl mx-auto">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div>
               <h1 className="font-serif text-2xl font-bold text-primary">Hymns</h1>
@@ -150,7 +147,7 @@ export default function AdminHymnsPage() {
             </div>
           )}
         </div>
-      </main>
+      
 
       {/* Add / Edit form */}
       {showForm && (
@@ -231,6 +228,7 @@ God is so good, He's so good to me.
           </div>
         </div>
       )}
-    </div>
+
+</AdminShell>
   );
 }

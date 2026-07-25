@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminShell from "@/components/AdminShell";
 import R2Uploader from "@/components/R2Uploader";
 import { defaultSettings } from "@/lib/seed-data";
 import { getSiteSettings, updateSiteSettings } from "@/lib/settings";
@@ -41,7 +41,7 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-stone-50"><AdminSidebar /><main className="flex-1 p-6 lg:p-8 ml-0 lg:ml-64 pr-16 lg:pr-8"><div className="max-w-5xl mx-auto">
+    <AdminShell><div className="max-w-5xl mx-auto">
       <div className="max-w-2xl">
         <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-8">
           <h3 className="font-serif text-lg text-primary font-bold mb-2">Site Settings</h3>
@@ -163,6 +163,7 @@ export default function AdminSettingsPage() {
           </div>
         </div>
       </div>
-    </div></main></div>
+    </div>
+    </AdminShell>
   );
 }

@@ -1,4 +1,5 @@
 "use client";
+import PastorSpeaksPopup from '@/components/PastorSpeaksPopup';
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -935,6 +936,7 @@ export default function HomePage() {
 
       {/* 10. Footer */}
       <Footer />
-    </div>
+    <PastorSpeaksPopup />
+  </div>
   );
 }

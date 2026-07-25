@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminShell from "@/components/AdminShell";
 import { getSiteSettings, updateSiteSettings } from "@/lib/settings";
 
 export default function AnnouncementsPage() {
@@ -87,9 +87,7 @@ export default function AnnouncementsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#F4F6F3]">
-      <AdminSidebar />
-      <main className="flex-1 p-6 lg:p-8 ml-0 md:ml-[72px] lg:ml-[260px] pt-20 lg:pt-8">
+    <AdminShell>
         <div className="max-w-3xl mx-auto space-y-6">
 
           {/* Header */}
@@ -200,7 +198,7 @@ export default function AnnouncementsPage() {
           </div>
 
         </div>
-      </main>
-    </div>
-  );
+      
+</AdminShell>
+);
 }

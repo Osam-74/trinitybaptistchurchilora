@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminShell from "@/components/AdminShell";
 import { PERMISSIONS, ROLE_DEFAULTS, Permission } from "@/types";
 import { auth, db } from "@/lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 
 interface AdminUser {
+  ministryAccess?: string[];
   id: string;
   uid?: string;
   email: string;
@@ -25,7 +26,7 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
-  const [form, setForm] = useState({ email: "", displayName: "", password: "", role: "editor", permissions: [] as Permission[] });
+  const [form, setForm] = useState({ email: "", displayName: "", password: "", role: "editor", permissions: [] as Permission[], ministryAccess: [] as string[] });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -44,14 +45,14 @@ export default function AdminUsersPage() {
 
   const openNew = () => {
     setEditingUser(null);
-    setForm({ email: "", displayName: "", password: "", role: "editor", permissions: [...ROLE_DEFAULTS.editor] });
+    setForm({ email: "", displayName: "", password: "", role: "editor", permissions: [...ROLE_DEFAULTS.editor], ministryAccess: [] });
     setError("");
     setShowForm(true);
   };
 
   const openEdit = (user: AdminUser) => {
     setEditingUser(user);
-    setForm({ email: user.email, displayName: user.displayName, password: "", role: user.roles[0] || "editor", permissions: [...user.permissions] });
+    setForm({ email: user.email, displayName: user.displayName, password: "", role: user.roles[0] || "editor", permissions: [...user.permissions], ministryAccess: user.ministryAccess || [] });
     setError("");
     setShowForm(true);
   };
@@ -84,6 +85,7 @@ export default function AdminUsersPage() {
           displayName: form.displayName,
           roles: [form.role],
           permissions: form.permissions,
+            ministryAccess: form.ministryAccess,
         };
         await updateDoc(doc(db, "admin_users", editingUser.id), updates as Record<string, unknown>);
         // If a new password was entered, update it via Firebase Auth
@@ -109,6 +111,7 @@ export default function AdminUsersPage() {
             displayName: form.displayName,
             roles: [form.role],
             permissions: form.permissions,
+            ministryAccess: form.ministryAccess,
             active: true,
             createdAt: new Date().toISOString(),
           });
@@ -159,10 +162,7 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-stone-50">
-      <AdminSidebar />
-      <main className="flex-1 p-6 lg:p-8 ml-0 lg:ml-64 pr-16 lg:pr-8">
-        <div className="max-w-5xl mx-auto">
+    <AdminShell><div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="font-serif text-2xl font-bold text-primary">Users &amp; Permissions</h1>
@@ -238,7 +238,34 @@ export default function AdminUsersPage() {
                         </label>
                       ))}
                     </div>
-                  </div>
+                  
+                    {/* Ministry Access */}
+                    <div className="mt-4">
+                      <label className="block text-xs font-semibold text-primary mb-2 uppercase tracking-wide">Ministry Access</label>
+                      <p className="text-xs text-text-muted mb-2">Assign which ministries this user can manage.</p>
+                      <div className="grid grid-cols-1 gap-1.5">
+                        {[
+                          { key: 'royal-ambassadors', label: 'Royal Ambassadors' },
+                          { key: 'girls-auxiliary', label: "Girls' Auxiliary" },
+                          { key: 'lydia-auxiliary', label: 'Lydia Auxiliary' },
+                        ].map(m => (
+                          <label key={m.key} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-stone-50">
+                            <input type="checkbox"
+                              checked={(form.ministryAccess || []).includes(m.key)}
+                              onChange={() => setForm(prev => ({
+                                ...prev,
+                                ministryAccess: (prev.ministryAccess || []).includes(m.key)
+                                  ? (prev.ministryAccess || []).filter((x: string) => x !== m.key)
+                                  : [...(prev.ministryAccess || []), m.key]
+                              }))}
+                              className="w-4 h-4 rounded accent-primary"
+                            />
+                            <span className="text-sm text-primary">{m.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    </div>
                   <div className="flex gap-3 pt-2">
                     <button type="submit" disabled={saving} className="flex-1 btn-gold py-3 rounded-xl font-semibold disabled:opacity-50">{saving ? "Saving…" : editingUser ? "Save Changes" : "Create Account"}</button>
                     <button type="button" onClick={() => setShowForm(false)} className="px-5 py-3 rounded-xl border border-stone-200 text-text-muted hover:bg-stone-50 text-sm font-medium transition-colors">Cancel</button>
@@ -304,7 +331,6 @@ export default function AdminUsersPage() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+</AdminShell>
   );
 }

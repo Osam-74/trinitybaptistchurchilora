@@ -21,6 +21,7 @@ const navigationGroups = [
       { href: "/admin/sermons", label: "Sermons", icon: "M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" },
       { href: "/admin/hymns", label: "Hymns", icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" },
       { href: "/admin/gallery", label: "Gallery", icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" },
+      { href: "/admin/pastor-speaks", label: "Pastor's Word", icon: "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" },
     ]
   },
   {
@@ -110,7 +111,7 @@ export default function AdminSidebar() {
       {/* Overlay for mobile */}
       {mobileOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm transition-opacity duration-300" 
+          className="lg:hidden fixed inset-0 bg-black/60 z-50 backdrop-blur-sm transition-opacity duration-300" 
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -118,7 +119,7 @@ export default function AdminSidebar() {
       {/* Sidebar container */}
       <aside 
         style={{ backgroundColor: "#0B2C22" }}
-        className={`fixed top-0 left-0 h-screen z-50 flex flex-col transition-all duration-300 border-r border-[#0D4A35]
+        className={`fixed top-0 left-0 h-screen z-[60] flex flex-col transition-all duration-300 border-r border-[#0D4A35]
           w-[260px] md:w-[72px] lg:w-[260px]
           ${mobileOpen ? "translate-x-0 !w-[260px]" : "-translate-x-full md:translate-x-0"}
         `}
@@ -174,9 +175,16 @@ export default function AdminSidebar() {
                         >
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon}/>
                         </svg>
-                        <span className="text-sm font-medium md:hidden lg:block transition-opacity duration-300">
-                          {item.label}
-                        </span>
+                        <div className="flex flex-col md:hidden lg:flex transition-opacity duration-300">
+                          <span className="text-sm font-medium">
+                            {item.label}
+                          </span>
+                          {item.href === "/admin/ministry-members" && (
+                            <span className="text-[10px] text-white/40 font-normal leading-tight">
+                              Restricted users see assigned ministry only
+                            </span>
+                          )}
+                        </div>
                       </div>
                       
                       {(item as { href: string; label: string; icon: string; badge?: string }).badge && (

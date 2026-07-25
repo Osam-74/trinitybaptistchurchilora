@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import R2Uploader from "@/components/R2Uploader";
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminShell from "@/components/AdminShell";
 import { Sermon } from "@/types";
 import { sampleSermons } from "@/lib/seed-data";
 import { formatDate } from "@/lib/utils";
@@ -21,7 +21,7 @@ export default function AdminSermonsPage() {
   const handleDelete = (id: string) => { if (confirm("Delete?")) setSermons(sermons.filter((s) => s.id !== id)); };
 
   return (
-    <div className="flex min-h-screen bg-stone-50"><AdminSidebar /><main className="flex-1 p-6 lg:p-8 ml-0 lg:ml-64 pr-16 lg:pr-8"><div className="max-w-5xl mx-auto">
+    <AdminShell><div className="max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <p className="text-text-muted text-sm">Manage sermon library</p>
         <button onClick={() => setShowForm(true)} className="btn-shine px-5 py-2.5 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-dark transition-colors flex items-center gap-2">
@@ -86,6 +86,7 @@ export default function AdminSermonsPage() {
           </tbody>
         </table>
       </div>
-    </div></main></div>
+    </div>
+    </AdminShell>
   );
 }

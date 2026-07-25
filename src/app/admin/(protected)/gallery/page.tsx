@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import R2Uploader from "@/components/R2Uploader";
-import AdminSidebar from "@/components/AdminSidebar";
+import AdminShell from "@/components/AdminShell";
 import {
   listAlbums, createAlbum, updateAlbum, deleteAlbum,
   listPhotos, addPhoto, deletePhoto,
@@ -150,9 +150,7 @@ export default function AdminGalleryPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-stone-50">
-      <AdminSidebar />
-      <main className="flex-1 p-6 lg:p-8 ml-0 lg:ml-64 pr-16 lg:pr-8">
+    <AdminShell>
         <div className="max-w-6xl mx-auto">
 
           {/* Header */}
@@ -282,7 +280,7 @@ export default function AdminGalleryPage() {
             )
           )}
         </div>
-      </main>
+      
 
       {/* Album modal */}
       {showAlbumModal && (
@@ -387,6 +385,6 @@ export default function AdminGalleryPage() {
           </div>
         </div>
       )}
-    </div>
+    </AdminShell>
   );
 }
