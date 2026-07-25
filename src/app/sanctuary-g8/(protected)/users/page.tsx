@@ -243,6 +243,7 @@ export default function AdminUsersPage() {
                               manage_sermons: "Sermons",
                               manage_activities: "Activities",
                               manage_settings: "Site Settings",
+                              manage_announcements: "Announcements",
                               manage_calendar: "Calendar",
                             } as Record<string, string>)[perm] || perm.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</p>
                             <p className="text-xs text-text-muted">{perm}</p>

@@ -206,7 +206,7 @@ export default function ActivitiesPage() {
         </section>
 
         {/* Monthly Saturday note */}
-        <section className="reveal max-w-4xl mx-auto">
+        <section className="reveal max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
           <div className="bg-white border border-stone-200 rounded-2xl p-5 flex items-start gap-4 shadow-sm">
             <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
               <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,7 +218,8 @@ export default function ActivitiesPage() {
               <p className="text-text-muted text-sm">
                 <span className="font-semibold text-primary">Convenient Service</span> — Every <span className="font-semibold">1st Saturday</span> of the month, <span className="font-semibold">6:00 AM – 7:00 AM</span> at the Main Sanctuary.
               </p>
-            
+            </div>
+          </div>
 
           <div className="bg-white border border-stone-200 rounded-2xl p-5 flex items-start gap-4 shadow-sm">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -232,7 +233,6 @@ export default function ActivitiesPage() {
                 Held on the <span className="font-semibold text-primary">1st &amp; 3rd Friday</span> of every month, <span className="font-semibold">6:00 – 7:00 PM</span> at the Main Sanctuary.
               </p>
             </div>
-          </div></div>
           </div>
         </section>
 

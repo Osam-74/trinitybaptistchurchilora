@@ -172,6 +172,18 @@ export default function HomePage() {
     fetchGallery();
   }, []);
 
+  // Faith Articles — loaded from seed data (published only, max 3)
+  const [faithArticles, setFaithArticles] = useState<Array<{id: string; title: string; body: string; scripture: string; pinned: boolean; status: string; authorName: string}>>([]);
+  useEffect(() => {
+    import('@/lib/seed-data').then(({ samplePosts }) => {
+      const articles = (samplePosts as Array<{title: string; body: string; scripture: string; pinned: boolean; status: string; mediaType: string; mediaUrl?: string; amenCount: number; createdAt: string; authorUid: string; authorName: string}>)
+        .filter(p => p.status === 'published')
+        .slice(0, 3)
+        .map((p, i) => ({ ...p, id: `article-${i}` }));
+      setFaithArticles(articles);
+    });
+  }, []);
+
   // Helper function to format timestamp/date for overlay
   const formatPhotoDate = (createdAt: { seconds: number } | string | null | undefined) => {
     if (!createdAt) return "Recent";
@@ -902,6 +914,36 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+
+      {/* Faith Articles */}
+      {faithArticles.length > 0 && (
+        <section className="bg-stone-50 py-16 sm:py-20">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="text-center mb-10 reveal">
+              <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-2">The Word</p>
+              <h2 className="font-serif text-3xl sm:text-4xl font-bold text-primary-dark mb-3">Faith Articles</h2>
+              <div className="gold-divider mx-auto" />
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {faithArticles.map((article, i) => (
+                <div key={article.id} className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 flex flex-col reveal" style={{ transitionDelay: `${i * 0.08}s` }}>
+                  {article.pinned && (
+                    <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full mb-3 self-start">Pinned</span>
+                  )}
+                  <h3 className="font-serif text-xl font-bold text-primary mb-2 leading-tight">{article.title}</h3>
+                  {article.scripture && (
+                    <p className="text-amber-600 text-xs font-semibold italic mb-3 border-l-2 border-amber-300 pl-2">{article.scripture}</p>
+                  )}
+                  <p className="text-stone-600 text-sm leading-relaxed flex-1 line-clamp-4">{article.body}</p>
+                  <div className="mt-4 pt-3 border-t border-stone-100">
+                    <span className="text-xs text-stone-400">{article.authorName}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 9. Contact / Action CTA section */}
       <section className="bg-primary-dark text-white py-20 relative overflow-hidden">

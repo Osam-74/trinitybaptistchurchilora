@@ -10,17 +10,17 @@ export default function AdminPostsPage() {
   const [posts, setPosts] = useState<Post[]>(samplePosts.map((p, i) => ({ ...p, id: `post-${i}` })));
   const [showForm, setShowForm] = useState(false);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
-  const [form, setForm] = useState({ title: "", body: "", scripture: "", mediaType: "text" as Post["mediaType"], mediaUrl: "", pinned: false, status: "published" as Post["status"] });
+  const [form, setForm] = useState({ title: "", body: "", scripture: "", mediaType: "text" as Post["mediaType"], pinned: false, status: "published" as Post["status"] });
 
   const openNew = () => {
     setEditingPost(null);
-    setForm({ title: "", body: "", scripture: "", mediaType: "text", mediaUrl: "", pinned: false, status: "published" });
+    setForm({ title: "", body: "", scripture: "", mediaType: "text", pinned: false, status: "published" });
     setShowForm(true);
   };
 
   const openEdit = (post: Post) => {
     setEditingPost(post);
-    setForm({ title: post.title, body: post.body, scripture: post.scripture, mediaType: post.mediaType, mediaUrl: post.mediaUrl || "", pinned: post.pinned, status: post.status });
+    setForm({ title: post.title, body: post.body, scripture: post.scripture, mediaType: "text", pinned: post.pinned, status: post.status });
     setShowForm(true);
   };
 
@@ -29,14 +29,14 @@ export default function AdminPostsPage() {
     if (editingPost) {
       setPosts(prev => prev.map(p => p.id === editingPost.id ? { ...p, ...form } : p));
     } else {
-      const newPost: Post = { ...form, id: `post-${Date.now()}`, amenCount: 0, createdAt: new Date().toISOString(), authorUid: "admin", authorName: "Admin" };
+      const newPost: Post = { ...form, mediaUrl: "", id: `post-${Date.now()}`, amenCount: 0, createdAt: new Date().toISOString(), authorUid: "admin", authorName: "Admin" };
       setPosts(prev => [newPost, ...prev]);
     }
     setShowForm(false);
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Delete this post?")) { setPosts(prev => prev.filter(p => p.id !== id)); }
+    if (confirm("Delete this article?")) { setPosts(prev => prev.filter(p => p.id !== id)); }
   };
 
   const togglePin = (id: string) => {
@@ -51,15 +51,15 @@ export default function AdminPostsPage() {
     <AdminShell><div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="font-serif text-2xl font-bold text-primary">Posts</h1>
-              <p className="text-text-muted text-sm mt-1">Manage pastor messages and announcements</p>
+              <h1 className="font-serif text-2xl font-bold text-primary">Faith Articles</h1>
+              <p className="text-text-muted text-sm mt-1">Manage faith articles and devotional content</p>
             </div>
             <button onClick={openNew}
               className="btn-shine btn-gold inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/>
               </svg>
-              New Post
+              New Article
             </button>
           </div>
 
@@ -68,7 +68,7 @@ export default function AdminPostsPage() {
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
               <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
                 <div className="p-6 border-b border-stone-100 flex items-center justify-between">
-                  <h2 className="font-serif text-xl font-bold text-primary">{editingPost ? "Edit Post" : "New Post"}</h2>
+                  <h2 className="font-serif text-xl font-bold text-primary">{editingPost ? "Edit Article" : "New Article"}</h2>
                   <button onClick={() => setShowForm(false)} className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center hover:bg-stone-200 transition-colors">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
                   </button>
@@ -76,7 +76,7 @@ export default function AdminPostsPage() {
                 <form onSubmit={handleSave} className="p-6 space-y-4">
                   <div>
                     <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Title *</label>
-                    <input required value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="input-field" placeholder="Post title"/>
+                    <input required value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="input-field" placeholder="Article title"/>
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Scripture Reference</label>
@@ -86,36 +86,19 @@ export default function AdminPostsPage() {
                     <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Content *</label>
                     <textarea required rows={5} value={form.body} onChange={e => setForm(p => ({ ...p, body: e.target.value }))} className="input-field resize-none" placeholder="Write your message..."/>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Media Type</label>
-                      <select value={form.mediaType} onChange={e => setForm(p => ({ ...p, mediaType: e.target.value as Post["mediaType"] }))} className="input-field bg-white">
-                        <option value="text">Text only</option>
-                        <option value="image">Image</option>
-                        <option value="video">YouTube Video</option>
-                        <option value="audio">Audio</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Status</label>
-                      <select value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value as Post["status"] }))} className="input-field bg-white">
-                        <option value="published">Published</option>
-                        <option value="draft">Draft</option>
-                      </select>
-                    </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Status</label>
+                    <select value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value as Post["status"] }))} className="input-field bg-white">
+                      <option value="published">Published</option>
+                      <option value="draft">Draft</option>
+                    </select>
                   </div>
-                  {form.mediaType !== "text" && (
-                    <div>
-                      <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Media URL</label>
-                      <input value={form.mediaUrl} onChange={e => setForm(p => ({ ...p, mediaUrl: e.target.value }))} className="input-field" placeholder="https://..."/>
-                    </div>
-                  )}
                   <div className="flex items-center gap-2">
                     <input type="checkbox" id="pinned" checked={form.pinned} onChange={e => setForm(p => ({ ...p, pinned: e.target.checked }))} className="w-4 h-4 accent-amber-600"/>
-                    <label htmlFor="pinned" className="text-sm text-primary font-medium cursor-pointer">Pin this post (featured)</label>
+                    <label htmlFor="pinned" className="text-sm text-primary font-medium cursor-pointer">Pin this article (featured)</label>
                   </div>
                   <div className="flex gap-3 pt-2">
-                    <button type="submit" className="flex-1 btn-gold py-3 rounded-xl font-semibold">{editingPost ? "Save Changes" : "Publish Post"}</button>
+                    <button type="submit" className="flex-1 btn-gold py-3 rounded-xl font-semibold">{editingPost ? "Save Changes" : "Publish Article"}</button>
                     <button type="button" onClick={() => setShowForm(false)} className="px-5 py-3 rounded-xl border border-stone-200 text-text-muted hover:bg-stone-50 text-sm font-medium transition-colors">Cancel</button>
                   </div>
                 </form>
@@ -129,7 +112,7 @@ export default function AdminPostsPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-stone-100 bg-stone-50">
-                    {["Post", "Type", "Status", "Date", "Actions"].map(h => (
+                    {["Article", "Type", "Status", "Date", "Actions"].map(h => (
                       <th key={h} className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-5 py-3.5">{h}</th>
                     ))}
                   </tr>
@@ -151,7 +134,6 @@ export default function AdminPostsPage() {
                         </div>
                       </td>
                       <td className="px-5 py-4">
-                        <span className="px-2.5 py-1 bg-stone-100 text-text-muted text-xs rounded-full capitalize">{post.mediaType}</span>
                       </td>
                       <td className="px-5 py-4">
                         <button onClick={() => toggleStatus(post.id)} className={`px-2.5 py-1 text-xs rounded-full font-medium transition-colors ${post.status === "published" ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-stone-100 text-stone-500 hover:bg-stone-200"}`}>
