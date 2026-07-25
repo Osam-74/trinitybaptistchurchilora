@@ -138,8 +138,15 @@ export default function PastorSpeaksAdmin() {
             )}
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
-                {error}
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl space-y-1">
+                <p className="font-semibold">{error.includes('permission') || error.includes('Permission') ? 'Firestore Rules Not Published Yet' : 'Error'}</p>
+                {error.includes('permission') || error.includes('Permission') ? (
+                  <p className="text-xs leading-relaxed">
+                    Go to <strong>Firebase Console → Firestore Database → Rules</strong>, paste the contents of <code>firestore.rules</code> from the project, then click <strong>Publish</strong>. This only needs to be done once.
+                  </p>
+                ) : (
+                  <p>{error}</p>
+                )}
               </div>
             )}
 

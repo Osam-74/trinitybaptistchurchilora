@@ -190,7 +190,6 @@ export default function HomePage() {
   const [currentBg, setCurrentBg] = useState(0);
   const heroBackgrounds = [
     "/church-building.jpg",
-    "/church-front.jpg",
     "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1920&q=80",
   ];
 
