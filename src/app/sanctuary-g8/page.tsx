@@ -32,7 +32,7 @@ export default function AdminLoginPage() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);
-      router.push("/admin/dashboard");
+      router.push("/sanctuary-g8/dashboard");
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code ?? "";
       setError(friendlyAuthError(code));

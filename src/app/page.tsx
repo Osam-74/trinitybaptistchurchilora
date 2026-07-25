@@ -341,10 +341,10 @@ export default function HomePage() {
               Plan Your Visit
             </Link>
             <Link
-              href="/about"
+              href="/activities"
               className="bg-transparent hover:bg-white/10 text-white font-semibold py-4 px-8 rounded-2xl border border-white/30 flex items-center justify-center gap-2 hover:scale-[1.04] transition-all duration-300"
             >
-              Learn More
+              Worship With Us
             </Link>
           </div>
         </div>

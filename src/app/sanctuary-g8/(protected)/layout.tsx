@@ -12,7 +12,7 @@ export default function ProtectedAdminLayout({ children }: { children: React.Rea
   useEffect(() => {
     if (!auth) {
       setStatus("unauthed");
-      router.replace("/admin");
+      router.replace("/sanctuary-g8");
       return;
     }
     const unsub = onAuthStateChanged(auth, (user: User | null) => {
@@ -20,7 +20,7 @@ export default function ProtectedAdminLayout({ children }: { children: React.Rea
         setStatus("authed");
       } else {
         setStatus("unauthed");
-        router.replace("/admin");
+        router.replace("/sanctuary-g8");
       }
     });
     return () => unsub();
