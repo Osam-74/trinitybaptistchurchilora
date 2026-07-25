@@ -18,14 +18,14 @@ const navLinks = [
 ];
 
 const ministries = [
-  { name: "Royal Ambassadors (RA)", slug: "royal-ambassadors" },
-  { name: "Girls' Auxiliaries (GA)", slug: "girls-auxiliaries" },
-  { name: "Lydia Auxiliary", slug: "lydia-auxiliary" },
-  { name: "Men's Missionary Union (MMU)", slug: "mens-missionary-union" },
-  { name: "Women Missionary Union (WMU)", slug: "womens-missionary-union" },
-  { name: "Youth Fellowship (BYF)", slug: "youth-fellowship" },
-  { name: "Sunday School", slug: "sunday-school" },
-  { name: "Choir & Music Ministry", slug: "choir" },
+  { name: "Royal Ambassadors (RA)", slug: "royal-ambassadors", href: "/ministries/royal-ambassadors" },
+  { name: "Girls' Auxiliaries (GA)", slug: "girls-auxiliary", href: "/ministries/girls-auxiliary" },
+  { name: "Lydia Band", slug: "lydia-auxiliary", href: "/ministries/lydia-auxiliary" },
+  { name: "Men's Missionary Union (MMU)", slug: "mmu", href: "/ministries/mmu" },
+  { name: "Women Missionary Union (WMU)", slug: "wmu", href: "/ministries/wmu" },
+  { name: "Youth Fellowship (BYF)", slug: "youth-fellowship", href: "/ministries/youth-fellowship" },
+  { name: "Sunday School", slug: "sunday-school", href: "/ministries/sunday-school" },
+  { name: "Choir & Music Ministry", slug: "choir", href: "/ministries/choir" },
 ];
 
 function useScrolled(threshold = 60) {
@@ -199,7 +199,7 @@ export default function Navbar() {
                         <Link href="/ministries" className="text-xs font-bold text-accent uppercase tracking-wider">View All Ministries →</Link>
                       </div>
                       {ministries.map((m) => (
-                        <Link key={m.slug} href={`/ministries#${m.slug}`}
+                        <Link key={m.slug} href={m.href}
                           className="block px-4 py-2.5 text-sm text-white/80 hover:text-accent hover:bg-white/5 transition-colors">
                           {m.name}
                         </Link>
@@ -275,7 +275,7 @@ export default function Navbar() {
                     </button>
                     <div className={`pl-4 space-y-1 transition-all duration-300 overflow-hidden ${isDropdownOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
                       {ministries.map((m) => (
-                        <Link key={m.slug} href={`/ministries#${m.slug}`}
+                        <Link key={m.slug} href={m.href}
                           className="block px-4 py-2 text-sm text-white/60 hover:text-accent transition-colors">
                           {m.name}
                         </Link>

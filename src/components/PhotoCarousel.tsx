@@ -115,7 +115,7 @@ export default function PhotoCarousel({ speed = 35, rowCount = 2, label, hideWhe
 
         {/* Row 1 — scrolls left */}
         <div className="relative mb-3">
-          <div className="flex" style={{ animation: `carousel-left ${speed}s linear infinite` }}>
+          <div className="flex" style={{ animation: `carousel-left ${speed}s linear infinite`, willChange: 'transform' }}>
             {[...row1, ...row1].map((photo, i) => (
               <PhotoCard key={`r1-${photo.id}-${i}`} photo={photo} keyStr={`r1-${i}`} />
             ))}
@@ -125,7 +125,7 @@ export default function PhotoCarousel({ speed = 35, rowCount = 2, label, hideWhe
         {/* Row 2 — scrolls right */}
         {rowCount === 2 && (
           <div className="relative">
-            <div className="flex" style={{ animation: `carousel-right ${speed * 1.15}s linear infinite` }}>
+            <div className="flex" style={{ animation: `carousel-right ${speed * 1.15}s linear infinite`, willChange: 'transform' }}>
               {[...row2, ...row2].map((photo, i) => (
                 <PhotoCard key={`r2-${photo.id}-${i}`} photo={photo} keyStr={`r2-${i}`} />
               ))}
@@ -133,7 +133,7 @@ export default function PhotoCarousel({ speed = 35, rowCount = 2, label, hideWhe
           </div>
         )}
 
-        <style jsx>{`
+        <style>{`
           @keyframes carousel-left {
             0%   { transform: translateX(0); }
             100% { transform: translateX(-50%); }
