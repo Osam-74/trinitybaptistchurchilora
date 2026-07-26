@@ -28,9 +28,6 @@ export default function AdminGalleryPage() {
 
   // Photo modal
   const [showPhotoModal, setShowPhotoModal] = useState(false);
-  const [photoCaption, setPhotoCaption] = useState("");
-  const [photoUrl, setPhotoUrl] = useState("");
-  const [photoMode, setPhotoMode] = useState<"batch" | "single">("batch");
   const [photoSaving, setPhotoSaving] = useState(false);
   const [batchProgress, setBatchProgress] = useState("");
 
@@ -142,9 +139,6 @@ export default function AdminGalleryPage() {
   };
 
   const openAddPhoto = () => {
-    setPhotoCaption("");
-    setPhotoUrl("");
-    setPhotoMode("batch");
     setBatchProgress("");
     setShowPhotoModal(true);
   };
@@ -180,27 +174,6 @@ export default function AdminGalleryPage() {
     }
   };
 
-  const handleAddSinglePhoto = async () => {
-    if (!activeAlbum || !photoUrl) return;
-    setPhotoSaving(true);
-    try {
-      const id = await addPhoto(activeAlbum.id, photoUrl, photoCaption);
-      logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "added", target: `Photo in ${activeAlbum.title}`, section: "Gallery" });
-      const newPhoto: GalleryPhoto = { id, albumId: activeAlbum.id, url: photoUrl, caption: photoCaption, createdAt: new Date().toISOString() };
-      setPhotos(prev => [newPhoto, ...prev]);
-      if (!activeAlbum.coverUrl) {
-        await updateAlbum(activeAlbum.id, { coverUrl: photoUrl });
-        setActiveAlbum(a => a ? { ...a, coverUrl: photoUrl } : a);
-        setAlbums(prev => prev.map(a => a.id === activeAlbum.id ? { ...a, coverUrl: photoUrl } : a));
-      }
-      setShowPhotoModal(false);
-    } catch (err) {
-      console.error("Add photo error:", err);
-      alert("Failed to add photo.");
-    } finally {
-      setPhotoSaving(false);
-    }
-  };
 
   const handleDeletePhoto = async (photo: GalleryPhoto) => {
     if (!confirm("Delete this photo?")) return;
@@ -441,55 +414,15 @@ export default function AdminGalleryPage() {
               </button>
             </div>
             <div className="p-5 space-y-3">
-              {/* Mode toggle */}
-              <div className="flex gap-2 p-1 bg-stone-100 rounded-xl">
-                {(["batch", "single"] as const).map(mode => (
-                  <button key={mode} onClick={() => { setPhotoMode(mode); setPhotoUrl(""); }}
-                    className={`flex-1 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${photoMode === mode ? "bg-white shadow-sm text-primary" : "text-stone-500 hover:text-primary"}`}>
-                    {mode === "batch" ? "📁 Batch Upload" : "🔗 Single URL"}
-                  </button>
-                ))}
-              </div>
-
-              {photoMode === "batch" ? (
-                <>
-                  <BatchUploader
-                    folder="gallery"
-                    accept="image/*"
-                    label="Select multiple photos to upload"
-                    onAllUploaded={handleBatchUploaded}
-                    onError={(msg) => alert(msg)}
-                  />
-                  {batchProgress && (
-                    <p className="text-xs text-center font-medium text-accent">{batchProgress}</p>
-                  )}
-                </>
-              ) : (
-                <>
-                  <div>
-                    <label className="block text-xs font-bold text-primary mb-1 uppercase tracking-wide">Image URL</label>
-                    <input value={photoUrl} onChange={e => setPhotoUrl(e.target.value)} placeholder="https://..."
-                      className="input-field w-full px-3 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30" />
-                    {photoUrl && (
-                      <img src={photoUrl} alt="Preview" className="w-full h-28 object-cover rounded-xl mt-2"
-                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-primary mb-1 uppercase tracking-wide">Caption (optional)</label>
-                    <input value={photoCaption} onChange={e => setPhotoCaption(e.target.value)} placeholder="Describe the photo…"
-                      className="input-field w-full px-3 py-2.5 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30" />
-                  </div>
-                  <div className="flex gap-2 pt-2">
-                    <button onClick={handleAddSinglePhoto} disabled={photoSaving || !photoUrl}
-                      className="flex-1 btn-gold py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50">
-                      {photoSaving ? "Saving…" : "Add Photo"}
-                    </button>
-                    <button onClick={() => setShowPhotoModal(false)} className="px-4 py-2.5 rounded-xl border border-stone-200 text-stone-500 text-sm font-medium hover:bg-stone-50">
-                      Cancel
-                    </button>
-                  </div>
-                </>
+              <BatchUploader
+                folder="gallery"
+                accept="image/*"
+                label="Select photos to upload"
+                onAllUploaded={handleBatchUploaded}
+                onError={(msg) => alert(msg)}
+              />
+              {batchProgress && (
+                <p className="text-xs text-center font-medium text-accent">{batchProgress}</p>
               )}
             </div>
           </div>

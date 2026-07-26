@@ -89,7 +89,7 @@ export default function AdminLeadershipPage() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/>
               </svg>
-              Add Leader
+              Add
             </button>
           </div>
 
@@ -126,10 +126,20 @@ export default function AdminLeadershipPage() {
                   <h3 className="font-serif text-sm font-bold text-primary">{l.name}</h3>
                   <p className="text-primary-light text-xs font-semibold mb-2">{l.role}</p>
                   <p className="text-text-muted text-xs leading-relaxed line-clamp-3">{l.bio}</p>
-                  <div className="flex gap-2 mt-3">
-                    <button onClick={() => openEdit(l)} className="flex-1 text-xs font-medium px-3 py-2 rounded-lg border border-stone-200 hover:border-accent/50 hover:bg-accent/5 text-primary transition-colors">Edit</button>
-                    <button onClick={() => toggleActive(l)} className="text-xs font-medium px-3 py-2 rounded-lg border border-stone-200 hover:border-accent/50 text-primary transition-colors">{l.active ? "Hide" : "Show"}</button>
-                    <button onClick={() => handleDelete(l.id)} className="text-xs font-medium px-3 py-2 rounded-lg border border-stone-200 hover:border-red-300 hover:bg-red-50 text-red-600 transition-colors">Delete</button>
+                  <div className="flex gap-1.5 mt-3">
+                    <button onClick={() => openEdit(l)} className="w-8 h-8 rounded-lg border border-stone-200 hover:border-accent/50 hover:bg-accent/5 text-primary flex items-center justify-center transition-colors" title="Edit">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+                    <button onClick={() => toggleActive(l)} className="w-8 h-8 rounded-lg border border-stone-200 hover:border-accent/50 text-primary flex items-center justify-center transition-colors" title={l.active ? "Hide from public" : "Show on public"}>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {l.active
+                          ? <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></>
+                          : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59" />}
+                      </svg>
+                    </button>
+                    <button onClick={() => handleDelete(l.id)} className="w-8 h-8 rounded-lg border border-stone-200 hover:border-red-300 hover:bg-red-50 text-red-600 flex items-center justify-center transition-colors" title="Delete">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -141,7 +151,7 @@ export default function AdminLeadershipPage() {
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)" }}>
               <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto animate-scale-in">
                 <div className="p-6 border-b border-stone-100 flex items-center justify-between">
-                  <h2 className="font-serif text-lg font-bold text-primary">{editing ? "Edit Leader" : "Add New Leader"}</h2>
+                  <h2 className="font-serif text-lg font-bold text-primary">{editing ? "Edit Leader" : "Add"}</h2>
                   <button onClick={() => setShowForm(false)} className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center hover:bg-stone-200 transition-colors">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
                   </button>
@@ -179,7 +189,7 @@ export default function AdminLeadershipPage() {
                     </div>
                   </div>
                   <div className="flex gap-3 pt-2">
-                    <button type="submit" disabled={saving} className="flex-1 btn-gold py-2.5 rounded-xl font-semibold disabled:opacity-50">{saving ? "Saving…" : editing ? "Save Changes" : "Add Leader"}</button>
+                    <button type="submit" disabled={saving} className="flex-1 btn-gold py-2.5 rounded-xl font-semibold disabled:opacity-50">{saving ? "Saving…" : editing ? "Save Changes" : "Add"}</button>
                     <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2.5 rounded-xl border border-stone-200 text-text-muted hover:bg-stone-50 text-sm font-medium transition-colors">Cancel</button>
                   </div>
                 </form>

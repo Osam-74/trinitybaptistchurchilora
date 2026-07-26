@@ -84,15 +84,16 @@ export async function countPhotos(albumId: string): Promise<number> {
 
 // ── Photos ──────────────────────────────────────────────────────────────────
 
+/**
+ * List photos for an album.
+ * Uses only `where` (no orderBy) to avoid requiring a composite Firestore index.
+ * Sorts by createdAt in JS after fetching.
+ */
 export async function listPhotos(albumId: string): Promise<GalleryPhoto[]> {
   if (!db) return [];
-  const q = query(
-    collection(db, "gallery_photos"),
-    where("albumId", "==", albumId),
-    orderBy("createdAt", "desc")
-  );
+  const q = query(collection(db, "gallery_photos"), where("albumId", "==", albumId));
   const snap = await getDocs(q);
-  return snap.docs.map(d => {
+  const photos = snap.docs.map(d => {
     const data = d.data();
     return {
       id: d.id,
@@ -100,14 +101,16 @@ export async function listPhotos(albumId: string): Promise<GalleryPhoto[]> {
       url: data.url || data.cloudinaryUrl || data.imageUrl || "",
       caption: data.caption,
       createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : (data.createdAt || ""),
-    };
+    } as GalleryPhoto;
   });
+  // Sort by createdAt descending (newest first) in JS
+  photos.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+  return photos;
 }
 
 export async function listAllPhotos(): Promise<GalleryPhoto[]> {
   if (!db) return [];
-  const q = query(collection(db, "gallery_photos"), orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
+  const snap = await getDocs(collection(db, "gallery_photos"));
   return snap.docs
     .map(d => {
       const data = d.data();
@@ -117,9 +120,10 @@ export async function listAllPhotos(): Promise<GalleryPhoto[]> {
         url: data.url || data.cloudinaryUrl || data.imageUrl || "",
         caption: data.caption,
         createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : (data.createdAt || ""),
-      };
+      } as GalleryPhoto;
     })
-    .filter(p => p.url.startsWith("http"));
+    .filter(p => p.url.startsWith("http"))
+    .sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
 }
 
 export async function addPhoto(albumId: string, url: string, caption?: string): Promise<string> {
