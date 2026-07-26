@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 import AdminShell from "@/components/AdminShell";
 import PermissionGuard from "@/components/PermissionGuard";
 import { listAllMembers, updateMember, deleteMember } from "@/lib/choir";
+import R2Uploader from "@/components/R2Uploader";
 import { ChoirMember } from "@/types";
+
+const DEPARTMENTS = ["Senior Choir", "Youth Choir", "Instrumentalist", "Media Team"];
+const SECTIONS = ["Soprano", "Alto", "Tenor", "Bass", "Instrumentalist", "Media Team"];
 
 export default function AdminMembersPage() {
   const [members, setMembers] = useState<ChoirMember[]>([]);
@@ -12,6 +16,7 @@ export default function AdminMembersPage() {
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
   const [editing, setEditing] = useState<ChoirMember | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [editingPhotoUrl, setEditingPhotoUrl] = useState<string | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -54,6 +59,12 @@ export default function AdminMembersPage() {
     }
   };
 
+  const openEdit = (m: ChoirMember) => {
+    setEditing(m);
+    setEditingPhotoUrl(null);
+    setActionError(null);
+  };
+
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
@@ -61,12 +72,16 @@ export default function AdminMembersPage() {
     try {
       await updateMember(editing.id, {
         fullName: editing.fullName,
+        email: editing.email || "",
+        phone: editing.phone || "",
         department: editing.department,
         section: editing.section || "",
         bio: editing.bio || "",
-        photoUrl: editing.photoUrl || "",
+        photoUrl: editingPhotoUrl || editing.photoUrl || "",
+        dateJoined: editing.dateJoined || "",
       });
       setEditing(null);
+      setEditingPhotoUrl(null);
       load();
     } catch (err) {
       console.error("[members] Save edit failed:", err);
@@ -159,7 +174,7 @@ export default function AdminMembersPage() {
                   {m.status !== "rejected" && (
                     <button onClick={() => handleReject(m)} className="text-xs font-medium px-3 py-2 rounded-lg border border-stone-200 hover:border-red-300 hover:bg-red-50 text-red-600 transition-colors">Reject</button>
                   )}
-                  <button onClick={() => setEditing(m)} className="text-xs font-medium px-3 py-2 rounded-lg border border-stone-200 hover:border-accent/50 text-primary transition-colors">Edit</button>
+                  <button onClick={() => openEdit(m)} className="text-xs font-medium px-3 py-2 rounded-lg border border-stone-200 hover:border-accent/50 text-primary transition-colors">Edit</button>
                   <button onClick={() => handleDelete(m.id)} className="text-xs font-medium px-3 py-2 rounded-lg border border-stone-200 hover:border-red-300 hover:bg-red-50 text-red-600 transition-colors">Delete</button>
                 </div>
               </div>
@@ -177,33 +192,80 @@ export default function AdminMembersPage() {
                   </button>
                 </div>
                 <form onSubmit={handleSaveEdit} className="p-6 space-y-4">
+                  {/* Photo upload */}
+                  <div>
+                    <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Headshot</label>
+                    {(editing.photoUrl || editingPhotoUrl) && (
+                      <img src={editingPhotoUrl || editing.photoUrl} alt="Preview" className="w-20 h-20 rounded-2xl object-cover border border-stone-200 mb-2"/>
+                    )}
+                    <R2Uploader folder="choir" label="Upload Photo" onUploaded={(url) => setEditingPhotoUrl(url)} />
+                    {editing.photoUrl && !editingPhotoUrl && (
+                      <button type="button" onClick={() => setEditing({ ...editing, photoUrl: "" })}
+                        className="text-xs text-red-500 mt-1 hover:underline">Remove current photo</button>
+                    )}
+                  </div>
+
                   <div>
                     <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Full Name</label>
                     <input type="text" value={editing.fullName} onChange={e => setEditing({ ...editing, fullName: e.target.value })} className="input-field"/>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Department</label>
-                      <select value={editing.department} onChange={e => setEditing({ ...editing, department: e.target.value })} className="input-field bg-white">
-                        <option value="Choir">Choir</option>
-                        <option value="Media Team">Media Team</option>
-                        <option value="Instrumentalist">Instrumentalist</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Section / Voice Part</label>
-                      <input type="text" value={editing.section || ""} onChange={e => setEditing({ ...editing, section: e.target.value })} className="input-field"/>
-                    </div>
-                  </div>
+
                   <div>
-                    <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Photo URL</label>
-                    <input type="text" value={editing.photoUrl || ""} onChange={e => setEditing({ ...editing, photoUrl: e.target.value })} className="input-field" placeholder="Image URL"/>
-                    {editing.photoUrl && <img src={editing.photoUrl} alt="Preview" className="w-16 h-16 rounded-full object-cover border border-stone-200 mt-2"/>}
+                    <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Email Address</label>
+                    <input type="email" value={editing.email || ""} onChange={e => setEditing({ ...editing, email: e.target.value })} className="input-field"/>
                   </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Phone Number</label>
+                    <input type="tel" value={editing.phone || ""} onChange={e => setEditing({ ...editing, phone: e.target.value })} className="input-field"/>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Date Joined</label>
+                    <input type="date" value={editing.dateJoined || ""} onChange={e => setEditing({ ...editing, dateJoined: e.target.value })} className="input-field"/>
+                  </div>
+
+                  {/* Department — multi-select checkboxes */}
+                  <div>
+                    <label className="block text-xs font-semibold text-primary mb-2 uppercase tracking-wide">Department(s)</label>
+                    <p className="text-xs text-text-muted mb-2">Select all that apply</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {DEPARTMENTS.map(d => {
+                        const currentDepts = (editing.department || "").split(", ").filter(Boolean);
+                        const checked = currentDepts.includes(d);
+                        return (
+                          <label key={d} className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all text-sm ${checked ? 'border-primary bg-primary/5 text-primary font-semibold' : 'border-stone-200 text-stone-600 hover:border-primary/40'}`}>
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => {
+                                const newDepts = checked
+                                  ? currentDepts.filter(x => x !== d)
+                                  : [...currentDepts, d];
+                                setEditing({ ...editing, department: newDepts.join(", ") });
+                              }}
+                              className="w-4 h-4 rounded accent-amber-600"
+                            />
+                            {d}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Section / Voice Part</label>
+                    <select value={editing.section || ""} onChange={e => setEditing({ ...editing, section: e.target.value })} className="input-field bg-white">
+                      <option value="">— Select —</option>
+                      {SECTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+
                   <div>
                     <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Bio</label>
-                    <textarea value={editing.bio || ""} onChange={e => setEditing({ ...editing, bio: e.target.value })} rows={3} className="input-field resize-none"/>
+                    <textarea value={editing.bio || ""} onChange={e => setEditing({ ...editing, bio: e.target.value })} rows={3} className="input-field resize-none" placeholder="Brief biography..."/>
                   </div>
+
                   <div className="flex gap-3 pt-2">
                     <button type="submit" className="flex-1 btn-gold py-3 rounded-xl font-semibold">Save Changes</button>
                     <button type="button" onClick={() => setEditing(null)} className="px-5 py-3 rounded-xl border border-stone-200 text-text-muted hover:bg-stone-50 text-sm font-medium transition-colors">Cancel</button>

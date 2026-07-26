@@ -61,11 +61,19 @@ export default function AdminLeadershipPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Remove this leader from the website?")) return;
-    try { await deleteLeader(id); load(); } catch { /* ignore */ }
+    setError("");
+    try { await deleteLeader(id); load(); } catch (err) {
+      console.error("[leadership] Delete failed:", err);
+      setError(`Couldn't delete: ${(err as { message?: string })?.message || "unknown error"}`);
+    }
   };
 
   const toggleActive = async (l: Leader) => {
-    try { await updateLeader(l.id, { active: !l.active }); load(); } catch { /* ignore */ }
+    setError("");
+    try { await updateLeader(l.id, { active: !l.active }); load(); } catch (err) {
+      console.error("[leadership] Toggle active failed:", err);
+      setError(`Couldn't update visibility: ${(err as { message?: string })?.message || "unknown error"}`);
+    }
   };
 
   return (
@@ -91,6 +99,10 @@ export default function AdminLeadershipPage() {
             <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center text-text-muted">
               No leaders yet. Click &ldquo;Add Leader&rdquo; to get started.
             </div>
+          )}
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 text-sm text-red-700">{error}</div>
           )}
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">

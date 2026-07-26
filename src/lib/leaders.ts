@@ -45,10 +45,22 @@ export async function listAllLeaders(): Promise<Leader[]> {
   try {
     if (!db) return [...defaultLeaders].sort((a, b) => a.order - b.order);
     const snap = await getDocs(collection(db, "leaders"));
-    if (snap.empty) return [...defaultLeaders].sort((a, b) => a.order - b.order);
+    if (snap.empty) {
+      // Seed the default leaders into Firestore so admin can edit/hide/delete them
+      console.log("[leaders] Seeding default leaders into Firestore...");
+      for (const leader of defaultLeaders) {
+        const { id, ...data } = leader;
+        await addDoc(collection(db, "leaders"), stripUndefined(data as Record<string, unknown>));
+      }
+      // Re-fetch after seeding
+      const freshSnap = await getDocs(collection(db, "leaders"));
+      const items = freshSnap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<Leader, "id">) })) as Leader[];
+      return items.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+    }
     const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<Leader, "id">) })) as Leader[];
     return items.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
-  } catch {
+  } catch (err) {
+    console.error("[leaders] listAllLeaders failed:", err);
     return [...defaultLeaders].sort((a, b) => a.order - b.order);
   }
 }
