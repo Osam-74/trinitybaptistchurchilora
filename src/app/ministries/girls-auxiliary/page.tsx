@@ -97,7 +97,7 @@ export default function GirlsAuxiliaryPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center reveal">
             <div>
               <img
-                src="https://images.unsplash.com/photo-1607453998774-d533f65dac99?w=800&q=80"
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT9Lq5qTCNfXMzP39KXbq8RjOE_mDHoXdjvHK7wui8uZ1fEVsbUXldvA92W&s=10"
                 alt="Girls Auxiliary"
                 className="w-full rounded-3xl shadow-xl object-cover aspect-[4/3]"
               />

@@ -39,7 +39,7 @@ export default function SunbeamPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center reveal">
             <div>
-              <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80" alt="Sunbeam Band"
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZpW2cUdkYN3xD2sHsm7W6KYAWTsUSqrpbNnl5TTlry8TSWEWEFHAkWroj&s=10" alt="Sunbeam Band"
                 className="w-full rounded-3xl shadow-xl object-cover aspect-[4/3]" />
             </div>
             <div>

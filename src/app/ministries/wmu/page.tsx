@@ -29,7 +29,7 @@ export default function WMUPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center reveal">
             <div>
-              <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800&q=80" alt="Women Missionary Union" className="w-full rounded-3xl shadow-xl object-cover aspect-[4/3]" />
+              <img src="https://nsbcikorodu.wordpress.com/wp-content/uploads/2025/07/img-20250710-wa00154277680562241187089.jpg" alt="Women Missionary Union" className="w-full rounded-3xl shadow-xl object-cover aspect-[4/3]" />
             </div>
             <div>
               <span className="inline-block bg-rose-100 text-rose-700 font-bold text-xs uppercase tracking-widest px-3 py-1.5 rounded-full mb-4">Women&apos;s Missions</span>

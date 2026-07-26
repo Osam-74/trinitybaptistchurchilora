@@ -6,11 +6,12 @@ import AdminShell from "@/components/AdminShell";
 import PermissionGuard from "@/components/PermissionGuard";
 import { Sermon } from "@/types";
 import { formatDate } from "@/lib/utils";
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
 import {
   collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot,
   orderBy, query, serverTimestamp,
 } from "firebase/firestore";
+import { logActivity } from "@/lib/activityLog";
 
 /* ─── Recorder hook ─── */
 function useRecorder() {
@@ -116,8 +117,10 @@ export default function AdminSermonsPage() {
       };
       if (editingId) {
         await updateDoc(doc(db, "sermons", editingId), payload);
+        logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "updated", target: `Sermon: ${form.title}`, section: "Sermons" });
       } else {
         await addDoc(collection(db, "sermons"), { ...payload, createdAt: serverTimestamp() });
+        logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "created", target: `Sermon: ${form.title}`, section: "Sermons" });
       }
       setShowForm(false); rec.reset(); setForm({ ...EMPTY_FORM }); setEditingId(null);
     } catch (err) {
@@ -128,6 +131,7 @@ export default function AdminSermonsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this sermon?")) return;
     await deleteDoc(doc(db, "sermons", id));
+    logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "deleted", target: `Sermon`, section: "Sermons" });
   };
 
   /**

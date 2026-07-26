@@ -95,7 +95,7 @@ export default function LydiaAuxiliaryPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center reveal">
             <div>
               <img
-                src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80"
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ77jwXm__WjHqoV_jjMS3Q3nQVU57q3FpXZYt8oIl6ErcfVWvPtgaRlgk&s=10"
                 alt="Lydia Auxiliary"
                 className="w-full rounded-3xl shadow-xl object-cover aspect-[4/3]"
               />

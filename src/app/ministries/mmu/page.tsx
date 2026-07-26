@@ -29,7 +29,7 @@ export default function MMUPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center reveal">
             <div>
-              <img src="https://nsbcikorodu.wordpress.com/wp-content/uploads/2025/07/img-20250710-wa00154277680562241187089.jpg"
+              <img src="https://gbcowode.org.ng/wp-content/uploads/2024/03/mmu.png"
                 alt="Men's Missionary Union" className="w-full rounded-3xl shadow-xl object-cover aspect-[4/3]"
                 onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&q=80"; }} />
             </div>

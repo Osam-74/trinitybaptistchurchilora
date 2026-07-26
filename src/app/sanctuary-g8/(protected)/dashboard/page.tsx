@@ -8,6 +8,7 @@ import { samplePosts, sampleSermons, sampleAlbums } from "@/lib/seed-data";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
+import { getRecentActivity, ActivityEntry } from "@/lib/activityLog";
 
 export default function AdminDashboardPage() {
   const [greeting, setGreeting] = useState("Hello");
@@ -23,6 +24,7 @@ export default function AdminDashboardPage() {
   const [annSaving, setAnnSaving] = useState(false);
   const [annSuccess, setAnnSuccess] = useState(false);
   const [announcements, setAnnouncements] = useState<string[]>([]);
+  const [activities, setActivities] = useState<ActivityEntry[]>([]);
 
   useEffect(() => {
     const hr = new Date().getHours();
@@ -54,6 +56,9 @@ export default function AdminDashboardPage() {
       });
       return () => unsub();
     }
+
+    // Load recent activity log
+    getRecentActivity(15).then(setActivities).catch(() => {});
   }, []);
 
   const toggleLive = async () => {
@@ -289,6 +294,54 @@ export default function AdminDashboardPage() {
 
             </div>
           </div>
+
+        {/* ── Activity Log ── */}
+        <div className="bg-white rounded-2xl border border-[#E8EDE8] shadow-sm p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="font-serif text-xl font-bold text-[#0B2C22]">📋 Activity Log</h2>
+              <p className="text-stone-400 text-xs mt-0.5">Recent changes made by admin users</p>
+            </div>
+            <span className="text-xs text-stone-400 font-medium">{activities.length} recent {activities.length === 1 ? 'entry' : 'entries'}</span>
+          </div>
+
+          {activities.length === 0 ? (
+            <div className="py-12 text-center">
+              <svg className="w-12 h-12 text-stone-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+              </svg>
+              <p className="text-stone-400 text-sm">No activity logged yet. Changes you make will appear here.</p>
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {activities.map((act, i) => (
+                <div key={act.id ?? i} className="flex items-start gap-3 p-3 rounded-xl hover:bg-stone-50 transition-colors border border-transparent hover:border-[#E8EDE8]">
+                  <div className="flex-shrink-0 w-9 h-9 rounded-full bg-[#0D4A35]/10 flex items-center justify-center text-[#0D4A35] font-bold text-xs">
+                    {act.userName?.charAt(0).toUpperCase() ?? 'A'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-[#0B2C22]">
+                      <span className="font-semibold">{act.userName}</span>{' '}
+                      <span className="text-stone-500">{act.action}</span>{' '}
+                      <span className="font-medium">{act.target}</span>
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[10px] font-bold text-[#0D4A35] bg-[#C8E63A]/20 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        {act.section}
+                      </span>
+                      <span className="text-[11px] text-stone-400">
+                        {act.createdAt
+                          ? new Date(act.createdAt as string | number | Date).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' })
+                          : 'just now'}
+                      </span>
+                      <span className="text-[10px] text-stone-300 hidden sm:inline">{act.user}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         </div>
       
