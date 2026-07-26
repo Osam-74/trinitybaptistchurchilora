@@ -2,17 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
 function friendlyAuthError(code: string): string {
   switch (code) {
     case "auth/invalid-email": return "That doesn't look like a valid email address.";
-    case "auth/user-not-found":
-    case "auth/invalid-credential":
-    case "auth/wrong-password": return "Invalid email or password. Please try again.";
-    case "auth/too-many-requests": return "Too many attempts. Please wait a moment and try again.";
-    case "auth/network-request-failed": return "Network error. Check your connection and try again.";
+    case "auth/user-not-found": return "No account found with that email. Ask the super admin to create your account first.";
+    case "auth/invalid-credential": return "Invalid email or password. Double-check both and try again — or use \"Forgot password?\" to reset.";
+    case "auth/wrong-password": return "Wrong password. Use \"Forgot password?\" to reset it if you're unsure.";
+    case "auth/too-many-requests": return "Too many failed attempts. Please wait a few minutes and try again, or use \"Forgot password?\".";
+    case "auth/network-request-failed": return "Network error. Check your internet connection and try again.";
+    case "auth/user-disabled": return "This account has been disabled. Contact the super admin.";
+    case "auth/operation-not-allowed": return "Email/password sign-in is not enabled for this project. Contact the super admin.";
+    case "auth/email-not-verified": return "Please verify your email address before signing in. Check your inbox for a verification link.";
     default: return "Couldn't sign in. Please check your credentials and try again.";
   }
 }
@@ -22,12 +25,15 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
+  const [resetMode, setResetMode] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setInfo("");
     if (!auth) { setError("Sign-in is temporarily unavailable. Please contact the site administrator."); return; }
     setLoading(true);
     try {
@@ -35,7 +41,34 @@ export default function AdminLoginPage() {
       router.push("/sanctuary-g8/dashboard");
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code ?? "";
+      console.error("[Login] Firebase auth error:", code, (err as { message?: string })?.message);
       setError(friendlyAuthError(code));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setInfo("");
+    if (!auth) { setError("Password reset is unavailable. Please contact the site administrator."); return; }
+    if (!email.trim()) { setError("Enter your email address first."); return; }
+    setLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      setInfo(`Password reset email sent to ${email.trim()}. Check your inbox (and spam folder) for a link to set a new password.`);
+      setResetMode(false);
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code ?? "";
+      console.error("[Login] Password reset error:", code);
+      if (code === "auth/user-not-found") {
+        setError("No account found with that email. Ask the super admin to create your account first.");
+      } else if (code === "auth/invalid-email") {
+        setError("That doesn't look like a valid email address.");
+      } else {
+        setError("Couldn't send reset email. Please try again or contact the super admin.");
+      }
     } finally {
       setLoading(false);
     }
@@ -96,8 +129,17 @@ export default function AdminLoginPage() {
             </div>
           </div>
 
-          <h2 className="font-serif text-3xl font-bold text-[#0B2C22] mb-2">Admin Portal</h2>
-          <p className="text-stone-500 text-sm mb-8">Sign in to access your church management dashboard.</p>
+          {resetMode ? (
+            <>
+              <h2 className="font-serif text-3xl font-bold text-[#0B2C22] mb-2">Reset Password</h2>
+              <p className="text-stone-500 text-sm mb-8">Enter your email and we&apos;ll send you a link to set a new password.</p>
+            </>
+          ) : (
+            <>
+              <h2 className="font-serif text-3xl font-bold text-[#0B2C22] mb-2">Admin Portal</h2>
+              <p className="text-stone-500 text-sm mb-8">Sign in to access your church management dashboard.</p>
+            </>
+          )}
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 mb-6 flex items-start gap-2">
@@ -106,43 +148,72 @@ export default function AdminLoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-xs font-bold text-[#0B2C22] uppercase tracking-wider mb-2">Email Address</label>
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email address"
-                className="w-full px-4 py-3.5 rounded-xl border-2 border-stone-200 bg-white text-sm focus:outline-none focus:border-[#0D4A35] focus:ring-4 focus:ring-[#0D4A35]/10 transition-all" />
+          {info && (
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-xl px-4 py-3 mb-6 flex items-start gap-2">
+              <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+              {info}
             </div>
+          )}
 
-            <div>
-              <label className="block text-xs font-bold text-[#0B2C22] uppercase tracking-wider mb-2">Password</label>
-              <div className="relative">
-                <input type={showPass ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  className="w-full px-4 py-3.5 pr-12 rounded-xl border-2 border-stone-200 bg-white text-sm focus:outline-none focus:border-[#0D4A35] focus:ring-4 focus:ring-[#0D4A35]/10 transition-all" />
-                <button type="button" onClick={() => setShowPass(!showPass)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-[#0D4A35] transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {showPass
-                      ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
-                      : <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></>
-                    }
-                  </svg>
-                </button>
+          {resetMode ? (
+            <form onSubmit={handlePasswordReset} className="space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-[#0B2C22] uppercase tracking-wider mb-2">Email Address</label>
+                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email address"
+                  className="w-full px-4 py-3.5 rounded-xl border-2 border-stone-200 bg-white text-sm focus:outline-none focus:border-[#0D4A35] focus:ring-4 focus:ring-[#0D4A35]/10 transition-all" />
               </div>
-            </div>
+              <button type="submit" disabled={loading}
+                className="w-full py-4 bg-[#0D4A35] text-white font-bold rounded-xl hover:bg-[#0B2C22] transition-all shadow-lg shadow-[#0D4A35]/20 disabled:opacity-60 flex items-center justify-center gap-2 text-sm">
+                {loading ? (
+                  <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Sending…</>
+                ) : "Send Reset Link"}
+              </button>
+              <button type="button" onClick={() => { setResetMode(false); setError(""); setInfo(""); }}
+                className="w-full text-center text-xs text-[#0D4A35] font-semibold hover:underline">
+                ← Back to Sign In
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-[#0B2C22] uppercase tracking-wider mb-2">Email Address</label>
+                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email address"
+                  className="w-full px-4 py-3.5 rounded-xl border-2 border-stone-200 bg-white text-sm focus:outline-none focus:border-[#0D4A35] focus:ring-4 focus:ring-[#0D4A35]/10 transition-all" />
+              </div>
 
-            <div className="flex items-center justify-end">
-              <button type="button" className="text-xs text-[#0D4A35] font-semibold hover:underline">Forgot password?</button>
-            </div>
+              <div>
+                <label className="block text-xs font-bold text-[#0B2C22] uppercase tracking-wider mb-2">Password</label>
+                <div className="relative">
+                  <input type={showPass ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className="w-full px-4 py-3.5 pr-12 rounded-xl border-2 border-stone-200 bg-white text-sm focus:outline-none focus:border-[#0D4A35] focus:ring-4 focus:ring-[#0D4A35]/10 transition-all" />
+                  <button type="button" onClick={() => setShowPass(!showPass)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-[#0D4A35] transition-colors">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {showPass
+                        ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                        : <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></>
+                      }
+                    </svg>
+                  </button>
+                </div>
+              </div>
 
-            <button type="submit" disabled={loading}
-              className="w-full py-4 bg-[#0D4A35] text-white font-bold rounded-xl hover:bg-[#0B2C22] transition-all shadow-lg shadow-[#0D4A35]/20 disabled:opacity-60 flex items-center justify-center gap-2 text-sm">
-              {loading ? (
-                <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Signing In…</>
-              ) : "Sign In to Dashboard"}
-            </button>
-          </form>
+              <div className="flex items-center justify-end">
+                <button type="button" onClick={() => { setResetMode(true); setError(""); setInfo(""); }}
+                  className="text-xs text-[#0D4A35] font-semibold hover:underline">Forgot password?</button>
+              </div>
+
+              <button type="submit" disabled={loading}
+                className="w-full py-4 bg-[#0D4A35] text-white font-bold rounded-xl hover:bg-[#0B2C22] transition-all shadow-lg shadow-[#0D4A35]/20 disabled:opacity-60 flex items-center justify-center gap-2 text-sm">
+                {loading ? (
+                  <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Signing In…</>
+                ) : "Sign In to Dashboard"}
+              </button>
+            </form>
+          )}
 
           <p className="text-center text-xs text-stone-400 mt-8">
             Access restricted to authorised administrators only.

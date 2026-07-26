@@ -5,7 +5,7 @@ import AdminShell from "@/components/AdminShell";
 import PermissionGuard from "@/components/PermissionGuard";
 import { PERMISSIONS, ROLE_DEFAULTS, Permission } from "@/types";
 import { auth, db, firebaseConfig } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, getAuth, signOut as fbSignOut } from "firebase/auth";
+import { createUserWithEmailAndPassword, getAuth, signOut as fbSignOut, sendPasswordResetEmail } from "firebase/auth";
 import { initializeApp, deleteApp } from "firebase/app";
 import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 
@@ -31,6 +31,7 @@ export default function AdminUsersPage() {
   const [form, setForm] = useState({ email: "", displayName: "", password: "", role: "editor", permissions: [] as Permission[], ministryAccess: [] as string[] });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -49,6 +50,7 @@ export default function AdminUsersPage() {
     setEditingUser(null);
     setForm({ email: "", displayName: "", password: "", role: "editor", permissions: [...ROLE_DEFAULTS.editor], ministryAccess: [] });
     setError("");
+    setSuccess("");
     setShowForm(true);
   };
 
@@ -56,6 +58,7 @@ export default function AdminUsersPage() {
     setEditingUser(user);
     setForm({ email: user.email, displayName: user.displayName, password: "", role: user.roles[0] || "editor", permissions: [...user.permissions], ministryAccess: user.ministryAccess || [] });
     setError("");
+    setSuccess("");
     setShowForm(true);
   };
 
@@ -132,6 +135,8 @@ export default function AdminUsersPage() {
       }
 
       setShowForm(false);
+      setSuccess(editingUser ? "User updated successfully." : `User created! ${form.email} can now sign in with the password you set. If they have trouble, use the "Reset Password" button to send them a reset link.`);
+      setTimeout(() => setSuccess(""), 8000);
       await load();
     } catch (err) {
       const code = (err as { code?: string })?.code ?? "";
@@ -149,6 +154,18 @@ export default function AdminUsersPage() {
       }
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSendReset = async (email: string) => {
+    if (!auth) return;
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      alert(`Password reset email sent to ${email}. Ask the user to check their inbox and spam folder.`);
+    } catch (err) {
+      const code = (err as { code?: string })?.code ?? "";
+      console.error("[Users] Password reset error:", code);
+      alert(`Could not send reset email: ${code || (err as Error).message}`);
     }
   };
 
@@ -187,6 +204,13 @@ export default function AdminUsersPage() {
           </div>
 
 
+
+          {success && (
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-4 py-3 rounded-xl mb-6 flex items-start gap-2">
+              <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+              {success}
+            </div>
+          )}
 
           {loading && <p className="text-text-muted text-sm">Loading…</p>}
 
@@ -342,6 +366,7 @@ export default function AdminUsersPage() {
                         <td className="px-5 py-4">
                           <div className="flex gap-2">
                             <button onClick={() => openEdit(user)} className="text-xs font-medium px-3 py-1.5 rounded-lg border border-stone-200 hover:border-accent/50 text-primary transition-colors">Edit</button>
+                            <button onClick={() => handleSendReset(user.email)} className="text-xs font-medium px-3 py-1.5 rounded-lg border border-stone-200 hover:border-amber-300 hover:bg-amber-50 text-amber-700 transition-colors" title="Send a password reset email to this user">Reset Password</button>
                             <button onClick={() => handleDelete(user.id)} className="text-xs font-medium px-3 py-1.5 rounded-lg border border-stone-200 hover:border-red-300 hover:bg-red-50 text-red-600 transition-colors">Remove</button>
                           </div>
                         </td>
