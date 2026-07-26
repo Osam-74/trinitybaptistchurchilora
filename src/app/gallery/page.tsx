@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PhotoCarousel from "@/components/PhotoCarousel";
@@ -22,6 +22,7 @@ export default function GalleryPage() {
   const [loading, setLoading] = useState(true);
   const [photosLoading, setPhotosLoading] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const lightboxTouchX = useRef(0);
 
   useEffect(() => {
     listPublishedAlbums().then(data => {
@@ -87,7 +88,7 @@ export default function GalleryPage() {
       {/* Photo Carousel — pulls all gallery photos */}
       <section className="py-8 bg-bg overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <PhotoCarousel speed={40} rowCount={2} label="Our Church in Pictures" />
+          <PhotoCarousel speed={35} rowCount={2} label="Our Church in Pictures" />
         </div>
       </section>
 
@@ -254,17 +255,26 @@ export default function GalleryPage() {
         )}
       </div>
 
-      {/* ── Full-Screen Lightbox ── */}
+      {/* ── Full-Screen Lightbox (swipeable, no arrows) ── */}
       {lightboxIndex !== null && photos.length > 0 && (
         <div
-          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center touch-none"
           onClick={closeLightbox}
+          onTouchStart={(e) => { lightboxTouchX.current = e.touches[0].clientX; }}
+          onTouchEnd={(e) => {
+            const delta = e.changedTouches[0].clientX - lightboxTouchX.current;
+            if (Math.abs(delta) > 50) {
+              if (delta < 0) nextPhoto();
+              else prevPhoto();
+            }
+          }}
         >
-          <div className="relative max-w-5xl w-full max-h-full px-16 py-12" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-w-5xl w-full max-h-full px-4 py-8" onClick={(e) => e.stopPropagation()}>
             <img
               src={photos[lightboxIndex].url}
               alt={photos[lightboxIndex].caption || activeAlbum?.title || ""}
-              className="w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl"
+              className="w-full max-h-[78vh] object-contain rounded-2xl shadow-2xl"
+              draggable={false}
             />
 
             {/* Watermark on lightbox image */}
@@ -287,7 +297,7 @@ export default function GalleryPage() {
             <p className="text-white/40 text-sm mt-1 text-center">{lightboxIndex + 1} / {photos.length}</p>
 
             {/* Thumbnail strip */}
-            <div className="flex justify-center gap-2 mt-4 overflow-x-auto pb-1">
+            <div className="flex justify-center gap-2 mt-4 overflow-x-auto pb-1 max-w-xl mx-auto">
               {photos.map((p, i) => (
                 <button
                   key={i}
@@ -299,24 +309,6 @@ export default function GalleryPage() {
               ))}
             </div>
           </div>
-
-          {/* Prev / Next */}
-          <button
-            onClick={(e) => { e.stopPropagation(); prevPhoto(); }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); nextPhoto(); }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
 
           {/* Close */}
           <button

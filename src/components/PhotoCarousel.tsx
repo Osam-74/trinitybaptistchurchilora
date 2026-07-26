@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { listAllPhotos, GalleryPhoto } from "@/lib/gallery";
 
 const FALLBACK_PHOTOS: GalleryPhoto[] = [
@@ -77,33 +77,6 @@ export default function PhotoCarousel({ speed = 35, rowCount = 2, label, hideWhe
   const row1 = padded.filter((_, i) => i % 2 === 0);
   const row2 = padded.filter((_, i) => i % 2 === 1);
 
-  const PhotoCard = ({ photo, keyStr }: { photo: GalleryPhoto; keyStr: string }) => (
-    <button
-      key={keyStr}
-      onClick={() => setLightbox(photo)}
-      className="flex-shrink-0 w-56 h-40 mx-1.5 rounded-2xl overflow-hidden shadow-md group relative focus:outline-none focus:ring-2 focus:ring-accent"
-      aria-label={photo.caption || "View photo"}
-    >
-      <img
-        src={photo.url}
-        alt={photo.caption || "Church photo"}
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        loading="lazy"
-        onError={(e) => {
-          // Hide the entire card if the image fails to load (e.g. deleted R2 file)
-          const card = (e.target as HTMLElement).closest("button");
-          if (card) card.style.display = "none";
-        }}
-      />
-      {/* Hover overlay */}
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-        <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
-        </svg>
-      </div>
-    </button>
-  );
-
   return (
     <>
       <div className="w-full overflow-hidden py-2">
@@ -113,36 +86,13 @@ export default function PhotoCarousel({ speed = 35, rowCount = 2, label, hideWhe
           </div>
         )}
 
-        {/* Row 1 — scrolls left */}
-        <div className="relative mb-3">
-          <div className="flex" style={{ animation: `carousel-left ${speed}s linear infinite`, willChange: 'transform' }}>
-            {[...row1, ...row1].map((photo, i) => (
-              <PhotoCard key={`r1-${photo.id}-${i}`} photo={photo} keyStr={`r1-${i}`} />
-            ))}
-          </div>
-        </div>
+        {/* Row 1 — scrolls left, swipeable */}
+        <SwipeableRow photos={row1} direction="left" speed={speed} onPhotoClick={setLightbox} />
 
-        {/* Row 2 — scrolls right */}
+        {/* Row 2 — scrolls right, swipeable */}
         {rowCount === 2 && (
-          <div className="relative">
-            <div className="flex" style={{ animation: `carousel-right ${speed * 1.15}s linear infinite`, willChange: 'transform' }}>
-              {[...row2, ...row2].map((photo, i) => (
-                <PhotoCard key={`r2-${photo.id}-${i}`} photo={photo} keyStr={`r2-${i}`} />
-              ))}
-            </div>
-          </div>
+          <SwipeableRow photos={row2} direction="right" speed={speed * 1.15} onPhotoClick={setLightbox} />
         )}
-
-        <style>{`
-          @keyframes carousel-left {
-            0%   { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-          }
-          @keyframes carousel-right {
-            0%   { transform: translateX(-50%); }
-            100% { transform: translateX(0); }
-          }
-        `}</style>
       </div>
 
       {/* Lightbox */}
@@ -173,5 +123,198 @@ export default function PhotoCarousel({ speed = 35, rowCount = 2, label, hideWhe
         </div>
       )}
     </>
+  );
+}
+
+// ── Swipeable Row ────────────────────────────────────────────────────────────
+// Uses requestAnimationFrame for auto-scroll. On touch/drag, the user takes
+// over and can scroll freely in either direction. On release, auto-scroll
+// resumes from the current position.
+
+function SwipeableRow({
+  photos,
+  direction,
+  speed,
+  onPhotoClick,
+}: {
+  photos: GalleryPhoto[];
+  direction: "left" | "right";
+  speed: number;
+  onPhotoClick: (p: GalleryPhoto) => void;
+}) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef(0);          // current pixel offset
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const startOffsetRef = useRef(0);
+  const velocityRef = useRef(0);        // for momentum after release
+  const lastXRef = useRef(0);
+  const lastTimeRef = useRef(0);
+  const [, forceRender] = useState(0);
+
+  // Auto-scroll speed in px/sec, derived from the `speed` prop (seconds per loop)
+  // Total loop width = half the duplicated track. Faster speed prop = slower scroll.
+  const pxPerSec = 60 / (speed / 35);    // ~60px/s at speed=35
+  const autoDir = direction === "left" ? -1 : 1;  // left = scroll left (negative offset)
+
+  // Duplicate the photos so the track loops seamlessly
+  const doubled = [...photos, ...photos];
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    let rafId: number;
+    let lastFrame = performance.now();
+
+    const tick = (now: number) => {
+      const dt = (now - lastFrame) / 1000;
+      lastFrame = now;
+
+      if (!isDraggingRef.current) {
+        // Apply momentum decay, then resume auto-scroll
+        if (Math.abs(velocityRef.current) > 0.5) {
+          offsetRef.current += velocityRef.current * dt;
+          velocityRef.current *= 0.92; // decay
+        } else {
+          velocityRef.current = 0;
+          // Auto-scroll
+          offsetRef.current += autoDir * pxPerSec * dt;
+        }
+
+        // Wrap around for seamless loop
+        const halfWidth = track.scrollWidth / 2;
+        if (halfWidth > 0) {
+          if (offsetRef.current <= -halfWidth) offsetRef.current += halfWidth;
+          if (offsetRef.current > 0) offsetRef.current -= halfWidth;
+        }
+      }
+
+      track.style.transform = `translate3d(${offsetRef.current}px, 0, 0)`;
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [autoDir, pxPerSec]);
+
+  // ── Touch handlers ──
+  const onTouchStart = (e: React.TouchEvent) => {
+    isDraggingRef.current = true;
+    startXRef.current = e.touches[0].clientX;
+    startOffsetRef.current = offsetRef.current;
+    velocityRef.current = 0;
+    lastXRef.current = e.touches[0].clientX;
+    lastTimeRef.current = performance.now();
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!isDraggingRef.current) return;
+    const x = e.touches[0].clientX;
+    const delta = x - startXRef.current;
+    offsetRef.current = startOffsetRef.current + delta;
+
+    // Track velocity for momentum
+    const now = performance.now();
+    const dt = (now - lastTimeRef.current) / 1000;
+    if (dt > 0) {
+      velocityRef.current = (x - lastXRef.current) / dt;
+    }
+    lastXRef.current = x;
+    lastTimeRef.current = now;
+
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translate3d(${offsetRef.current}px, 0, 0)`;
+    }
+  };
+
+  const onTouchEnd = () => {
+    isDraggingRef.current = false;
+    // Velocity will decay in the tick loop, then auto-scroll resumes
+  };
+
+  // ── Mouse handlers (for desktop drag) ──
+  const onMouseDown = (e: React.MouseEvent) => {
+    isDraggingRef.current = true;
+    startXRef.current = e.clientX;
+    startOffsetRef.current = offsetRef.current;
+    velocityRef.current = 0;
+    lastXRef.current = e.clientX;
+    lastTimeRef.current = performance.now();
+    e.preventDefault();
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current) return;
+    const x = e.clientX;
+    const delta = x - startXRef.current;
+    offsetRef.current = startOffsetRef.current + delta;
+
+    const now = performance.now();
+    const dt = (now - lastTimeRef.current) / 1000;
+    if (dt > 0) {
+      velocityRef.current = (x - lastXRef.current) / dt;
+    }
+    lastXRef.current = x;
+    lastTimeRef.current = now;
+
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translate3d(${offsetRef.current}px, 0, 0)`;
+    }
+  };
+
+  const onMouseUp = () => {
+    isDraggingRef.current = false;
+  };
+
+  const PhotoCard = ({ photo, idx }: { photo: GalleryPhoto; idx: number }) => (
+    <button
+      key={`${photo.id}-${idx}`}
+      onClick={() => {
+        if (!isDraggingRef.current) onPhotoClick(photo);
+      }}
+      className="flex-shrink-0 w-56 h-40 mx-1.5 rounded-2xl overflow-hidden shadow-md group relative focus:outline-none focus:ring-2 focus:ring-accent"
+      aria-label={photo.caption || "View photo"}
+    >
+      <img
+        src={photo.url}
+        alt={photo.caption || "Church photo"}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        loading="lazy"
+        draggable={false}
+        onError={(e) => {
+          const card = (e.target as HTMLElement).closest("button");
+          if (card) card.style.display = "none";
+        }}
+      />
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+        <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+        </svg>
+      </div>
+    </button>
+  );
+
+  return (
+    <div
+      className="relative mb-3 overflow-hidden cursor-grab active:cursor-grabbing select-none"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUp}
+      onMouseLeave={onMouseUp}
+    >
+      <div
+        ref={trackRef}
+        className="flex"
+        style={{ willChange: 'transform', width: 'max-content' }}
+      >
+        {doubled.map((photo, i) => (
+          <PhotoCard key={`${photo.id}-${i}`} photo={photo} idx={i} />
+        ))}
+      </div>
+    </div>
   );
 }
