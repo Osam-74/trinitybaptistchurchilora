@@ -209,7 +209,7 @@ export default function PastorSpeaksPopup() {
               margin: '0 0 20px', color: '#292524',
               fontStyle: 'italic', lineHeight: 1.82,
               fontFamily: "'Georgia', 'Palatino Linotype', serif",
-              fontSize: '1.05rem',
+              fontSize: 'calc(1.05rem - 5px)',
             }}>
               {message}
             </p>
