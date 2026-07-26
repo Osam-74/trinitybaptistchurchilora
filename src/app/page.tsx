@@ -219,7 +219,7 @@ export default function HomePage() {
         const photos: GalleryPhoto[] = [];
         querySnapshot.forEach((docSnap) => {
           const data = docSnap.data();
-          const url = data.imageUrl || data.photoUrl || "";
+          const url = data.url || data.imageUrl || data.photoUrl || "";
           // Skip local/public-folder paths — these can be deleted; only keep http(s) URLs
           if (url && url.startsWith("http")) {
             photos.push({
@@ -916,7 +916,7 @@ export default function HomePage() {
               width: "max-content",
             }}
           >
-            {[...(galleryPhotos.length >= 6 ? galleryPhotos : placeholderPhotos), ...(galleryPhotos.length >= 6 ? galleryPhotos : placeholderPhotos)].slice(0, 16).map((photo, i) => (
+            {[...(galleryPhotos.length >= 1 ? [...galleryPhotos, ...placeholderPhotos].slice(0, 12) : placeholderPhotos), ...(galleryPhotos.length >= 1 ? [...galleryPhotos, ...placeholderPhotos].slice(0, 12) : placeholderPhotos)].slice(0, 16).map((photo, i) => (
               <div
                 key={`row1-${photo.id}-${i}`}
                 data-photo-card
@@ -945,7 +945,7 @@ export default function HomePage() {
               width: "max-content",
             }}
           >
-            {[...(galleryPhotos.length >= 6 ? [...galleryPhotos].reverse() : [...placeholderPhotos].reverse()), ...(galleryPhotos.length >= 6 ? [...galleryPhotos].reverse() : [...placeholderPhotos].reverse())].slice(0, 16).map((photo, i) => (
+            {[...(galleryPhotos.length >= 1 ? [...galleryPhotos, ...placeholderPhotos].slice(0, 12).reverse() : [...placeholderPhotos].reverse()), ...(galleryPhotos.length >= 1 ? [...galleryPhotos, ...placeholderPhotos].slice(0, 12).reverse() : [...placeholderPhotos].reverse())].slice(0, 16).map((photo, i) => (
               <div
                 key={`row2-${photo.id}-${i}`}
                 data-photo-card

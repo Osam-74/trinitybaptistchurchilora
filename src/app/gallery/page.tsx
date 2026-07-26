@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PhotoCarousel from "@/components/PhotoCarousel";
 import { listPublishedAlbums, listPhotos, GalleryAlbum, GalleryPhoto } from "@/lib/gallery";
 
 const VIDEO_GALLERY = [
@@ -82,6 +83,13 @@ export default function GalleryPage() {
           </h1>
         </div>
       </div>
+
+      {/* Photo Carousel — pulls all gallery photos */}
+      <section className="py-8 bg-bg overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <PhotoCarousel speed={40} rowCount={2} label="Our Church in Pictures" />
+        </div>
+      </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
