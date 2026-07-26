@@ -81,11 +81,11 @@ export default function AdminLeadershipPage() {
       <PermissionGuard required="manage_leadership"><div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="font-serif text-2xl font-bold text-primary">Church Leadership</h1>
+              <h1 className="font-serif text-lg font-bold text-primary">Church Leadership</h1>
               <p className="text-text-muted text-sm mt-1">Add, edit, or remove leaders shown on the About page</p>
             </div>
             <button onClick={openNew}
-              className="btn-shine btn-gold inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold">
+              className="btn-shine btn-gold inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/>
               </svg>
@@ -105,7 +105,7 @@ export default function AdminLeadershipPage() {
             <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 text-sm text-red-700">{error}</div>
           )}
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {leaders.sort((a, b) => a.order - b.order).map(l => (
               <div key={l.id} className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
                 <div className="relative w-full overflow-hidden" style={{ aspectRatio: "3/4" }}>
@@ -141,7 +141,7 @@ export default function AdminLeadershipPage() {
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)" }}>
               <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto animate-scale-in">
                 <div className="p-6 border-b border-stone-100 flex items-center justify-between">
-                  <h2 className="font-serif text-xl font-bold text-primary">{editing ? "Edit Leader" : "Add New Leader"}</h2>
+                  <h2 className="font-serif text-lg font-bold text-primary">{editing ? "Edit Leader" : "Add New Leader"}</h2>
                   <button onClick={() => setShowForm(false)} className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center hover:bg-stone-200 transition-colors">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
                   </button>
@@ -179,8 +179,8 @@ export default function AdminLeadershipPage() {
                     </div>
                   </div>
                   <div className="flex gap-3 pt-2">
-                    <button type="submit" disabled={saving} className="flex-1 btn-gold py-3 rounded-xl font-semibold disabled:opacity-50">{saving ? "Saving…" : editing ? "Save Changes" : "Add Leader"}</button>
-                    <button type="button" onClick={() => setShowForm(false)} className="px-5 py-3 rounded-xl border border-stone-200 text-text-muted hover:bg-stone-50 text-sm font-medium transition-colors">Cancel</button>
+                    <button type="submit" disabled={saving} className="flex-1 btn-gold py-2.5 rounded-xl font-semibold disabled:opacity-50">{saving ? "Saving…" : editing ? "Save Changes" : "Add Leader"}</button>
+                    <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2.5 rounded-xl border border-stone-200 text-text-muted hover:bg-stone-50 text-sm font-medium transition-colors">Cancel</button>
                   </div>
                 </form>
               </div>

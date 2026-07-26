@@ -17,6 +17,7 @@ export interface GalleryAlbum {
   description?: string;
   coverUrl?: string;
   eventDate?: string;
+  hidden?: boolean;
   createdAt: string;
 }
 
@@ -42,9 +43,16 @@ export async function listAlbums(): Promise<GalleryAlbum[]> {
       description: data.description,
       coverUrl: data.coverUrl,
       eventDate: data.eventDate,
+      hidden: data.hidden || false,
       createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : (data.createdAt || ""),
     };
   });
+}
+
+/** Public-facing: only non-hidden albums */
+export async function listPublishedAlbums(): Promise<GalleryAlbum[]> {
+  const all = await listAlbums();
+  return all.filter(a => !a.hidden);
 }
 
 export async function createAlbum(data: Omit<GalleryAlbum, "id" | "createdAt">): Promise<string> {
@@ -64,6 +72,14 @@ export async function updateAlbum(id: string, data: Partial<Omit<GalleryAlbum, "
 export async function deleteAlbum(id: string): Promise<void> {
   if (!db) throw new Error("Firestore not configured");
   await deleteDoc(doc(db, "gallery_albums", id));
+}
+
+/** Count photos in an album (for delete warning) */
+export async function countPhotos(albumId: string): Promise<number> {
+  if (!db) return 0;
+  const q = query(collection(db, "gallery_photos"), where("albumId", "==", albumId));
+  const snap = await getDocs(q);
+  return snap.size;
 }
 
 // ── Photos ──────────────────────────────────────────────────────────────────
@@ -103,7 +119,7 @@ export async function listAllPhotos(): Promise<GalleryPhoto[]> {
         createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : (data.createdAt || ""),
       };
     })
-    .filter(p => p.url.startsWith("http")); // skip records with no valid URL
+    .filter(p => p.url.startsWith("http"));
 }
 
 export async function addPhoto(albumId: string, url: string, caption?: string): Promise<string> {

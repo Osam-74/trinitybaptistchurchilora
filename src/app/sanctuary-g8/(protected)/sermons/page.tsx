@@ -170,7 +170,7 @@ export default function AdminSermonsPage() {
       <div className="max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="font-serif text-2xl font-bold text-primary">Sermons</h1>
+            <h1 className="font-serif text-lg font-bold text-primary">Sermons</h1>
             <p className="text-text-muted text-sm mt-1">Manage the sermon library</p>
           </div>
           <button onClick={openNew}
@@ -188,7 +188,7 @@ export default function AdminSermonsPage() {
             style={{ background: "rgba(0,0,0,0.6)" }}>
             <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[92vh] overflow-y-auto">
               <div className="p-6 border-b border-stone-100 flex items-center justify-between sticky top-0 bg-white z-10 rounded-t-3xl">
-                <h2 className="font-serif text-xl font-bold text-primary">{editingId ? "Edit Sermon" : "New Sermon"}</h2>
+                <h2 className="font-serif text-lg font-bold text-primary">{editingId ? "Edit Sermon" : "New Sermon"}</h2>
                 <button onClick={() => { setShowForm(false); rec.reset(); }}
                   className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center hover:bg-stone-200">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

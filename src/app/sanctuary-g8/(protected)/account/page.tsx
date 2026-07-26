@@ -109,7 +109,7 @@ export default function AccountPage() {
     <AdminShell>
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
-          <h1 className="font-serif text-2xl font-bold text-primary">My Account</h1>
+          <h1 className="font-serif text-lg font-bold text-primary">My Account</h1>
           <p className="text-text-muted text-sm mt-1">Manage your display name and password</p>
         </div>
 

@@ -41,7 +41,7 @@ export default function AdminContactsPage() {
       <PermissionGuard required="manage_contacts">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <h1 className="font-serif text-2xl font-bold text-primary">Contact Messages</h1>
+            <h1 className="font-serif text-lg font-bold text-primary">Contact Messages</h1>
             <p className="text-text-muted text-sm mt-1">{messages.length} message{messages.length !== 1 ? "s" : ""} received</p>
           </div>
 

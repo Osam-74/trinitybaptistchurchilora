@@ -126,7 +126,7 @@ export default function AdminBookingsPage() {
           {/* Header with booking toggle */}
           <div className="flex items-start justify-between mb-8">
             <div>
-              <h1 className="font-serif text-2xl font-bold text-primary">Bookings</h1>
+              <h1 className="font-serif text-lg font-bold text-primary">Bookings</h1>
               <p className="text-text-muted text-sm mt-1">Manage pastoral session requests</p>
             </div>
             <div className="flex items-center gap-3 bg-white rounded-2xl border border-stone-200 px-5 py-3 shadow-sm">
@@ -149,7 +149,7 @@ export default function AdminBookingsPage() {
           <div className="flex gap-2 mb-6 p-1 bg-stone-100 rounded-2xl w-fit">
             {(["bookings","availability"] as const).map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`px-5 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all ${activeTab === tab ? "bg-white shadow-sm text-primary" : "text-text-muted hover:text-primary"}`}>
+                className={`px-4 py-2 rounded-lg text-xs font-semibold capitalize transition-all ${activeTab === tab ? "bg-white shadow-sm text-primary" : "text-text-muted hover:text-primary"}`}>
                 {tab === "availability" ? "📅 Availability" : "📋 Bookings"}
               </button>
             ))}

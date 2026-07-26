@@ -160,7 +160,7 @@ export default function AdminDashboardPage() {
               {/* Quick Announcement Card */}
               <div className="bg-white rounded-2xl border border-[#E8EDE8] shadow-sm p-6">
                 <div className="mb-5">
-                  <h2 className="font-serif text-xl font-bold text-[#0B2C22]">📢 Quick Announcement</h2>
+                  <h2 className="font-serif text-lg font-bold text-[#0B2C22]">📢 Quick Announcement</h2>
                   <p className="text-stone-400 text-xs mt-0.5">Type an announcement — it will be added to the scrolling ticker on the site immediately.</p>
                 </div>
 
@@ -218,7 +218,7 @@ export default function AdminDashboardPage() {
 
               {/* Today's Service Timeline */}
               <div className="bg-white rounded-2xl border border-[#E8EDE8] shadow-sm p-6">
-                <h3 className="font-serif text-xl font-bold text-[#0B2C22] mb-5">Today&apos;s Service Timeline</h3>
+                <h3 className="font-serif text-lg font-bold text-[#0B2C22] mb-5">Today&apos;s Service Timeline</h3>
                 <div className="relative pl-6 border-l-2 border-[#E8EDE8] space-y-6">
                   <div className="relative">
                     <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-[#22C55E] border-4 border-white"/>
@@ -299,7 +299,7 @@ export default function AdminDashboardPage() {
         <div className="bg-white rounded-2xl border border-[#E8EDE8] shadow-sm p-6">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="font-serif text-xl font-bold text-[#0B2C22]">📋 Activity Log</h2>
+              <h2 className="font-serif text-lg font-bold text-[#0B2C22]">📋 Activity Log</h2>
               <p className="text-stone-400 text-xs mt-0.5">Recent changes made by admin users</p>
             </div>
             <span className="text-xs text-stone-400 font-medium">{activities.length} recent {activities.length === 1 ? 'entry' : 'entries'}</span>

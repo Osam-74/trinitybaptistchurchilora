@@ -94,7 +94,7 @@ export default function AnnouncementsPage() {
 
           {/* Header */}
           <div className="bg-white rounded-2xl border border-[#E8EDE8] shadow-sm p-6">
-            <h1 className="font-serif text-2xl font-bold text-[#0B2C22]">📢 Announcements</h1>
+            <h1 className="font-serif text-lg font-bold text-[#0B2C22]">📢 Announcements</h1>
             <p className="text-stone-400 text-sm mt-1">Manage the scrolling ticker bar at the top of the website. Changes apply immediately to all visitors.</p>
           </div>
 

@@ -58,7 +58,7 @@ export default function PastorSpeaksAdmin() {
       <PermissionGuard required="manage_pastor_speaks">
       <div className={`w-full transition-all duration-300 ${data.message ? 'max-w-2xl lg:max-w-6xl' : 'max-w-2xl'}`}>
         <div className="mb-6">
-          <h1 className="font-serif text-2xl font-bold text-primary">Pastor&apos;s Word</h1>
+          <h1 className="font-serif text-lg font-bold text-primary">Pastor&apos;s Word</h1>
           <p className="text-text-muted text-sm mt-1">This appears as a popup on the homepage on every visit</p>
         </div>
 

@@ -94,7 +94,7 @@ export default function AdminHymnsPage() {
       <PermissionGuard required="manage_hymns"><div className="max-w-5xl mx-auto">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div>
-              <h1 className="font-serif text-2xl font-bold text-primary">Hymns</h1>
+              <h1 className="font-serif text-lg font-bold text-primary">Hymns</h1>
               <p className="text-text-muted text-sm mt-1">Manage the English &amp; Yoruba hymnals shown on the website</p>
             </div>
             <div className="flex gap-2">
@@ -156,7 +156,7 @@ export default function AdminHymnsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
           <form onSubmit={handleSave} className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-stone-100 flex items-center justify-between">
-              <h2 className="font-serif text-xl font-bold text-primary">{editingId ? "Edit Hymn" : "Add Hymn"}</h2>
+              <h2 className="font-serif text-lg font-bold text-primary">{editingId ? "Edit Hymn" : "Add Hymn"}</h2>
               <button type="button" onClick={() => setShowForm(false)} className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center hover:bg-stone-200">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
@@ -191,7 +191,7 @@ export default function AdminHymnsPage() {
               </div>
             </div>
             <div className="p-6 border-t border-stone-100 flex gap-3">
-              <button type="submit" disabled={saving} className="flex-1 btn-shine btn-gold py-3 rounded-xl font-semibold disabled:opacity-50">
+              <button type="submit" disabled={saving} className="flex-1 btn-shine btn-gold py-2.5 rounded-xl font-semibold disabled:opacity-50">
                 {saving ? "Saving…" : editingId ? "Save Changes" : "Add Hymn"}
               </button>
             </div>
@@ -204,7 +204,7 @@ export default function AdminHymnsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-stone-100 flex items-center justify-between">
-              <h2 className="font-serif text-xl font-bold text-primary">Bulk Import Hymns</h2>
+              <h2 className="font-serif text-lg font-bold text-primary">Bulk Import Hymns</h2>
               <button onClick={() => setShowBulk(false)} className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center hover:bg-stone-200">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
@@ -223,7 +223,7 @@ God is so good, He's so good to me.
               <textarea rows={10} value={bulkText} onChange={(e) => setBulkText(e.target.value)}
                 placeholder="Paste hymns here…" className="input-field resize-none font-mono text-sm w-full" />
               {bulkResult && <p className="text-sm text-primary font-medium">{bulkResult}</p>}
-              <button onClick={handleBulkImport} disabled={saving || !bulkText.trim()} className="w-full btn-shine btn-gold py-3 rounded-xl font-semibold disabled:opacity-50">
+              <button onClick={handleBulkImport} disabled={saving || !bulkText.trim()} className="w-full btn-shine btn-gold py-2.5 rounded-xl font-semibold disabled:opacity-50">
                 {saving ? "Importing…" : "Import Hymns"}
               </button>
             </div>

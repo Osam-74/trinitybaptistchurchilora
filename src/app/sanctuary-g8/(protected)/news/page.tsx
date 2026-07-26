@@ -224,14 +224,14 @@ export default function AdminNewsPage() {
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="font-serif text-2xl font-bold text-primary">Latest News & Events</h1>
+              <h1 className="font-serif text-lg font-bold text-primary">Latest News & Events</h1>
               <p className="text-text-muted text-sm mt-1">
                 Manage announcements, events, celebrations, and news posts shown on the website
               </p>
             </div>
             <button
               onClick={openNew}
-              className="btn-shine btn-gold inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold"
+              className="btn-shine btn-gold inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -271,7 +271,7 @@ export default function AdminNewsPage() {
               <h3 className="text-sm font-semibold text-primary mb-1">No posts found</h3>
               <p className="text-xs text-text-muted mb-4">Click &ldquo;Add Post&rdquo; to create your first update, or seed the anniversary post below.</p>
               <button onClick={handleSeedAnniversary} disabled={saving}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border border-accent/40 text-accent hover:bg-accent/10 transition-all disabled:opacity-50">
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold border border-accent/40 text-accent hover:bg-accent/10 transition-all disabled:opacity-50">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
                 {saving ? "Seeding…" : "Seed Anniversary Post"}
               </button>
@@ -410,7 +410,7 @@ export default function AdminNewsPage() {
                     <div className="flex h-full flex-col justify-between">
                       {/* Header */}
                       <div className="flex h-16 items-center justify-between px-6 border-b border-stone-100 bg-stone-50">
-                        <h2 className="font-serif text-xl font-bold text-primary">
+                        <h2 className="font-serif text-lg font-bold text-primary">
                           {editing ? "Edit News Post" : "Add News Post"}
                         </h2>
                         <button
@@ -563,14 +563,14 @@ export default function AdminNewsPage() {
                           <button
                             type="submit"
                             disabled={saving}
-                            className="flex-1 btn-gold py-3 rounded-xl font-semibold disabled:opacity-55"
+                            className="flex-1 btn-gold py-2.5 rounded-xl font-semibold disabled:opacity-55"
                           >
                             {saving ? "Saving..." : (editing ? "Save Changes" : "Create Post")}
                           </button>
                           <button
                             type="button"
                             onClick={() => setShowForm(false)}
-                            className="px-5 py-3 rounded-xl border border-stone-200 text-text-muted hover:bg-stone-50 text-sm font-medium transition-colors"
+                            className="px-4 py-2.5 rounded-xl border border-stone-200 text-text-muted hover:bg-stone-50 text-sm font-medium transition-colors"
                           >
                             Cancel
                           </button>

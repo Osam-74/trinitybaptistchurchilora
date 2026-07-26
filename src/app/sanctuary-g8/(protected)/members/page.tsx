@@ -105,7 +105,7 @@ export default function AdminMembersPage() {
       <PermissionGuard required="manage_members"><div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="font-serif text-2xl font-bold text-primary">Choir &amp; Media Team</h1>
+              <h1 className="font-serif text-lg font-bold text-primary">Choir &amp; Media Team</h1>
               <p className="text-text-muted text-sm mt-1">Review registrations and manage the team directory</p>
             </div>
           </div>
@@ -186,7 +186,7 @@ export default function AdminMembersPage() {
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)" }}>
               <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto animate-scale-in">
                 <div className="p-6 border-b border-stone-100 flex items-center justify-between">
-                  <h2 className="font-serif text-xl font-bold text-primary">Edit Member</h2>
+                  <h2 className="font-serif text-lg font-bold text-primary">Edit Member</h2>
                   <button onClick={() => setEditing(null)} className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center hover:bg-stone-200 transition-colors">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
                   </button>
@@ -267,8 +267,8 @@ export default function AdminMembersPage() {
                   </div>
 
                   <div className="flex gap-3 pt-2">
-                    <button type="submit" className="flex-1 btn-gold py-3 rounded-xl font-semibold">Save Changes</button>
-                    <button type="button" onClick={() => setEditing(null)} className="px-5 py-3 rounded-xl border border-stone-200 text-text-muted hover:bg-stone-50 text-sm font-medium transition-colors">Cancel</button>
+                    <button type="submit" className="flex-1 btn-gold py-2.5 rounded-xl font-semibold">Save Changes</button>
+                    <button type="button" onClick={() => setEditing(null)} className="px-4 py-2.5 rounded-xl border border-stone-200 text-text-muted hover:bg-stone-50 text-sm font-medium transition-colors">Cancel</button>
                   </div>
                 </form>
               </div>
