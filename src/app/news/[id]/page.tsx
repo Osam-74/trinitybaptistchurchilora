@@ -147,8 +147,8 @@ export default function NewsDetailPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           
           {/* Cover Image */}
-          <div className="relative rounded-3xl overflow-hidden shadow-xl mb-12 aspect-video img-zoom">
-            <img src={coverImage} alt={post.title} className="w-full h-full object-cover" />
+          <div className="relative rounded-3xl overflow-hidden shadow-xl mb-12 aspect-video img-zoom bg-stone-100">
+            <img src={coverImage} alt={post.title} className="w-full h-full object-contain" />
           </div>
 
           {/* Article Body */}
@@ -166,8 +166,8 @@ export default function NewsDetailPage() {
               <h2 className="font-serif text-2xl font-bold text-primary mb-6">Gallery</h2>
               <div className="grid md:grid-cols-2 gap-6">
                 {additionalImages.map((img, idx) => (
-                  <div key={idx} className="relative rounded-2xl overflow-hidden shadow-md aspect-video group img-zoom">
-                    <img src={img} alt={`${post.title} gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                  <div key={idx} className="relative rounded-2xl overflow-hidden shadow-md aspect-video group img-zoom bg-stone-100">
+                    <img src={img} alt={`${post.title} gallery ${idx + 1}`} className="w-full h-full object-contain" />
                   </div>
                 ))}
               </div>
@@ -219,8 +219,8 @@ export default function NewsDetailPage() {
                       href={`/news/${other.id}`}
                       className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-stone-100 transition-all duration-300 h-full"
                     >
-                      <div className="relative aspect-video overflow-hidden">
-                        <img src={otherCover} alt={other.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <div className="relative aspect-video overflow-hidden bg-stone-100">
+                        <img src={otherCover} alt={other.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
                         <span className={`absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/95 text-primary border border-stone-100`}>
                           {other.category}
                         </span>

@@ -285,9 +285,9 @@ export default function AdminNewsPage() {
                 <div key={post.id} className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden flex flex-col justify-between">
                   <div>
                     {/* Cover image thumbnail */}
-                    <div className="relative aspect-video w-full overflow-hidden bg-stone-50">
+                    <div className="relative aspect-video w-full overflow-hidden bg-stone-100 flex items-center justify-center">
                       {post.images && post.images.length > 0 ? (
-                        <img src={post.images[0]} alt={post.title} className="w-full h-full object-cover" />
+                        <img src={post.images[0]} alt={post.title} className="w-full h-full object-contain" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-stone-300">
                           <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -499,8 +499,8 @@ export default function AdminNewsPage() {
                           {form.images && form.images.length > 0 && (
                             <div className="grid grid-cols-3 gap-3 mb-4">
                               {form.images.map((url, index) => (
-                                <div key={index} className="relative aspect-video rounded-xl overflow-hidden border border-stone-200 group">
-                                  <img src={url} alt={`Post Image ${index + 1}`} className="w-full h-full object-cover" />
+                                <div key={index} className="relative aspect-video rounded-xl overflow-hidden border border-stone-200 group bg-stone-100">
+                                  <img src={url} alt={`Post Image ${index + 1}`} className="w-full h-full object-contain" />
                                   <button
                                     type="button"
                                     onClick={() => setForm(p => ({ ...p, images: p.images.filter((_, i) => i !== index) }))}

@@ -164,11 +164,11 @@ export default function NewsListingPage() {
                     className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-stone-100 transition-all duration-300 flex flex-col h-full"
                   >
                     {/* Cover image & Category badge */}
-                    <div className="relative aspect-video overflow-hidden">
+                    <div className="relative aspect-video overflow-hidden bg-stone-100">
                       <img
                         src={coverImage}
                         alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                       />
                       <span className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/95 text-primary border border-stone-100 ${getCategoryColor(post.category)}`}>
                         {post.category}
