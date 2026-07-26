@@ -11,6 +11,7 @@ import { getYouTubeThumbnail } from "@/lib/utils";
 import { sampleSermons, samplePosts } from "@/lib/seed-data";
 import { doc, onSnapshot, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { listPublishedPosts } from "@/lib/news";
 
 // Custom useScrollReveal Hook
 function useScrollReveal() {
@@ -167,6 +168,22 @@ export default function HomePage() {
     createdAt?: { seconds: number } | string | null;
   }
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
+
+  // NEWS & EVENTS: fetch latest published posts
+  const [newsPosts, setNewsPosts] = useState<Array<{
+    id: string; title: string; category: string; excerpt: string;
+    images: string[]; date: string; author?: string;
+  }>>([]);
+
+  useEffect(() => {
+    listPublishedPosts().then(posts => {
+      setNewsPosts(posts.slice(0, 4).map(p => ({
+        id: p.id, title: p.title, category: p.category,
+        excerpt: p.excerpt, images: p.images || [],
+        date: p.date, author: p.author,
+      })));
+    }).catch(() => {});
+  }, []);
 
   // Remove a broken photo from state so it vanishes from BOTH carousel rows
   const handlePhotoError = (photoId: string) => {
@@ -962,6 +979,64 @@ export default function HomePage() {
       {/* Faith Articles */}
       {faithArticles.length > 0 && (
         <FaithArticlesSection articles={faithArticles} />
+      )}
+
+      {/* Latest News & Events */}
+      {newsPosts.length > 0 && (
+        <section className="py-20 bg-stone-50 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <span className="inline-block bg-accent/10 text-accent font-bold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full mb-3">Stay Updated</span>
+              <h2 className="font-serif text-3xl lg:text-4xl text-primary font-bold mb-3">Latest News &amp; Events</h2>
+              <p className="text-text-muted text-sm max-w-xl mx-auto">Catch up on the latest happenings, celebrations, and announcements from Trinity Baptist Church, Ilora.</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {newsPosts.map((post, i) => {
+                const categoryColors: Record<string, string> = {
+                  news: "bg-blue-100 text-blue-700",
+                  event: "bg-green-100 text-green-700",
+                  announcement: "bg-amber-100 text-amber-700",
+                  celebration: "bg-rose-100 text-rose-700",
+                };
+                return (
+                  <Link key={post.id} href={`/news/${post.id}`} className="group block bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <div className="relative w-full overflow-hidden" style={{ aspectRatio: "4/3" }}>
+                      {post.images && post.images[0] ? (
+                        <img src={post.images[0]} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 flex items-center justify-center">
+                          <svg className="w-12 h-12 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 12h6m-6 4h2"/></svg>
+                        </div>
+                      )}
+                      <span className={`absolute top-3 left-3 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide rounded-full ${categoryColors[post.category] || "bg-stone-100 text-stone-600"}`}>
+                        {post.category}
+                      </span>
+                    </div>
+                    <div className="p-5">
+                      <p className="text-[11px] text-text-muted mb-2 font-medium">
+                        {new Date(post.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                      </p>
+                      <h3 className="font-serif font-bold text-primary text-base mb-2 line-clamp-2 group-hover:text-accent transition-colors">{post.title}</h3>
+                      <p className="text-text-muted text-xs leading-relaxed line-clamp-3 mb-3">{post.excerpt}</p>
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-accent group-hover:gap-2 transition-all">
+                        Read More
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="text-center mt-10">
+              <Link href="/news" className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-semibold px-7 py-3 rounded-xl shadow-lg hover:-translate-y-0.5 transition-all text-sm">
+                View All News &amp; Events
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+              </Link>
+            </div>
+          </div>
+        </section>
       )}
 
       {/* 9. Contact / Action CTA section */}

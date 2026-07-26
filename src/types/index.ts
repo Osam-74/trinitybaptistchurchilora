@@ -226,3 +226,18 @@ export const ROLE_DEFAULTS: Record<string, Permission[]> = {
     "manage_posts", "manage_activities", "manage_announcements", "manage_hymns",
   ],
 };
+
+export interface NewsPost {
+  id: string;
+  title: string;
+  category: "news" | "event" | "announcement" | "celebration";
+  date: string;
+  excerpt: string;
+  body: string;
+  images: string[];
+  featured: boolean;
+  active: boolean;
+  author?: string;
+  publishedAt?: string;
+  createdAt?: string;
+}
