@@ -23,7 +23,7 @@ const RA_RANKS = [
 
 export default function RoyalAmbassadorsPage() {
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ fullName: "", rank: "", photoFile: null as File | null });
+  const [form, setForm] = useState({ fullName: "", rank: "", photoFile: null as File | null, raIdCardNumber: "", occupation: "" });
   const [photoPreview, setPhotoPreview] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -60,6 +60,8 @@ export default function RoyalAmbassadorsPage() {
         fullName: form.fullName.trim(),
         rank: form.rank,
         photoUrl: url,
+        ...(form.raIdCardNumber.trim() ? { raIdCardNumber: form.raIdCardNumber.trim() } : {}),
+        ...(form.occupation.trim() ? { occupation: form.occupation.trim() } : {}),
       });
       setSuccess(true);
       setShowForm(false);

@@ -22,6 +22,9 @@ export interface MinistryMember {
   submittedAt: string;
   approvedAt?: string;
   note?: string;         // admin note
+  // ── RA-specific optional fields (admin can update later) ──
+  raIdCardNumber?: string;   // RA ID card number
+  occupation?: string;       // kind of work / job / employment
 }
 
 export async function submitMembership(data: {
@@ -29,6 +32,8 @@ export async function submitMembership(data: {
   fullName: string;
   rank: string;
   photoUrl: string;
+  raIdCardNumber?: string;
+  occupation?: string;
 }): Promise<string> {
   if (!db) throw new Error("Firestore not configured");
   const ref = await addDoc(collection(db, "ministry_members"), {
@@ -59,6 +64,8 @@ export async function listMembersForMinistry(ministry: MinistryKey): Promise<Min
       submittedAt: data.submittedAt instanceof Timestamp ? data.submittedAt.toDate().toISOString() : (data.submittedAt || ""),
       approvedAt: data.approvedAt instanceof Timestamp ? data.approvedAt.toDate().toISOString() : data.approvedAt,
       note: data.note,
+      raIdCardNumber: data.raIdCardNumber || "",
+      occupation: data.occupation || "",
     };
   });
 }
@@ -79,6 +86,8 @@ export async function listAllMembers(): Promise<MinistryMember[]> {
       submittedAt: data.submittedAt instanceof Timestamp ? data.submittedAt.toDate().toISOString() : (data.submittedAt || ""),
       approvedAt: data.approvedAt instanceof Timestamp ? data.approvedAt.toDate().toISOString() : data.approvedAt,
       note: data.note,
+      raIdCardNumber: data.raIdCardNumber || "",
+      occupation: data.occupation || "",
     };
   });
 }
@@ -94,6 +103,18 @@ export async function updateMemberStatus(
     ...(note !== undefined ? { note } : {}),
     ...(status === "approved" ? { approvedAt: serverTimestamp() } : {}),
   });
+}
+
+export async function updateMemberDetails(
+  id: string,
+  details: { raIdCardNumber?: string; occupation?: string; rank?: string }
+): Promise<void> {
+  if (!db) throw new Error("Firestore not configured");
+  const update: Record<string, string> = {};
+  if (details.raIdCardNumber !== undefined) update.raIdCardNumber = details.raIdCardNumber;
+  if (details.occupation !== undefined) update.occupation = details.occupation;
+  if (details.rank !== undefined) update.rank = details.rank;
+  await updateDoc(doc(db, "ministry_members", id), update);
 }
 
 export async function deleteMember(id: string): Promise<void> {

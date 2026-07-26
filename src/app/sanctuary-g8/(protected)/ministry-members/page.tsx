@@ -4,10 +4,11 @@ import AdminShell from "@/components/AdminShell";
 import PermissionGuard from "@/components/PermissionGuard";
 import { useState, useEffect, useCallback } from "react";
 import {
-  listAllMembers, updateMemberStatus, deleteMember,
+  listAllMembers, updateMemberStatus, deleteMember, updateMemberDetails,
   submitMembership,
   MinistryMember, MemberStatus, MinistryKey,
 } from "@/lib/ministryMembers";
+import * as XLSX from "xlsx";
 
 const MINISTRY_LABELS: Record<string, string> = {
   "royal-ambassadors": "Royal Ambassadors",
@@ -58,11 +59,13 @@ function AddMemberModal({
   const [rank, setRank] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState("");
+  const [raIdCardNumber, setRaIdCardNumber] = useState("");
+  const [occupation, setOccupation] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   // When ministry changes reset rank
-  const handleMinistryChange = (v: MinistryKey) => { setMinistry(v); setRank(""); };
+  const handleMinistryChange = (v: MinistryKey) => { setMinistry(v); setRank(""); setRaIdCardNumber(""); setOccupation(""); };
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -78,7 +81,11 @@ function AddMemberModal({
     try {
       const { uploadToR2 } = await import("@/lib/r2");
       const photoUrl = await uploadToR2(photoFile, "members");
-      const id = await submitMembership({ ministry, fullName: fullName.trim(), rank, photoUrl });
+      const id = await submitMembership({
+        ministry, fullName: fullName.trim(), rank, photoUrl,
+        ...(ministry === "royal-ambassadors" && raIdCardNumber.trim() ? { raIdCardNumber: raIdCardNumber.trim() } : {}),
+        ...(ministry === "royal-ambassadors" && occupation.trim() ? { occupation: occupation.trim() } : {}),
+      });
       onAdded({
         id,
         ministry,
@@ -87,6 +94,8 @@ function AddMemberModal({
         photoUrl,
         status: "pending",
         submittedAt: new Date().toISOString(),
+        raIdCardNumber: ministry === "royal-ambassadors" ? raIdCardNumber.trim() : "",
+        occupation: ministry === "royal-ambassadors" ? occupation.trim() : "",
       });
     } catch (err) {
       setError("Failed to add member. Please try again.");
@@ -140,6 +149,23 @@ function AddMemberModal({
                 {(RANK_OPTIONS[ministry] || []).map(r => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
+            {/* RA-specific fields */}
+            {ministry === "royal-ambassadors" && (
+              <>
+                <div>
+                  <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">RA ID Card Number <span className="text-stone-400 normal-case font-normal">(optional)</span></label>
+                  <input type="text" value={raIdCardNumber} onChange={e => setRaIdCardNumber(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40"
+                    placeholder="RA ID card number" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">Occupation <span className="text-stone-400 normal-case font-normal">(optional)</span></label>
+                  <input type="text" value={occupation} onChange={e => setOccupation(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40"
+                    placeholder="e.g. Student, Trader, Civil Servant" />
+                </div>
+              </>
+            )}
             {/* Photo */}
             <div>
               <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">Photo in Uniform *</label>
@@ -168,6 +194,265 @@ function AddMemberModal({
   );
 }
 
+
+// ── Edit Details Modal (admin updates RA-specific fields) ─────────────────────
+function EditDetailsModal({
+  member, onClose, onSaved,
+}: { member: MinistryMember; onClose: () => void; onSaved: (m: MinistryMember) => void }) {
+  const [raIdCardNumber, setRaIdCardNumber] = useState(member.raIdCardNumber || "");
+  const [occupation, setOccupation] = useState(member.occupation || "");
+  const [rank, setRank] = useState(member.rank);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const rankOptions = RANK_OPTIONS[member.ministry] || [];
+
+  const handleSave = async () => {
+    setSaving(true); setError("");
+    try {
+      await updateMemberDetails(member.id, {
+        raIdCardNumber: raIdCardNumber.trim(),
+        occupation: occupation.trim(),
+        rank,
+      });
+      onSaved({ ...member, raIdCardNumber: raIdCardNumber.trim(), occupation: occupation.trim(), rank });
+    } catch (err) {
+      setError("Failed to update. Please try again.");
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+      <div onClick={e => e.stopPropagation()}
+        className="relative w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl overflow-hidden max-h-[94vh] flex flex-col">
+        <div className="w-10 h-1.5 rounded-full bg-stone-200 mx-auto mt-3 mb-1 sm:hidden"/>
+        <div className="px-6 pt-5 pb-4 border-b border-stone-100 flex items-center justify-between">
+          <div>
+            <h2 className="font-bold text-stone-800 text-lg">Edit Member Details</h2>
+            <p className="text-xs text-stone-500">{member.fullName}</p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center transition-colors">
+            <svg className="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
+          {/* Rank (editable for all ministries) */}
+          <div>
+            <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">
+              {member.ministry === "royal-ambassadors" ? "Rank" : "Forward Step"}
+            </label>
+            <select value={rank} onChange={e => setRank(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white">
+              {rankOptions.map(r => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+
+          {/* RA-specific fields */}
+          {member.ministry === "royal-ambassadors" && (
+            <>
+              <div>
+                <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">RA ID Card Number</label>
+                <input type="text" value={raIdCardNumber} onChange={e => setRaIdCardNumber(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40"
+                  placeholder="Enter RA ID card number" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">Occupation / Kind of Work</label>
+                <input type="text" value={occupation} onChange={e => setOccupation(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40"
+                  placeholder="e.g. Student, Trader, Civil Servant" />
+              </div>
+            </>
+          )}
+
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+        </div>
+        <div className="px-6 py-4 border-t border-stone-100 flex gap-3">
+          <button onClick={handleSave} disabled={saving}
+            className="flex-1 py-3 rounded-xl bg-primary text-white font-bold text-sm disabled:opacity-50 hover:bg-primary/90 transition-colors">
+            {saving ? "Saving…" : "Save Changes"}
+          </button>
+          <button onClick={onClose}
+            className="px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-sm font-semibold hover:bg-stone-50 transition-colors">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ── Export Modal (Excel export with rank filtering) ───────────────────────────
+function ExportModal({ members, onClose }: { members: MinistryMember[]; onClose: () => void }) {
+  const [exportMinistry, setExportMinistry] = useState<"all" | MinistryKey>("all");
+  const [rankMode, setRankMode] = useState<"all" | "specific">("all");
+  const [selectedRanks, setSelectedRanks] = useState<Set<string>>(new Set());
+  const [statusMode, setStatusMode] = useState<"all" | "approved">("all");
+
+  // Get available ranks based on selected ministry
+  const availableRanks: string[] = exportMinistry === "all"
+    ? [...new Set([...RA_RANKS, ...GA_STEPS, ...LYDIA_STEPS])]
+    : RANK_OPTIONS[exportMinistry] || [];
+
+  const toggleRank = (rank: string) => {
+    setSelectedRanks(prev => {
+      const next = new Set(prev);
+      if (next.has(rank)) next.delete(rank); else next.add(rank);
+      return next;
+    });
+  };
+
+  // Filter members for export
+  const getExportData = () => {
+    let filtered = members;
+    if (exportMinistry !== "all") filtered = filtered.filter(m => m.ministry === exportMinistry);
+    if (statusMode === "approved") filtered = filtered.filter(m => m.status === "approved");
+    if (rankMode === "specific" && selectedRanks.size > 0) {
+      filtered = filtered.filter(m => selectedRanks.has(m.rank));
+    }
+    return filtered;
+  };
+
+  const handleExport = () => {
+    const data = getExportData();
+    if (data.length === 0) {
+      alert("No members match the selected filters.");
+      return;
+    }
+
+    const rows = data.map((m, i) => ({
+      "#": i + 1,
+      "Full Name": m.fullName,
+      "Ministry": MINISTRY_LABELS[m.ministry] || m.ministry,
+      "Rank / Step": m.rank,
+      "Status": m.status,
+      "RA ID Card Number": m.raIdCardNumber || "",
+      "Occupation": m.occupation || "",
+      "Submitted": formatDate(m.submittedAt),
+      "Approved": m.approvedAt ? formatDate(m.approvedAt) : "",
+      "Note": m.note || "",
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    // Set column widths
+    ws["!cols"] = [
+      { wch: 4 }, { wch: 25 }, { wch: 20 }, { wch: 30 }, { wch: 10 },
+      { wch: 20 }, { wch: 25 }, { wch: 14 }, { wch: 14 }, { wch: 30 },
+    ];
+
+    const wb = XLSX.utils.book_new();
+    const ministryLabel = exportMinistry === "all" ? "All_Ministries" : exportMinistry.replace(/-/g, "_");
+    const rankLabel = rankMode === "all" ? "All_Ranks" : "Selected_Ranks";
+    XLSX.utils.book_append_sheet(wb, ws, "Members");
+
+    const date = new Date().toISOString().split("T")[0];
+    XLSX.writeFile(wb, `${ministryLabel}_${rankLabel}_${date}.xlsx`);
+    onClose();
+  };
+
+  const previewCount = getExportData().length;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+      <div onClick={e => e.stopPropagation()}
+        className="relative w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl overflow-hidden max-h-[94vh] flex flex-col">
+        <div className="w-10 h-1.5 rounded-full bg-stone-200 mx-auto mt-3 mb-1 sm:hidden"/>
+        <div className="px-6 pt-5 pb-4 border-b border-stone-100 flex items-center justify-between">
+          <h2 className="font-bold text-stone-800 text-lg">Export to Excel</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center transition-colors">
+            <svg className="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+          {/* Ministry selector */}
+          <div>
+            <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">Ministry</label>
+            <div className="flex gap-2 flex-wrap">
+              <button onClick={() => { setExportMinistry("all"); setSelectedRanks(new Set()); }}
+                className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${exportMinistry === "all" ? "bg-primary text-white border-primary shadow-sm" : "border-stone-200 text-stone-600 hover:border-stone-300"}`}>
+                All Ministries
+              </button>
+              {(["royal-ambassadors", "girls-auxiliary", "lydia-auxiliary"] as MinistryKey[]).map(k => (
+                <button key={k} onClick={() => { setExportMinistry(k); setSelectedRanks(new Set()); }}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${exportMinistry === k ? "bg-primary text-white border-primary shadow-sm" : "border-stone-200 text-stone-600 hover:border-stone-300"}`}>
+                  {MINISTRY_LABELS[k]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Status filter */}
+          <div>
+            <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">Status</label>
+            <div className="flex gap-2">
+              <button onClick={() => setStatusMode("all")}
+                className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${statusMode === "all" ? "bg-stone-700 text-white border-stone-700" : "border-stone-200 text-stone-600 hover:border-stone-300"}`}>
+                All Statuses
+              </button>
+              <button onClick={() => setStatusMode("approved")}
+                className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${statusMode === "approved" ? "bg-emerald-600 text-white border-emerald-600" : "border-stone-200 text-stone-600 hover:border-stone-300"}`}>
+                Approved Only
+              </button>
+            </div>
+          </div>
+
+          {/* Rank filter */}
+          <div>
+            <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">Ranks / Steps</label>
+            <div className="flex gap-2 mb-3">
+              <button onClick={() => setRankMode("all")}
+                className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${rankMode === "all" ? "bg-stone-700 text-white border-stone-700" : "border-stone-200 text-stone-600 hover:border-stone-300"}`}>
+                All Ranks
+              </button>
+              <button onClick={() => setRankMode("specific")}
+                className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${rankMode === "specific" ? "bg-stone-700 text-white border-stone-700" : "border-stone-200 text-stone-600 hover:border-stone-300"}`}>
+                Choose Specific Ranks
+              </button>
+            </div>
+            {rankMode === "specific" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1">
+                {availableRanks.map(r => (
+                  <button key={r} onClick={() => toggleRank(r)}
+                    className={`text-left px-3 py-2 rounded-lg text-xs font-medium border transition-all flex items-center gap-2 ${selectedRanks.has(r) ? "bg-primary/10 border-primary text-primary" : "border-stone-200 text-stone-600 hover:border-stone-300"}`}>
+                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${selectedRanks.has(r) ? "bg-primary border-primary" : "border-stone-300"}`}>
+                      {selectedRanks.has(r) && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7"/></svg>}
+                    </div>
+                    {r}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Preview count */}
+          <div className="bg-stone-50 rounded-xl px-4 py-3 text-center">
+            <p className="text-sm text-stone-600">
+              <span className="font-bold text-stone-800">{previewCount}</span> member{previewCount !== 1 ? "s" : ""} will be exported
+            </p>
+          </div>
+        </div>
+        <div className="px-6 py-4 border-t border-stone-100 flex gap-3">
+          <button onClick={handleExport} disabled={previewCount === 0}
+            className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm disabled:opacity-50 hover:bg-emerald-700 transition-colors inline-flex items-center justify-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Download Excel (.xlsx)
+          </button>
+          <button onClick={onClose}
+            className="px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 text-sm font-semibold hover:bg-stone-50 transition-colors">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Admin Page ──────────────────────────────────────────────────────────
 export default function MinistryMembersAdmin() {
   const [members, setMembers]   = useState<MinistryMember[]>([]);
@@ -179,6 +464,8 @@ export default function MinistryMembersAdmin() {
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [saving, setSaving]     = useState<string | null>(null);
   const [showAdd, setShowAdd]   = useState(false);
+  const [editMember, setEditMember] = useState<MinistryMember | null>(null);
+  const [showExport, setShowExport] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -235,6 +522,11 @@ export default function MinistryMembersAdmin() {
           <button onClick={load}
             className="text-sm px-4 py-2.5 border border-stone-200 rounded-xl hover:bg-stone-50 transition-colors text-stone-600">
             Refresh
+          </button>
+          <button onClick={() => setShowExport(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700 transition-colors shadow-sm">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Export to Excel
           </button>
         </div>
       </div>
@@ -333,10 +625,24 @@ export default function MinistryMembersAdmin() {
                   {m.approvedAt && <span className="ml-2 text-emerald-600">· Approved: {formatDate(m.approvedAt)}</span>}
                 </p>
                 {m.note && <p className="text-xs text-stone-500 italic mt-1 bg-stone-50 rounded-lg px-2 py-1">Note: {m.note}</p>}
+                {(m.raIdCardNumber || m.occupation) && (
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {m.raIdCardNumber && (
+                      <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">ID: {m.raIdCardNumber}</span>
+                    )}
+                    {m.occupation && (
+                      <span className="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full font-medium">Work: {m.occupation}</span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Actions */}
               <div className="flex flex-col gap-1.5 flex-shrink-0">
+                <button onClick={() => setEditMember(m)}
+                  className="px-3 py-1.5 border border-stone-200 text-stone-600 text-xs font-semibold rounded-lg hover:bg-stone-50 transition-colors">
+                  Edit
+                </button>
                 {m.status === "pending" && (
                   <>
                     <button onClick={() => handleStatus(m.id, "approved")} disabled={saving === m.id}
@@ -369,6 +675,23 @@ export default function MinistryMembersAdmin() {
             </div>
           ))}
         </div>
+)}
+
+      {/* Edit details modal */}
+      {editMember && (
+        <EditDetailsModal
+          member={editMember}
+          onClose={() => setEditMember(null)}
+          onSaved={(updated) => {
+            setMembers(prev => prev.map(m => m.id === updated.id ? updated : m));
+            setEditMember(null);
+          }}
+        />
+      )}
+
+      {/* Export modal */}
+      {showExport && (
+        <ExportModal members={members} onClose={() => setShowExport(false)} />
       )}
 
       {/* Note / reject modal */}
