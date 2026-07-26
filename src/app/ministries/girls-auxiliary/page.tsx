@@ -103,7 +103,7 @@ export default function GirlsAuxiliaryPage() {
               />
             </div>
             <div>
-              <span className="inline-block bg-green-100 text-green-800 font-bold text-xs uppercase tracking-widest px-3 py-1.5 rounded-full mb-4">Girls · Ages 10–16</span>
+              <span className="inline-block bg-green-100 text-green-800 font-bold text-xs uppercase tracking-widest px-3 py-1.5 rounded-full mb-4">Girls · Ages 10+</span>
               <h2 className="font-serif text-3xl lg:text-4xl text-primary font-bold mb-4">History of Girls&apos; Auxiliary</h2>
               <p className="text-stone-600 leading-relaxed mb-4">
                 The Girls&apos; Auxiliary was pioneered in Nigeria in 1922 by Mrs. Carson, a Southern Baptist Convention missionary, who gathered girls too old for the Sunbeam Band to form a &ldquo;Girls&apos; Association&rdquo; — renamed Girls&apos; Auxiliary that same year. Miss Grace Emokpae (later Mrs. Sagie) was among the earliest leaders in Lagos, while Miss Young championed the work in Ogbomoso.
@@ -112,7 +112,7 @@ export default function GirlsAuxiliaryPage() {
                 By 1924, nine GA chapters had been established across Ijora, Awe, Ode-Omu, Ibadan, Iresi, Ikire, Abeokuta, Igbajo, and Ogbomoso — with 149 enrolled members. The organisation was officially recognised as part of the Women Missionary Union family in 1925. That year, its permanent watchword — Isaiah 60:1 — was adopted.
               </p>
               <p className="text-stone-600 leading-relaxed">
-                Today, the Girls&apos; Auxiliary is the NBC&apos;s vibrant missions organisation for girls ages 10–16, structured in two groups: Junior (10–12) and Intermediate (13–16). Members advance through seven Forward Steps, growing in faith, missions knowledge, and Christian character — before graduating to the Lydia Auxiliary at age 17.
+                Today, the Girls&apos; Auxiliary is the NBC&apos;s vibrant missions organisation for girls ages 10 and above, structured in two groups: Junior (10–12) and Intermediate (13+). Members advance through seven Forward Steps, growing in faith, missions knowledge, and Christian character — before graduating to the Lydia Auxiliary.
               </p>
             </div>
           </div>
@@ -127,7 +127,7 @@ export default function GirlsAuxiliaryPage() {
               { label: "Watchword", value: "Isaiah 60:1", col: "green" },
               { label: "Colours", value: "Green & White", col: "green" },
               { label: "Emblem", value: "White Star in Green Octagon", col: "green" },
-              { label: "Age Group", value: "10–16 years", col: "green" },
+              { label: "Age Group", value: "10+ years", col: "green" },
             ].map(item => (
               <div key={item.label} className="bg-white rounded-2xl border border-stone-100 p-5 text-center shadow-sm">
                 <p className="text-xs text-stone-400 font-semibold uppercase tracking-widest mb-1">{item.label}</p>

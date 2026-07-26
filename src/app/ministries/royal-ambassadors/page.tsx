@@ -109,10 +109,10 @@ export default function RoyalAmbassadorsPage() {
               />
             </div>
             <div>
-              <span className="inline-block bg-accent/10 text-primary font-bold text-xs uppercase tracking-widest px-3 py-1.5 rounded-full mb-4">Boys · Ages 6–24</span>
+              <span className="inline-block bg-accent/10 text-primary font-bold text-xs uppercase tracking-widest px-3 py-1.5 rounded-full mb-4">Boys · Ages 10+</span>
               <h2 className="font-serif text-3xl lg:text-4xl text-primary font-bold mb-4">About Royal Ambassadors</h2>
               <p className="text-stone-600 leading-relaxed mb-4">
-                The Royal Ambassadors (RA) is the boys' missions organisation of the Nigerian Baptist Convention, operating under the Men's Missionary Union (MMU). Founded to fulfil the Great Commission among the next generation, RA trains boys from age 6 through 24 to become devoted followers of Christ and active kingdom workers.
+                The Royal Ambassadors (RA) is the boys' missions organisation of the Nigerian Baptist Convention, operating under the Men's Missionary Union (MMU). Founded to fulfil the Great Commission among the next generation, RA trains boys from age 10 and above to become devoted followers of Christ and active kingdom workers.
               </p>
               <p className="text-stone-600 leading-relaxed mb-4">
                 The RA programme was established in the NBC to cultivate in young men a passion for Scripture, a love for missions, and the discipline of Christian character. Boys meet weekly in chapters, where they study the Bible, learn about missionaries, earn merit ranks, and engage in community service projects — all under the banner of the King's Business.
@@ -133,7 +133,7 @@ export default function RoyalAmbassadorsPage() {
               { label: "Motto", value: '"The King\'s Business"', icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" },
               { label: "Watchword", value: "2 Corinthians 5:20", icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" },
               { label: "Colours", value: "Red, White & Blue", icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" },
-              { label: "Age Group", value: "6 – 24 years", icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
+              { label: "Age Group", value: "10+ years", icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
             ].map(item => (
               <div key={item.label} className="bg-white rounded-2xl border border-stone-100 p-5 text-center shadow-sm">
                 <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center mx-auto mb-3">

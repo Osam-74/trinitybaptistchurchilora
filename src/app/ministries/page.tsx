@@ -20,7 +20,7 @@ const ministries = [
   {
     id: "royal-ambassadors",
     name: "Royal Ambassadors",
-    badge: "Boys · Ages 6–24",
+    badge: "Boys · Ages 10+",
     image: "/images/royal-ambassadors.jpg",
     fallback: "https://images.unsplash.com/photo-1529390079861-591de354faf5?w=600&q=70",
     verse: '"We are Ambassadors for Christ" — 2 Cor 5:20',
@@ -31,7 +31,7 @@ const ministries = [
   {
     id: "girls-auxiliary",
     name: "Girls' Auxiliary",
-    badge: "Girls · Ages 10–16",
+    badge: "Girls · Ages 10+",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT9Lq5qTCNfXMzP39KXbq8RjOE_mDHoXdjvHK7wui8uZ1fEVsbUXldvA92W&s=10",
     verse: '"Arise, shine; for thy light is come" — Isa 60:1',
     cta: "Explore & Register",
