@@ -230,6 +230,18 @@ export default function RoyalAmbassadorsPage() {
                     </select>
                   </div>
                   <div>
+                    <label className="text-white/80 text-sm font-semibold block mb-1">RA ID Card Number <span className="text-white/40 font-normal">(optional)</span></label>
+                    <input type="text" value={form.raIdCardNumber} onChange={e => setForm(f => ({ ...f, raIdCardNumber: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-accent text-sm"
+                      placeholder="Enter your RA ID card number if you have one" />
+                  </div>
+                  <div>
+                    <label className="text-white/80 text-sm font-semibold block mb-1">Occupation / Kind of Work <span className="text-white/40 font-normal">(optional)</span></label>
+                    <input type="text" value={form.occupation} onChange={e => setForm(f => ({ ...f, occupation: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-accent text-sm"
+                      placeholder="e.g. Student, Trader, Civil Servant" />
+                  </div>
+                  <div>
                     <label className="text-white/80 text-sm font-semibold block mb-1">Photo in RA Uniform *</label>
                     <p className="text-white/50 text-xs mb-2">Please upload a clear photo of yourself in your Royal Ambassador uniform.</p>
                     <input type="file" accept="image/*" onChange={handlePhotoChange} className="w-full text-white/70 text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-accent file:text-primary-dark" required />
