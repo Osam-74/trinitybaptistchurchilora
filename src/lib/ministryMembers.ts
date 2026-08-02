@@ -45,14 +45,15 @@ export async function submitMembership(data: {
 }
 
 export async function listMembersForMinistry(ministry: MinistryKey): Promise<MinistryMember[]> {
-  if (!db) return [];
-  const q = query(
-    collection(db, "ministry_members"),
-    where("ministry", "==", ministry),
-    orderBy("submittedAt", "desc")
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map(d => {
+  try {
+    if (!db) return [];
+    const q = query(
+      collection(db, "ministry_members"),
+      where("ministry", "==", ministry),
+      orderBy("submittedAt", "desc")
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => {
     const data = d.data();
     return {
       id: d.id,
@@ -68,13 +69,18 @@ export async function listMembersForMinistry(ministry: MinistryKey): Promise<Min
       occupation: data.occupation || "",
     };
   });
+  } catch (err) {
+    console.error("[ministryMembers] listMembersForMinistry failed:", err);
+    return [];
+  }
 }
 
 export async function listAllMembers(): Promise<MinistryMember[]> {
-  if (!db) return [];
-  const q = query(collection(db, "ministry_members"), orderBy("submittedAt", "desc"));
-  const snap = await getDocs(q);
-  return snap.docs.map(d => {
+  try {
+    if (!db) return [];
+    const q = query(collection(db, "ministry_members"), orderBy("submittedAt", "desc"));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => {
     const data = d.data();
     return {
       id: d.id,
@@ -90,6 +96,10 @@ export async function listAllMembers(): Promise<MinistryMember[]> {
       occupation: data.occupation || "",
     };
   });
+  } catch (err) {
+    console.error("[ministryMembers] listAllMembers failed:", err);
+    return [];
+  }
 }
 
 export async function updateMemberStatus(

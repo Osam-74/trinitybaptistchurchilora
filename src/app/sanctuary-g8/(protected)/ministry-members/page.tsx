@@ -466,11 +466,20 @@ export default function MinistryMembersAdmin() {
   const [showAdd, setShowAdd]   = useState(false);
   const [editMember, setEditMember] = useState<MinistryMember | null>(null);
   const [showExport, setShowExport] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    try { const data = await listAllMembers(); setMembers(data); }
-    finally { setLoading(false); }
+    setLoadError(null);
+    try {
+      const data = await listAllMembers();
+      setMembers(data);
+    } catch (err) {
+      console.error("[ministry-members] Failed to load:", err);
+      setLoadError("Could not load registrations. Check your connection and try refreshing.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -580,6 +589,13 @@ export default function MinistryMembersAdmin() {
           ))}
         </div>
       </div>
+
+      {/* Load error */}
+      {loadError && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4 text-sm text-red-700">
+          {loadError}
+        </div>
+      )}
 
       {/* Members list */}
       {loading ? (
