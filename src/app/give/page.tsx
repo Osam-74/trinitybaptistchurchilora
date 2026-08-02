@@ -11,12 +11,11 @@ const givingReasons = [
   { title: "Building Fund", desc: "Contribute to the expansion and maintenance of our sanctuary and facilities — a lasting legacy for generations.", icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" },
 ];
 
-
 export default function GivePage() {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText("0123456789");
+    navigator.clipboard.writeText("2023471801");
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
@@ -80,20 +79,22 @@ export default function GivePage() {
                 </div>
                 <h3 className="font-serif text-xl font-bold text-primary">Bank Transfer</h3>
               </div>
-              <div className="space-y-4 bg-bg rounded-2xl p-5 border border-stone-100">
-                {[
-                  { label: "Bank Name", value: "First Bank of Nigeria Plc" },
-                  { label: "Account Name", value: "Trinity Baptist Church Ilora" },
-                  { label: "Account Number", value: "0123456789" },
-                ].map((row) => (
-                  <div key={row.label} className="flex justify-between items-center">
-                    <span className="text-xs text-stone-500 font-semibold uppercase tracking-wider">{row.label}</span>
-                    <span className="text-primary font-bold text-sm">{row.value}</span>
-                  </div>
-                ))}
+              <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl p-6 border border-stone-100 space-y-4">
+                <div className="text-center pb-3 border-b border-stone-100">
+                  <p className="text-xs text-stone-500 font-semibold uppercase tracking-wider mb-1">Bank</p>
+                  <p className="text-primary font-bold text-lg">First Bank of Nigeria</p>
+                </div>
+                <div className="text-center pb-3 border-b border-stone-100">
+                  <p className="text-xs text-stone-500 font-semibold uppercase tracking-wider mb-1">Account Name</p>
+                  <p className="text-primary font-bold">Trinity Baptist Church, Ilora</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-stone-500 font-semibold uppercase tracking-wider mb-1">Account Number</p>
+                  <p className="text-primary font-bold text-2xl tracking-wider font-mono">2023471801</p>
+                </div>
               </div>
               <button onClick={handleCopy}
-                className={`mt-5 w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${copied ? "bg-green-100 text-green-700 border border-green-200" : "bg-accent text-primary-dark hover:bg-accent-light"}`}>
+                className={`mt-5 w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${copied ? "bg-green-100 text-green-700 border border-green-200" : "bg-accent text-primary-dark hover:bg-accent-light"}`}>
                 {copied ? (
                   <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>Account Number Copied!</>
                 ) : (
@@ -139,8 +140,6 @@ export default function GivePage() {
           <p className="text-accent font-bold text-sm mt-4 tracking-wider">— 2 CORINTHIANS 9:7</p>
         </div>
       </section>
-
-
 
       {/* Prayer CTA */}
       <section className="py-20 bg-bg-alt">

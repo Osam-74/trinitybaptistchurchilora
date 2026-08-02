@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ShareButton from "@/components/ShareButton";
 import { Sermon } from "@/types";
-import { sampleSermons } from "@/lib/seed-data";
 import { formatDate, getYouTubeThumbnail } from "@/lib/utils";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
@@ -17,17 +17,17 @@ function formatDuration(sec?: number) {
 }
 
 export default function SermonsPage() {
-  const [sermons, setSermons] = useState<Sermon[]>(sampleSermons.map((s, i) => ({ ...s, id: `sermon-${i}` })));
+  const [sermons, setSermons] = useState<Sermon[]>([]);
 
-  // Live sync from Firestore (falls back to seed data if not connected)
+  // Live sync from Firestore
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, "sermons"), orderBy("createdAt", "desc"));
     const unsub = onSnapshot(q, snap => {
-      if (!snap.empty) {
-        setSermons(snap.docs.map(d => ({ id: d.id, ...d.data() } as Sermon)));
-      }
-    }, () => {}); // silently fall back to seed data on error
+      setSermons(snap.docs.map(d => ({ id: d.id, ...d.data() } as Sermon)));
+    }, (error) => {
+      console.error("Error fetching sermons:", error);
+    });
     return unsub;
   }, []);
   const [filter, setFilter] = useState<"all" | "audio" | "video">("all");
@@ -109,7 +109,9 @@ export default function SermonsPage() {
             <svg className="w-16 h-16 text-stone-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
-            <p className="text-stone-500 text-lg">No sermons match your criteria.</p>
+            <p className="text-stone-500 text-lg">
+              {sermons.length === 0 ? "No sermons available yet." : "No sermons match your criteria."}
+            </p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -145,7 +147,7 @@ export default function SermonsPage() {
                     <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary to-primary-light p-6">
                       <div className="text-center">
                         <svg className="w-14 h-14 text-accent/25 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                         </svg>
                         {sermon.audioUrl && (
                           <button
@@ -215,6 +217,10 @@ export default function SermonsPage() {
                       <span className="inline-block bg-bg-alt text-primary-light text-[11px] font-bold px-3 py-1 rounded-lg">
                         📖 {sermon.scripture}
                       </span>
+                      <ShareButton
+                        url={typeof window !== 'undefined' ? window.location.href : ''}
+                        title={sermon.title}
+                      />
                     </div>
                   </div>
                 </div>

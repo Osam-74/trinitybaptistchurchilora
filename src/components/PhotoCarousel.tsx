@@ -40,17 +40,17 @@ export default function PhotoCarousel({ speed = 35, rowCount = 2, label, hideWhe
   useEffect(() => {
     listAllPhotos()
       .then(data => {
-        if (data.length >= 2) {
+        if (data.length > 0) {
           setPhotos(shuffle(data));
           setIsReal(true);
         } else {
-          setPhotos(FALLBACK_PHOTOS);
+          setPhotos([]);
           setIsReal(false);
         }
         setReady(true);
       })
       .catch(() => {
-        setPhotos(FALLBACK_PHOTOS);
+        setPhotos([]);
         setIsReal(false);
         setReady(true);
       });
@@ -69,9 +69,9 @@ export default function PhotoCarousel({ speed = 35, rowCount = 2, label, hideWhe
   if (hideWhenEmpty && !isReal) return null;
   if (photos.length === 0) return null;
 
-  // Pad to at least 8 items for a full-looking carousel
-  const padded = photos.length < 8
-    ? [...photos, ...FALLBACK_PHOTOS].slice(0, 8)
+  // Pad to at least 8 items for a full-looking carousel if there are photos
+  const padded = photos.length > 0 && photos.length < 8
+    ? Array.from({ length: Math.ceil(8 / photos.length) }, () => photos).flat().slice(0, 8)
     : photos;
 
   const row1 = padded.filter((_, i) => i % 2 === 0);

@@ -6,15 +6,6 @@ import Footer from "@/components/Footer";
 import PhotoCarousel from "@/components/PhotoCarousel";
 import { listPublishedAlbums, listPhotos, GalleryAlbum, GalleryPhoto } from "@/lib/gallery";
 
-const VIDEO_GALLERY = [
-  { youtubeId: "dQw4w9WgXcQ", title: "Sunday Service Highlights", date: "July 2026" },
-  { youtubeId: "dQw4w9WgXcQ", title: "Revival Night — Full Message", date: "June 2026" },
-  { youtubeId: "dQw4w9WgXcQ", title: "Choir Special Ministration", date: "June 2026" },
-  { youtubeId: "dQw4w9WgXcQ", title: "Youth Sunday Service", date: "May 2026" },
-  { youtubeId: "dQw4w9WgXcQ", title: "Easter Celebration Programme", date: "April 2026" },
-  { youtubeId: "dQw4w9WgXcQ", title: "Watchnight Service", date: "Dec 2025" },
-];
-
 export default function GalleryPage() {
   const [albums, setAlbums] = useState<GalleryAlbum[]>([]);
   const [activeAlbum, setActiveAlbum] = useState<GalleryAlbum | null>(null);
@@ -149,42 +140,6 @@ export default function GalleryPage() {
                 </div>
               </>
             )}
-
-            {/* Video Gallery Section */}
-            <div className="pt-8 border-t border-stone-200">
-              <div className="text-center mb-10">
-                <span className="text-primary text-xs font-bold uppercase tracking-widest">DIGITAL MEDIA</span>
-                <h2 className="font-serif text-3xl font-bold text-primary-dark mt-2">Video Gallery</h2>
-                <p className="text-stone-500 text-sm mt-2">Watch highlights and sermons from our streaming ministry</p>
-              </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {VIDEO_GALLERY.map((video, idx) => (
-                  <div key={idx} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100 group">
-                    <div className="relative h-48 bg-primary-dark overflow-hidden">
-                      <img
-                        src={`https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`}
-                        alt={video.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <a
-                          href={`https://youtube.com/watch?v=${video.youtubeId}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-14 h-14 rounded-full bg-accent text-primary-dark flex items-center justify-center hover:bg-accent-light hover:scale-110 transition-all shadow-lg"
-                        >
-                          <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                        </a>
-                      </div>
-                    </div>
-                    <div className="p-5">
-                      <span className="text-[10px] text-stone-400 font-bold uppercase">{video.date}</span>
-                      <h3 className="font-serif text-base font-bold text-primary-dark mt-1">{video.title}</h3>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </>
         )}
 

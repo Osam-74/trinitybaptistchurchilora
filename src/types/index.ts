@@ -235,6 +235,7 @@ export interface NewsPost {
   excerpt: string;
   body: string;
   images: string[];
+  videoUrl?: string;
   featured: boolean;
   active: boolean;
   author?: string;

@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ShareButton from "@/components/ShareButton";
 import { NewsPost } from "@/types";
 import { listPublishedPosts } from "@/lib/news";
 import { formatDate } from "@/lib/utils";
@@ -17,7 +18,6 @@ export default function NewsDetailPage() {
   const [loading, setLoading] = useState(true);
   const [post, setPost] = useState<NewsPost | null>(null);
   const [recentPosts, setRecentPosts] = useState<NewsPost[]>([]);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -38,14 +38,6 @@ export default function NewsDetailPage() {
         setLoading(false);
       });
   }, [id]);
-
-  const handleShare = () => {
-    if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
-    }
-  };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -180,30 +172,11 @@ export default function NewsDetailPage() {
               <h3 className="font-serif text-xl font-bold text-primary">Share this post</h3>
               <p className="text-text-muted text-sm mt-1">Spread the word and inspire others with this update.</p>
             </div>
-            <button
-              onClick={handleShare}
-              className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${
-                copied
-                  ? "bg-green-100 text-green-800 border border-green-200"
-                  : "btn-gold"
-              }`}
-            >
-              {copied ? (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Copied Link!
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                  </svg>
-                  Copy Link
-                </>
-              )}
-            </button>
+            <ShareButton
+              url={typeof window !== 'undefined' ? window.location.href : ''}
+              title={post.title}
+              label="Share Post"
+            />
           </div>
 
           {/* More from Trinity Baptist */}

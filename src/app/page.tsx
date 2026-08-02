@@ -8,7 +8,6 @@ import Footer from "@/components/Footer";
 import LiveBanner from "@/components/LiveBanner";
 import SideRays from "@/components/SideRays";
 import { getYouTubeThumbnail } from "@/lib/utils";
-import { sampleSermons, samplePosts } from "@/lib/seed-data";
 import { doc, onSnapshot, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { listPublishedPosts } from "@/lib/news";
@@ -84,56 +83,6 @@ function StatCounter({ target, suffix = "" }: { target: number; suffix?: string 
   );
 }
 
-
-// FaithArticlesSection — expandable cards, auto-collapse on new open
-function FaithArticlesSection({ articles }: { articles: Array<{id: string; title: string; body: string; scripture: string; pinned: boolean; status: string; authorName?: string}> }) {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const handleToggle = (id: string) => setExpandedId(prev => prev === id ? null : id);
-  return (
-    <section className="bg-stone-50 py-16 sm:py-20">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-10 reveal">
-          <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-2">The Word</p>
-          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-primary-dark mb-3">Faith Articles</h2>
-          <div className="gold-divider mx-auto" />
-        </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {articles.map((article, i) => {
-            const isExpanded = expandedId === article.id;
-            return (
-              <div key={article.id} className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 flex flex-col reveal transition-all duration-300" style={{ transitionDelay: `${i * 0.08}s` }}>
-                {article.pinned && (
-                  <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full mb-3 self-start">Pinned</span>
-                )}
-                <h3 className="font-serif text-xl font-bold text-primary mb-2 leading-tight">{article.title}</h3>
-                {article.scripture && (
-                  <p className="text-amber-600 text-xs font-semibold italic mb-3 border-l-2 border-amber-300 pl-2">{article.scripture}</p>
-                )}
-                <p className={"text-stone-600 text-sm leading-relaxed flex-1 " + (isExpanded ? "" : "line-clamp-4")}>
-                  {article.body}
-                </p>
-                <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between">
-                  <span className="text-xs text-stone-400">{article.authorName ?? ""}</span>
-                  <button
-                    onClick={() => handleToggle(article.id)}
-                    className="text-xs font-bold text-primary hover:text-primary/70 transition-colors flex items-center gap-1 ml-2"
-                  >
-                    {isExpanded ? (
-                      <span className="flex items-center gap-1">Read less <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7"/></svg></span>
-                    ) : (
-                      <span className="flex items-center gap-1">Read more <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7"/></svg></span>
-                    )}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export default function HomePage() {
   useScrollReveal();
 
@@ -191,22 +140,6 @@ export default function HomePage() {
   };
   const [, setLoadingPhotos] = useState(true);
 
-  // Pre-configured backup list of high-quality church/worship photos from Unsplash
-  const placeholderPhotos = [
-    { id: "p1", imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80", createdAt: "July 2026" },
-    { id: "p2", imageUrl: "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=600&q=80", createdAt: "July 2026" },
-    { id: "p3", imageUrl: "https://images.unsplash.com/photo-1478147427282-58a87a120781?w=600&q=80", createdAt: "July 2026" },
-    { id: "p4", imageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80", createdAt: "July 2026" },
-    { id: "p5", imageUrl: "https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=600&q=80", createdAt: "July 2026" },
-    { id: "p6", imageUrl: "https://images.unsplash.com/photo-1460574283810-2aab119d8511?w=600&q=80", createdAt: "July 2026" },
-    { id: "p7", imageUrl: "https://images.unsplash.com/photo-1507692049790-de58290a4334?w=600&q=80", createdAt: "July 2026" },
-    { id: "p8", imageUrl: "https://images.unsplash.com/photo-1473177104440-ffee2f376098?w=600&q=80", createdAt: "July 2026" },
-    { id: "p9", imageUrl: "https://images.unsplash.com/photo-1438232992991-995b671e4427?w=600&q=80", createdAt: "July 2026" },
-    { id: "p10", imageUrl: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=600&q=80", createdAt: "July 2026" },
-    { id: "p11", imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80", createdAt: "July 2026" },
-    { id: "p12", imageUrl: "https://images.unsplash.com/photo-1609743522471-83c84ce23e32?w=600&q=80", createdAt: "July 2026" },
-  ];
-
   useEffect(() => {
     async function fetchGallery() {
       if (!db) {
@@ -239,11 +172,6 @@ export default function HomePage() {
     fetchGallery();
   }, []);
 
-  // Faith Articles — from seed data (published only, max 3)
-  const faithArticles = samplePosts
-    .filter(p => p.status === 'published')
-    .slice(0, 3)
-    .map((p, i) => ({ ...p, id: `article-${i}` }));
 
   // Helper function to format timestamp/date for overlay
   const formatPhotoDate = (createdAt: { seconds: number } | string | null | undefined) => {
@@ -302,8 +230,6 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, [scriptures.length]);
 
-  // 4. Extract latest featured sermon
-  const featuredSermon = sampleSermons.find((s) => s.featured) || sampleSermons[0];
 
   return (
     <div className="bg-bg text-primary-dark font-sans overflow-x-hidden min-h-screen flex flex-col">
@@ -799,93 +725,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 8. Featured Latest Sermon / Media Section */}
-      <section className="py-24 bg-bg">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6 reveal">
-            <div>
-              <span className="text-primary text-xs font-bold uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10 inline-block mb-3">
-                Latest Message
-              </span>
-              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-black text-primary-dark">
-                Hear the <span className="text-primary">Word of God</span>
-              </h2>
-            </div>
-            <Link
-              href="/sermons"
-              className="text-[#0D4A35] hover:text-[#0B2C22] font-bold text-sm flex items-center gap-1.5 shrink-0"
-            >
-              Browse Sermon Archive
-              <span>&rarr;</span>
-            </Link>
-          </div>
-
-          {featuredSermon && (
-            <div className="grid lg:grid-cols-12 gap-12 items-center reveal">
-              {/* Sermon Video Thumbnail with Play Hover */}
-              <div className="lg:col-span-6 relative rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 bg-stone-100 group">
-                <div className="aspect-video relative w-full overflow-hidden">
-                  <img
-                    src={getYouTubeThumbnail(featuredSermon.youtubeId || "")}
-                    alt={featuredSermon.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  {/* Dark mask overlay on hover */}
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/35 transition-colors duration-300" />
-                  
-                  {/* Play Button Icon */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-accent/95 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 text-primary-dark pl-1">
-                      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sermon Description Details */}
-              <div className="lg:col-span-6 space-y-5">
-                <span className="text-xs font-bold uppercase tracking-wider text-primary bg-accent/15 border border-accent/20 px-3 py-1 rounded-md inline-block">
-                  Featured Message
-                </span>
-                <h3 className="font-serif text-2xl sm:text-3xl font-black text-primary-dark leading-tight">
-                  {featuredSermon.title}
-                </h3>
-                <p className="text-xs font-semibold text-primary">
-                  Preached by {featuredSermon.preacher} &bull; {featuredSermon.date}
-                </p>
-                <p className="text-text-muted text-sm sm:text-base leading-relaxed">
-                  {featuredSermon.description || "Listen to this transformative, Bible-centered message designed to equip you with spiritual insight and lead you into deeper relationship with Jesus Christ."}
-                </p>
-                
-                <div className="pt-2 flex flex-wrap gap-4 items-center">
-                  <Link
-                    href="/sermons"
-                    className="inline-flex items-center gap-2 px-7 py-3 bg-[#0D4A35] hover:bg-[#0B2C22] text-white font-semibold rounded-xl text-sm shadow-md transition-colors"
-                  >
-                    Listen / Watch Now
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </Link>
-                  <Link
-                    href="/sermons"
-                    className="text-[#0D4A35] font-semibold text-sm hover:underline"
-                  >
-                    View All Sermons Series &rarr;
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
-
-        </div>
-      </section>
-
-      {/* GALLERY SECTION: Sunday Shots — Dual-row infinite auto-scroll */}
+      {/* GALLERY SECTION: Sunday Shots — Dual-row infinite auto-scroll (only show when photos exist) */}
+      {galleryPhotos.length > 0 && (
       <section className="py-20 bg-bg border-t border-stone-100 overflow-hidden">
         {/* Header */}
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 mb-10 reveal">
@@ -916,14 +757,14 @@ export default function HomePage() {
               width: "max-content",
             }}
           >
-            {[...(galleryPhotos.length >= 1 ? [...galleryPhotos, ...placeholderPhotos].slice(0, 12) : placeholderPhotos), ...(galleryPhotos.length >= 1 ? [...galleryPhotos, ...placeholderPhotos].slice(0, 12) : placeholderPhotos)].slice(0, 16).map((photo, i) => (
+            {[...galleryPhotos, ...galleryPhotos].slice(0, 16).map((photo, i) => (
               <div
                 key={`row1-${photo.id}-${i}`}
                 data-photo-card
                 className="relative flex-shrink-0 w-52 h-52 sm:w-60 sm:h-60 rounded-2xl overflow-hidden bg-stone-100 group shadow-sm"
               >
                 <img
-                  src={photo.imageUrl || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80"}
+                  src={photo.imageUrl}
                   alt="Sunday Shot"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   onError={() => handlePhotoError(photo.id)}
@@ -945,14 +786,14 @@ export default function HomePage() {
               width: "max-content",
             }}
           >
-            {[...(galleryPhotos.length >= 1 ? [...galleryPhotos, ...placeholderPhotos].slice(0, 12).reverse() : [...placeholderPhotos].reverse()), ...(galleryPhotos.length >= 1 ? [...galleryPhotos, ...placeholderPhotos].slice(0, 12).reverse() : [...placeholderPhotos].reverse())].slice(0, 16).map((photo, i) => (
+            {[...[...galleryPhotos].reverse(), ...[...galleryPhotos].reverse()].slice(0, 16).map((photo, i) => (
               <div
                 key={`row2-${photo.id}-${i}`}
                 data-photo-card
                 className="relative flex-shrink-0 w-52 h-52 sm:w-60 sm:h-60 rounded-2xl overflow-hidden bg-stone-100 group shadow-sm"
               >
                 <img
-                  src={photo.imageUrl || "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=600&q=80"}
+                  src={photo.imageUrl}
                   alt="Sunday Shot"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   onError={() => handlePhotoError(photo.id)}
@@ -975,10 +816,6 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
-
-      {/* Faith Articles */}
-      {faithArticles.length > 0 && (
-        <FaithArticlesSection articles={faithArticles} />
       )}
 
       {/* Latest News & Events */}

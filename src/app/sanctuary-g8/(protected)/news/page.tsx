@@ -14,6 +14,7 @@ const emptyForm: Omit<NewsPost, "id"> = {
   excerpt: "",
   body: "",
   images: [],
+  videoUrl: "",
   featured: false,
   active: true,
   author: "",
@@ -119,6 +120,7 @@ export default function AdminNewsPage() {
       excerpt: p.excerpt,
       body: p.body,
       images: p.images || [],
+      videoUrl: p.videoUrl || "",
       featured: p.featured ?? false,
       active: p.active ?? true,
       author: p.author || "",
@@ -301,6 +303,12 @@ export default function AdminNewsPage() {
                         <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border shadow-sm ${getCategoryStyles(post.category)}`}>
                           {post.category}
                         </span>
+                        {post.videoUrl && (
+                          <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-purple-100 text-purple-800 border border-purple-200 shadow-sm flex items-center gap-1">
+                            <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            Video
+                          </span>
+                        )}
                         {post.featured && (
                           <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200 shadow-sm flex items-center gap-1">
                             <svg className="w-2.5 h-2.5 fill-yellow-600" viewBox="0 0 20 20">
@@ -518,6 +526,35 @@ export default function AdminNewsPage() {
                             folder="news-events"
                             label={form.images.length > 0 ? "Add Another Image" : "Upload Post Image"}
                             onUploaded={(url) => setForm(p => ({ ...p, images: [...p.images, url] }))}
+                          />
+                        </div>
+
+                        {/* Video Upload */}
+                        <div>
+                          <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Video (optional max 100MB)</label>
+                          {form.videoUrl && (
+                            <div className="mb-3 flex items-center gap-3 bg-stone-50 rounded-xl p-3 border border-stone-200">
+                              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold text-stone-700 truncate">Video attached</p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setForm(p => ({ ...p, videoUrl: "" }))}
+                                className="w-7 h-7 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 transition-colors"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12"/></svg>
+                              </button>
+                            </div>
+                          )}
+                          <R2Uploader
+                            folder="news-events"
+                            accept="video/*"
+                            maxMB={100}
+                            label={form.videoUrl ? "Replace Video" : "Upload Video"}
+                            onUploaded={(url) => setForm(p => ({ ...p, videoUrl: url }))}
                           />
                         </div>
 

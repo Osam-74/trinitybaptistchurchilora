@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ShareButton from "@/components/ShareButton";
 import { NewsPost } from "@/types";
 import { listPublishedPosts } from "@/lib/news";
 import { formatDate } from "@/lib/utils";
@@ -170,9 +171,19 @@ export default function NewsListingPage() {
                         alt={post.title}
                         className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                       />
-                      <span className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/95 text-primary border border-stone-100 ${getCategoryColor(post.category)}`}>
-                        {post.category}
-                      </span>
+                      <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/95 text-primary border border-stone-100 ${getCategoryColor(post.category)}`}>
+                          {post.category}
+                        </span>
+                        {post.videoUrl && (
+                          <span className="px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-100 text-purple-800 border border-purple-200 flex items-center gap-1 shadow-sm">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            Video
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Card Content */}
@@ -203,15 +214,21 @@ export default function NewsListingPage() {
                         ) : (
                           <div />
                         )}
-                        <Link
-                          href={`/news/${post.id}`}
-                          className="btn-shine text-accent hover:text-primary-dark font-bold text-sm inline-flex items-center gap-1 group/btn"
-                        >
-                          Read More
-                          <svg className="w-4 h-4 transform group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </Link>
+                        <div className="flex items-center gap-3">
+                          <ShareButton
+                            url={typeof window !== 'undefined' ? window.location.origin + '/news/' + post.id : '/news/' + post.id}
+                            title={post.title}
+                          />
+                          <Link
+                            href={`/news/${post.id}`}
+                            className="btn-shine text-accent hover:text-primary-dark font-bold text-sm inline-flex items-center gap-1 group/btn"
+                          >
+                            Read More
+                            <svg className="w-4 h-4 transform group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </article>
