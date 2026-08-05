@@ -23,7 +23,6 @@ export default function LikeButton({ collection, docId, initialCount = 0, size =
   const handleLike = async () => {
     if (loading) return;
     setLoading(true);
-    // Optimistic update
     const newLiked = !liked;
     setLiked(newLiked);
     setCount(c => newLiked ? c + 1 : Math.max(0, c - 1));
@@ -32,7 +31,6 @@ export default function LikeButton({ collection, docId, initialCount = 0, size =
       setLiked(result.liked);
       setCount(result.count);
     } catch {
-      // Revert on error
       setLiked(!newLiked);
       setCount(initialCount);
     } finally {
@@ -40,27 +38,27 @@ export default function LikeButton({ collection, docId, initialCount = 0, size =
     }
   };
 
-  const iconSize = size === "sm" ? "w-3.5 h-3.5" : "w-4 h-4";
+  const iconSize = size === "sm" ? "w-4 h-4" : "w-5 h-5";
   const textSize = size === "sm" ? "text-xs" : "text-sm";
+  const pad = size === "sm" ? "px-2.5 py-1" : "px-3 py-1.5";
 
   return (
     <button
       onClick={handleLike}
       disabled={loading}
-      className={`inline-flex items-center gap-1.5 transition-all ${size === "sm" ? "px-2.5 py-1" : "px-3 py-1.5"} rounded-full font-medium ${
+      className={`inline-flex items-center gap-1.5 transition-all ${pad} rounded-full font-medium border ${loading ? "opacity-50" : ""} ${
         liked
-          ? "bg-accent/15 text-accent hover:bg-accent/20"
-          : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-      } ${loading ? "opacity-50" : ""}`}
+          ? "bg-accent/20 text-accent border-accent/30 hover:bg-accent/25"
+          : "bg-primary text-white border-primary hover:bg-primary-dark"
+      }`}
       aria-label={liked ? "Unlike" : "Like"}
     >
       <svg
         className={`${iconSize} transition-transform ${liked ? "scale-110" : ""}`}
-        fill={liked ? "currentColor" : "none"}
-        stroke="currentColor"
+        fill="currentColor"
         viewBox="0 0 24 24"
       >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.965.166-1.335.44a2.99 2.99 0 00-.398.39c-.484.493-1.089.816-1.716 1.003L2 7v13h5m7-10l-2-2m0 0l2 2m-2-2V3a2 2 0 012-2h3a2 2 0 012 2v0M9 13v8" />
+        <path d="M2 21h4V9H2v12zm20-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L13.17 1 7.59 6.59C7.22 6.95 7 7.45 7 8v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1z"/>
       </svg>
       <span className={textSize}>{count > 0 ? count : "Like"}</span>
     </button>

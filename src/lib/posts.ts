@@ -4,23 +4,8 @@ import {
   query, orderBy, getDocs,
 } from "firebase/firestore";
 import { Post } from "@/types";
-import { samplePosts } from "@/lib/seed-data";
 
 const COLL = "faith_articles";
-
-/** Seed default articles into Firestore if the collection is empty (first run) */
-export async function seedArticlesIfEmpty() {
-  if (!db) return;
-  const snap = await getDocs(collection(db, COLL));
-  if (snap.empty) {
-    for (const p of samplePosts) {
-      await addDoc(collection(db, COLL), {
-        ...p,
-        createdAt: p.createdAt || new Date().toISOString(),
-      });
-    }
-  }
-}
 
 /** Subscribe to all articles (admin) */
 export function subscribeArticles(cb: (articles: Post[]) => void) {
@@ -33,31 +18,50 @@ export function subscribeArticles(cb: (articles: Post[]) => void) {
 
 /** Get published articles for the public homepage */
 export async function getPublishedArticles(max = 6): Promise<Post[]> {
-  const fallback = () =>
-    samplePosts
-      .filter(p => p.status === "published")
-      .slice(0, max)
-      .map((p, i) => ({ ...p, id: `seed-${i}` }));
-
-  if (!db) return fallback();
+  if (!db) return [];
 
   try {
-    // Try seeding first if collection is empty (also works on homepage visits)
-    await seedArticlesIfEmpty();
+    // Try ordered query first
+    let snap;
+    try {
+      const q = query(collection(db, COLL), orderBy("createdAt", "desc"));
+      snap = await getDocs(q);
+    } catch {
+      // If orderBy fails (missing field), fall back to unordered query
+      snap = await getDocs(collection(db, COLL));
+    }
 
-    const q = query(collection(db, COLL), orderBy("createdAt", "desc"));
-    const snap = await getDocs(q);
-    const articles = snap.docs
-      .map(d => ({ id: d.id, ...d.data() } as Post))
-      .filter(p => p.status === "published")
+    const all = snap.docs.map(d => ({ id: d.id, ...d.data() } as Post));
+    // Sort client-side as fallback
+    all.sort((a, b) => {
+      const ta = a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
+      const tb = b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
+      return tb - ta;
+    });
+
+    const published = all
+      .filter(p => !p.status || p.status === "published")
       .slice(0, max);
 
-    // If Firestore returned nothing, use seed data so the section is never empty
-    if (articles.length === 0) return fallback();
-    return articles;
+    return published;
   } catch (err) {
-    console.error("[posts] getPublishedArticles failed, using fallback:", err);
-    return fallback();
+    console.error("[posts] getPublishedArticles failed:", err);
+    return [];
+  }
+}
+
+/** Seed default articles into Firestore if the collection is empty (first run) */
+export async function seedArticlesIfEmpty() {
+  if (!db) return;
+  const snap = await getDocs(collection(db, COLL));
+  if (snap.empty) {
+    const { samplePosts } = await import("@/lib/seed-data");
+    for (const p of samplePosts) {
+      await addDoc(collection(db, COLL), {
+        ...p,
+        createdAt: p.createdAt || new Date().toISOString(),
+      });
+    }
   }
 }
 

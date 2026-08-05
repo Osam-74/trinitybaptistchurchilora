@@ -131,13 +131,16 @@ export default function HomePage() {
 
   useEffect(() => {
     getPublishedArticles(6).then(articles => {
+      console.log("[homepage] Faith articles loaded:", articles.length, articles.map(a => ({ id: a.id, title: a.title, status: a.status })));
       setFaithArticles(articles.map(a => ({
-        id: a.id, title: a.title, body: a.body, scripture: a.scripture,
-        pinned: a.pinned, authorName: a.authorName, amenCount: a.amenCount || 0,
+        id: a.id, title: a.title || "", body: a.body || "", scripture: a.scripture || "",
+        pinned: a.pinned || false, authorName: a.authorName, amenCount: a.amenCount || 0,
         likeCount: (a as { likeCount?: number }).likeCount ?? 0,
-        createdAt: a.createdAt,
+        createdAt: a.createdAt || "",
       })));
-    }).catch(() => {});
+    }).catch(err => {
+      console.error("[homepage] Failed to load faith articles:", err);
+    });
   }, []);
 
   const [newsPosts, setNewsPosts] = useState<Array<{
