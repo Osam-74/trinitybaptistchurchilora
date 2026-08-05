@@ -32,20 +32,33 @@ export function subscribeArticles(cb: (articles: Post[]) => void) {
 }
 
 /** Get published articles for the public homepage */
-export async function getPublishedArticles(limit = 6): Promise<Post[]> {
-  if (!db) {
-    // Fallback to seed data if Firebase isn't configured
-    return samplePosts
+export async function getPublishedArticles(max = 6): Promise<Post[]> {
+  const fallback = () =>
+    samplePosts
       .filter(p => p.status === "published")
-      .slice(0, limit)
+      .slice(0, max)
       .map((p, i) => ({ ...p, id: `seed-${i}` }));
+
+  if (!db) return fallback();
+
+  try {
+    // Try seeding first if collection is empty (also works on homepage visits)
+    await seedArticlesIfEmpty();
+
+    const q = query(collection(db, COLL), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    const articles = snap.docs
+      .map(d => ({ id: d.id, ...d.data() } as Post))
+      .filter(p => p.status === "published")
+      .slice(0, max);
+
+    // If Firestore returned nothing, use seed data so the section is never empty
+    if (articles.length === 0) return fallback();
+    return articles;
+  } catch (err) {
+    console.error("[posts] getPublishedArticles failed, using fallback:", err);
+    return fallback();
   }
-  const q = query(collection(db, COLL), orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
-  return snap.docs
-    .map(d => ({ id: d.id, ...d.data() } as Post))
-    .filter(p => p.status === "published")
-    .slice(0, limit);
 }
 
 /** Create a new article */

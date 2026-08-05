@@ -10,6 +10,7 @@ import { NewsPost } from "@/types";
 import { listPublishedPosts } from "@/lib/news";
 import { formatDate } from "@/lib/utils";
 import { trackView } from "@/lib/analytics";
+import LikeButton from "@/components/LikeButton";
 
 export default function NewsDetailPage() {
   const params = useParams();
@@ -178,15 +179,20 @@ export default function NewsDetailPage() {
 
           {/* Share Section */}
           <div className="border-t border-b border-stone-100 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 mb-16">
-            <div>
-              <h3 className="font-serif text-xl font-bold text-primary">Share this post</h3>
-              <p className="text-text-muted text-sm mt-1">Spread the word and inspire others with this update.</p>
+            <div className="flex items-center gap-4">
+              <div>
+                <h3 className="font-serif text-xl font-bold text-primary">Share this post</h3>
+                <p className="text-text-muted text-sm mt-1">Spread the word and inspire others with this update.</p>
+              </div>
             </div>
-            <ShareButton
-              url={typeof window !== 'undefined' ? window.location.href : ''}
-              title={post.title}
-              label="Share Post"
-            />
+            <div className="flex items-center gap-3">
+              <LikeButton collection="news_posts" docId={post.id} initialCount={(post as { likeCount?: number }).likeCount ?? 0} />
+              <ShareButton
+                url={typeof window !== 'undefined' ? window.location.href : ''}
+                title={post.title}
+                label="Share Post"
+              />
+            </div>
           </div>
 
           {/* More from Trinity Baptist */}

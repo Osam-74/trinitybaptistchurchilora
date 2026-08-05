@@ -5,6 +5,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ShareButton from "@/components/ShareButton";
+import LikeButton from "@/components/LikeButton";
 import { NewsPost } from "@/types";
 import { listPublishedPosts } from "@/lib/news";
 import { formatDate } from "@/lib/utils";
@@ -225,6 +226,7 @@ export default function NewsListingPage() {
                           <div />
                         )}
                         <div className="flex items-center gap-3">
+                          <LikeButton collection="news_posts" docId={post.id} initialCount={(post as { likeCount?: number }).likeCount ?? 0} size="sm" />
                           <ShareButton
                             url={typeof window !== 'undefined' ? window.location.origin + '/news/' + post.id : '/news/' + post.id}
                             title={post.title}

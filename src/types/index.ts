@@ -25,6 +25,7 @@ export interface Post {
   authorUid: string;
   authorName?: string;
   viewCount?: number;
+  likeCount?: number;
 }
 
 export interface LiveStream {
@@ -98,6 +99,7 @@ export interface Sermon {
   durationSec?: number;
   featured: boolean;
   viewCount?: number;
+  likeCount?: number;
 }
 
 export interface Activity {
@@ -245,6 +247,7 @@ export interface NewsPost {
   publishedAt?: string;
   createdAt?: string;
   viewCount?: number;
+  likeCount?: number;
 }
 
 export interface ViewEvent {

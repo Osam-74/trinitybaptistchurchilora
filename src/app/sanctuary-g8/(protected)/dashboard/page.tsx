@@ -43,9 +43,16 @@ export default function AdminDashboardPage() {
       setAnnouncements(s.announcements || []);
     }).catch(() => {});
 
+    // Load recent activity log
+    getRecentActivity(15).then(setActivities).catch(() => {});
+
+    // Load analytics — must run before any early return in this effect
+    getAnalyticsSummary().then(s => { setAnalytics(s); setAnalyticsLoading(false); }).catch(() => setAnalyticsLoading(false));
+
     // Fetch the current user's display name from Firestore
+    let unsub: (() => void) | null = null;
     if (auth) {
-      const unsub = onAuthStateChanged(auth, async (user) => {
+      unsub = onAuthStateChanged(auth, async (user) => {
         if (!user) return;
         try {
           if (db) {
@@ -57,14 +64,9 @@ export default function AdminDashboardPage() {
           }
         } catch { /* ignore */ }
       });
-      return () => unsub();
     }
 
-    // Load recent activity log
-    getRecentActivity(15).then(setActivities).catch(() => {});
-
-    // Load analytics
-    getAnalyticsSummary().then(s => { setAnalytics(s); setAnalyticsLoading(false); }).catch(() => setAnalyticsLoading(false));
+    return () => { if (unsub) unsub(); };
   }, []);
 
   const toggleLive = async () => {

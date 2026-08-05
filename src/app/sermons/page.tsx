@@ -9,6 +9,7 @@ import { formatDate, getYouTubeThumbnail } from "@/lib/utils";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { trackView } from "@/lib/analytics";
+import LikeButton from "@/components/LikeButton";
 
 function formatDuration(sec?: number) {
   if (!sec) return null;
@@ -239,14 +240,17 @@ export default function SermonsPage() {
                       <span>{formatDate(sermon.date)}</span>
                     </div>
 
-                    <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
+                    <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-2">
                       <span className="inline-block bg-bg-alt text-primary-light text-[11px] font-bold px-3 py-1 rounded-lg">
                         📖 {sermon.scripture}
                       </span>
-                      <ShareButton
-                        url={typeof window !== 'undefined' ? window.location.href : ''}
-                        title={sermon.title}
-                      />
+                      <div className="flex items-center gap-2">
+                        <LikeButton collection="sermons" docId={sermon.id} initialCount={sermon.likeCount ?? 0} size="sm" />
+                        <ShareButton
+                          url={typeof window !== 'undefined' ? window.location.href : ''}
+                          title={sermon.title}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

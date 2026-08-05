@@ -13,6 +13,7 @@ import { db } from "@/lib/firebase";
 import { listPublishedPosts } from "@/lib/news";
 import { getPublishedArticles } from "@/lib/posts";
 import { trackView } from "@/lib/analytics";
+import LikeButton from "@/components/LikeButton";
 
 // Custom useScrollReveal Hook
 function useScrollReveal() {
@@ -124,7 +125,7 @@ export default function HomePage() {
   // FAITH ARTICLES: fetch published articles from Firestore (with seed fallback)
   const [faithArticles, setFaithArticles] = useState<Array<{
     id: string; title: string; body: string; scripture: string;
-    pinned: boolean; authorName?: string; amenCount: number; createdAt: string;
+    pinned: boolean; authorName?: string; amenCount: number; likeCount: number; createdAt: string;
   }>>([]);
   const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
 
@@ -133,6 +134,7 @@ export default function HomePage() {
       setFaithArticles(articles.map(a => ({
         id: a.id, title: a.title, body: a.body, scripture: a.scripture,
         pinned: a.pinned, authorName: a.authorName, amenCount: a.amenCount || 0,
+        likeCount: (a as { likeCount?: number }).likeCount ?? 0,
         createdAt: a.createdAt,
       })));
     }).catch(() => {});
@@ -940,14 +942,17 @@ export default function HomePage() {
                       {isExpanded ? "Show Less" : "Read More"}
                       <svg className={"w-3.5 h-3.5 transition-transform " + (isExpanded ? "rotate-180" : "")} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
                     </button>
-                    {article.authorName && (
-                      <div className="mt-4 pt-3 border-t border-stone-50 flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
-                          {article.authorName.charAt(0).toUpperCase()}
+                    <div className="mt-4 pt-3 border-t border-stone-50 flex items-center justify-between">
+                      {article.authorName ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                            {article.authorName.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="text-xs text-text-muted font-medium">{article.authorName}</span>
                         </div>
-                        <span className="text-xs text-text-muted font-medium">{article.authorName}</span>
-                      </div>
-                    )}
+                      ) : <span />}
+                      <LikeButton collection="faith_articles" docId={article.id} initialCount={article.likeCount ?? 0} size="sm" />
+                    </div>
                   </div>
                 );
               })}
