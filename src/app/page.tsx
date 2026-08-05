@@ -11,6 +11,8 @@ import { getYouTubeThumbnail } from "@/lib/utils";
 import { doc, onSnapshot, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { listPublishedPosts } from "@/lib/news";
+import { getPublishedArticles } from "@/lib/posts";
+import { trackView } from "@/lib/analytics";
 
 // Custom useScrollReveal Hook
 function useScrollReveal() {
@@ -119,6 +121,23 @@ export default function HomePage() {
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
 
   // NEWS & EVENTS: fetch latest published posts
+  // FAITH ARTICLES: fetch published articles from Firestore (with seed fallback)
+  const [faithArticles, setFaithArticles] = useState<Array<{
+    id: string; title: string; body: string; scripture: string;
+    pinned: boolean; authorName?: string; amenCount: number; createdAt: string;
+  }>>([]);
+  const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
+
+  useEffect(() => {
+    getPublishedArticles(6).then(articles => {
+      setFaithArticles(articles.map(a => ({
+        id: a.id, title: a.title, body: a.body, scripture: a.scripture,
+        pinned: a.pinned, authorName: a.authorName, amenCount: a.amenCount || 0,
+        createdAt: a.createdAt,
+      })));
+    }).catch(() => {});
+  }, []);
+
   const [newsPosts, setNewsPosts] = useState<Array<{
     id: string; title: string; category: string; excerpt: string;
     images: string[]; date: string; author?: string;
@@ -871,6 +890,67 @@ export default function HomePage() {
                 View All News &amp; Events
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
               </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Faith Articles */}
+      {faithArticles.length > 0 && (
+        <section className="py-20 bg-white relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <span className="inline-block bg-accent/10 text-accent font-bold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full mb-3">Spiritual Nourishment</span>
+              <h2 className="font-serif text-3xl lg:text-4xl text-primary font-bold mb-3">Faith Articles</h2>
+              <p className="text-text-muted text-sm max-w-xl mx-auto">Weekly devotionals, reflections, and messages from our pastor to encourage your walk with Christ.</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {faithArticles.map((article, i) => {
+                const isExpanded = expandedArticle === article.id;
+                return (
+                  <div
+                    key={article.id}
+                    className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 flex flex-col reveal transition-all duration-300 hover:shadow-md"
+                    style={{ transitionDelay: `${i * 0.08}s` }}
+                  >
+                    {article.pinned && (
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-accent bg-accent/8 px-2.5 py-1 rounded-full mb-3 w-fit">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        Pinned
+                      </span>
+                    )}
+                    <h3 className="font-serif text-xl font-bold text-primary mb-2 leading-tight">{article.title}</h3>
+                    {article.scripture && (
+                      <p className="text-accent text-xs font-semibold italic mb-3 border-l-2 border-accent/30 pl-2">{article.scripture}</p>
+                    )}
+                    <div className={"text-text-muted text-sm leading-relaxed flex-1 " + (isExpanded ? "" : "line-clamp-4")}>
+                      {article.body}
+                    </div>
+                    <button
+                      onClick={() => {
+                        const newId = isExpanded ? null : article.id;
+                        setExpandedArticle(newId);
+                        if (newId) {
+                          trackView({ collection: "faith_articles", docId: article.id, title: article.title });
+                        }
+                      }}
+                      className="mt-4 text-xs font-semibold text-accent hover:text-primary transition-colors inline-flex items-center gap-1 w-fit"
+                    >
+                      {isExpanded ? "Show Less" : "Read More"}
+                      <svg className={"w-3.5 h-3.5 transition-transform " + (isExpanded ? "rotate-180" : "")} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    {article.authorName && (
+                      <div className="mt-4 pt-3 border-t border-stone-50 flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                          {article.authorName.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="text-xs text-text-muted font-medium">{article.authorName}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>

@@ -10,7 +10,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-export type ContentType = "sermons" | "news_posts" | "posts";
+export type ContentType = "sermons" | "news_posts" | "posts" | "faith_articles";
 
 export interface ContentView {
   id: string;
@@ -26,6 +26,7 @@ export interface AnalyticsSummary {
   sermonViews: number;
   newsViews: number;
   postViews: number;
+  articleViews: number;
   topContent: { title: string; collection: ContentType; docId: string; views: number }[];
   recentViews: ContentView[];
   last7Days: { date: string; views: number }[];
@@ -76,6 +77,7 @@ export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
     sermonViews: 0,
     newsViews: 0,
     postViews: 0,
+    articleViews: 0,
     topContent: [],
     recentViews: [],
     last7Days: [],
@@ -98,6 +100,7 @@ export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
     const sermonViews = views.filter(v => v.collection === "sermons").length;
     const newsViews = views.filter(v => v.collection === "news_posts").length;
     const postViews = views.filter(v => v.collection === "posts").length;
+    const articleViews = views.filter(v => v.collection === "faith_articles").length;
 
     // Top content by view count
     const viewMap = new Map<string, { title: string; collection: ContentType; docId: string; views: number }>();
@@ -135,6 +138,7 @@ export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
       sermonViews,
       newsViews,
       postViews,
+      articleViews,
       topContent,
       recentViews,
       last7Days,
@@ -146,6 +150,7 @@ export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
       sermonViews: 0,
       newsViews: 0,
       postViews: 0,
+      articleViews: 0,
       topContent: [],
       recentViews: [],
       last7Days: [],

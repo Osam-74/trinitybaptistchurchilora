@@ -183,7 +183,7 @@ export default function AdminDashboardPage() {
             ) : (
               <div className="space-y-6">
                 {/* View counts by type */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                   <div className="bg-[#0D4A35]/5 rounded-xl p-4 border border-[#0D4A35]/10">
                     <p className="text-2xl font-bold text-[#0B2C22]">{analytics.totalViews}</p>
                     <p className="text-xs text-stone-500 font-medium mt-0.5">Total Views</p>
@@ -197,8 +197,12 @@ export default function AdminDashboardPage() {
                     <p className="text-xs text-stone-500 font-medium mt-0.5">News & Event Views</p>
                   </div>
                   <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
-                    <p className="text-2xl font-bold text-emerald-600">{analytics.postViews}</p>
+                    <p className="text-2xl font-bold text-emerald-600">{analytics.articleViews}</p>
                     <p className="text-xs text-stone-500 font-medium mt-0.5">Faith Article Views</p>
+                  </div>
+                  <div className="bg-amber-50 rounded-xl p-4 border border-amber-100">
+                    <p className="text-2xl font-bold text-amber-600">{analytics.postViews}</p>
+                    <p className="text-xs text-stone-500 font-medium mt-0.5">Other Post Views</p>
                   </div>
                 </div>
 
