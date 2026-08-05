@@ -405,7 +405,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
           {/* Section label */}
           <div className="text-center mb-10">
-            <span className="inline-flex items-center gap-2 bg-accent/10 border border-accent/20 text-accent text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full">
+            <span className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 text-primary text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full">
               ✝ Yearly Watchword — 2026
             </span>
           </div>
@@ -847,7 +847,7 @@ export default function HomePage() {
         <section className="py-20 bg-stone-50 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <span className="inline-block bg-accent/10 text-accent font-bold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full mb-3">Stay Updated</span>
+              <span className="inline-block text-primary bg-primary/5 font-bold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full border border-primary/10 mb-3">Stay Updated</span>
               <h2 className="font-serif text-3xl lg:text-4xl text-primary font-bold mb-3">Latest News &amp; Events</h2>
               <p className="text-text-muted text-sm max-w-xl mx-auto">Catch up on the latest happenings, celebrations, and announcements from Trinity Baptist Church, Ilora.</p>
             </div>
@@ -905,7 +905,7 @@ export default function HomePage() {
         <section className="py-20 bg-white relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <span className="inline-block bg-accent/10 text-accent font-bold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full mb-3">Spiritual Nourishment</span>
+              <span className="inline-block text-primary bg-primary/5 font-bold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full border border-primary/10 mb-3">Spiritual Nourishment</span>
               <h2 className="font-serif text-3xl lg:text-4xl text-primary font-bold mb-3">Faith Articles</h2>
               <p className="text-text-muted text-sm max-w-xl mx-auto">Weekly devotionals, reflections, and messages from our pastor to encourage your walk with Christ.</p>
             </div>
@@ -916,11 +916,11 @@ export default function HomePage() {
                 return (
                   <div
                     key={article.id}
-                    className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 flex flex-col reveal transition-all duration-300 hover:shadow-md"
+                    className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 flex flex-col animate-fade-in-up transition-all duration-300 hover:shadow-md"
                     style={{ transitionDelay: `${i * 0.08}s` }}
                   >
                     {article.pinned && (
-                      <span className="inline-flex items-center gap-1 text-xs font-bold text-accent bg-accent/8 px-2.5 py-1 rounded-full mb-3 w-fit">
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary/5 px-2.5 py-1 rounded-full mb-3 w-fit border border-primary/10">
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                         Pinned
                       </span>

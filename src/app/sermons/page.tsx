@@ -264,7 +264,7 @@ export default function SermonsPage() {
           <div className="absolute inset-0 pattern-overlay opacity-5" />
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div>
-              <span className="text-accent text-xs font-bold uppercase tracking-widest mb-2 block">SPIRITUAL GROWTH</span>
+              <span className="text-primary bg-primary/5 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border border-primary/10 inline-block mb-2">SPIRITUAL GROWTH</span>
               <h3 className="font-serif text-2xl lg:text-3xl font-bold mb-3">Subscribe to Our Podcast</h3>
               <p className="text-white/70 max-w-lg text-sm leading-relaxed">
                 Take the Word of God with you wherever you go. Listen to sermons, devotionals, and church teachings on the go.
