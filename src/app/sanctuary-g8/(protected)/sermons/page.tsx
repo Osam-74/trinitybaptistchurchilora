@@ -13,8 +13,8 @@ import {
 } from "firebase/firestore";
 import { logActivity } from "@/lib/activityLog";
 
-/* ─── Recorder hook ─── */
-function useRecorder() {
+/* ─── Audio Recorder hook (existing) ─── */
+function useAudioRecorder() {
   const [state, setState] = useState<"idle" | "recording" | "paused" | "stopped">("idle");
   const [elapsed, setElapsed] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -66,10 +66,86 @@ function useRecorder() {
   return { state, elapsed, fmt, audioBlob, audioUrl, start, pause, resume, stop, reset };
 }
 
+/* ─── Video Recorder hook ─── */
+function useVideoRecorder() {
+  const [state, setState] = useState<"idle" | "recording" | "paused" | "stopped">("idle");
+  const [elapsed, setElapsed] = useState(0);
+  const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const mediaRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const videoPreviewRef = useRef<HTMLVideoElement | null>(null);
+  const liveStreamRef = useRef<MediaStream | null>(null);
+
+  const startTimer = () => { timerRef.current = setInterval(() => setElapsed(e => e + 1), 1000); };
+  const stopTimer = () => { if (timerRef.current) clearInterval(timerRef.current); };
+
+  const start = async () => {
+    setErrorMsg(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: true,
+      });
+      liveStreamRef.current = stream;
+      if (videoPreviewRef.current) {
+        videoPreviewRef.current.srcObject = stream;
+        videoPreviewRef.current.play();
+      }
+
+      const mr = new MediaRecorder(stream);
+      chunksRef.current = [];
+      mr.ondataavailable = e => chunksRef.current.push(e.data);
+      mr.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: "video/webm" });
+        setVideoBlob(blob);
+        setVideoUrl(URL.createObjectURL(blob));
+        if (videoPreviewRef.current) {
+          videoPreviewRef.current.srcObject = null;
+        }
+      };
+      mr.start();
+      mediaRef.current = mr;
+      setElapsed(0); setVideoBlob(null); setVideoUrl(null);
+      setState("recording"); startTimer();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Camera access denied";
+      setErrorMsg(`Camera access denied: ${msg}. Please allow camera and microphone access and try again.`);
+    }
+  };
+
+  const pause = () => { mediaRef.current?.pause(); stopTimer(); setState("paused"); };
+  const resume = () => { mediaRef.current?.resume(); startTimer(); setState("recording"); };
+  const stop = () => {
+    mediaRef.current?.stop();
+    mediaRef.current?.stream.getTracks().forEach(t => t.stop());
+    stopTimer(); setState("stopped");
+  };
+  const reset = () => {
+    if (mediaRef.current?.state === "recording" || mediaRef.current?.state === "paused") {
+      mediaRef.current.stop();
+      mediaRef.current.stream.getTracks().forEach(t => t.stop());
+    }
+    stopTimer(); setElapsed(0); setVideoBlob(null); setVideoUrl(null); setState("idle");
+    if (videoPreviewRef.current) {
+      videoPreviewRef.current.srcObject = null;
+    }
+  };
+
+  useEffect(() => () => {
+    stopTimer();
+    liveStreamRef.current?.getTracks().forEach(t => t.stop());
+  }, []);
+  const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  return { state, elapsed, fmt, videoBlob, videoUrl, errorMsg, videoPreviewRef, start, pause, resume, stop, reset };
+}
+
 /* ─── Form default ─── */
 const EMPTY_FORM = {
   title: "", preacher: "", scripture: "", description: "",
-  series: "", type: "video" as "audio" | "video", youtubeId: "", audioUrl: "",
+  series: "", type: "video" as "audio" | "video", youtubeId: "", audioUrl: "", videoUrl: "",
 };
 
 /* ─── Page ─── */
@@ -79,11 +155,13 @@ export default function AdminSermonsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [audioTab, setAudioTab] = useState<"upload" | "record">("upload");
+  const [videoTab, setVideoTab] = useState<"record" | "youtube">("record");
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string>("");
-  const rec = useRecorder();
+  const rec = useAudioRecorder();
+  const vidRec = useVideoRecorder();
 
   /* Listen to Firestore */
   useEffect(() => {
@@ -97,12 +175,17 @@ export default function AdminSermonsPage() {
   }, []);
 
   const openNew = () => {
-    setEditingId(null); setForm({ ...EMPTY_FORM }); setAudioTab("upload"); rec.reset(); setShowForm(true);
+    setEditingId(null); setForm({ ...EMPTY_FORM }); setAudioTab("upload"); setVideoTab("record"); rec.reset(); vidRec.reset(); setShowForm(true);
   };
   const openEdit = (s: Sermon) => {
     setEditingId(s.id);
-    setForm({ title: s.title, preacher: s.preacher, scripture: s.scripture, description: s.description || "", series: s.series || "", type: s.type, youtubeId: s.youtubeId || "", audioUrl: s.audioUrl || "" });
-    setAudioTab("upload"); rec.reset(); setShowForm(true);
+    setForm({
+      title: s.title, preacher: s.preacher, scripture: s.scripture,
+      description: s.description || "", series: s.series || "",
+      type: s.type, youtubeId: s.youtubeId || "",
+      audioUrl: s.audioUrl || "", videoUrl: s.videoUrl || "",
+    });
+    setAudioTab("upload"); setVideoTab("record"); rec.reset(); vidRec.reset(); setShowForm(true);
   };
 
   const handleSave = async () => {
@@ -122,7 +205,7 @@ export default function AdminSermonsPage() {
         await addDoc(collection(db, "sermons"), { ...payload, createdAt: serverTimestamp() });
         logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "created", target: `Sermon: ${form.title}`, section: "Sermons" });
       }
-      setShowForm(false); rec.reset(); setForm({ ...EMPTY_FORM }); setEditingId(null);
+      setShowForm(false); rec.reset(); vidRec.reset(); setForm({ ...EMPTY_FORM }); setEditingId(null);
     } catch (err) {
       alert(`Save failed: ${(err as Error).message}`);
     } finally { setSaving(false); }
@@ -134,11 +217,8 @@ export default function AdminSermonsPage() {
     logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "deleted", target: `Sermon`, section: "Sermons" });
   };
 
-  /**
-   * Upload recording to Cloudflare R2 (permanent storage) via the shared
-   * consultdrfat Worker — same upload path the gallery already uses.
-   */
-  const handleUploadRecording = async () => {
+  /** Upload audio recording to R2 */
+  const handleUploadAudioRecording = async () => {
     if (!rec.audioBlob) return;
     setUploading(true);
     setUploadProgress("Uploading to cloud… (this may take a moment for large files)");
@@ -153,15 +233,20 @@ export default function AdminSermonsPage() {
     } finally { setUploading(false); }
   };
 
-  /**
-   * Save recording to Firestore using the local blob URL.
-   * NOTE: blob:// URLs only live in the current browser session.
-   * The sermon will show immediately but the audio link won't persist after page reload.
-   * For permanent storage, use "Upload to Cloud" first.
-   */
-  const handleSaveLocalRecording = () => {
-    if (!rec.audioUrl) return;
-    setForm(f => ({ ...f, audioUrl: rec.audioUrl!, type: "audio" }));
+  /** Upload video recording to R2 */
+  const handleUploadVideoRecording = async () => {
+    if (!vidRec.videoBlob) return;
+    setUploading(true);
+    setUploadProgress("Uploading video to cloud… (this may take a while for large videos)");
+    try {
+      const { uploadToR2 } = await import("@/lib/r2");
+      const blobFile = new File([vidRec.videoBlob], `video-recording-${Date.now()}.webm`, { type: "video/webm" });
+      const url = await uploadToR2(blobFile, "sermons");
+      setForm(f => ({ ...f, videoUrl: url, type: "video" }));
+      setUploadProgress("✓ Uploaded! Video saved to cloud — now click 'Save Sermon' to publish.");
+    } catch (err) {
+      setUploadProgress(`✗ Upload failed: ${(err as Error).message}`);
+    } finally { setUploading(false); }
   };
 
   return (
@@ -189,7 +274,7 @@ export default function AdminSermonsPage() {
             <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[92vh] overflow-y-auto">
               <div className="p-6 border-b border-stone-100 flex items-center justify-between sticky top-0 bg-white z-10 rounded-t-3xl">
                 <h2 className="font-serif text-lg font-bold text-primary">{editingId ? "Edit Sermon" : "New Sermon"}</h2>
-                <button onClick={() => { setShowForm(false); rec.reset(); }}
+                <button onClick={() => { setShowForm(false); rec.reset(); vidRec.reset(); }}
                   className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center hover:bg-stone-200">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -239,16 +324,168 @@ export default function AdminSermonsPage() {
                   </div>
                 </div>
 
-                {/* YouTube */}
+                {/* ── VIDEO TYPE ── */}
                 {form.type === "video" && (
                   <div>
-                    <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">YouTube Video ID</label>
-                    <input value={form.youtubeId} onChange={e => setForm(p => ({ ...p, youtubeId: e.target.value }))}
-                      className="input-field" placeholder="e.g. dQw4w9WgXcQ (the part after ?v=)" />
+                    <label className="block text-xs font-semibold text-primary mb-2 uppercase tracking-wide">Video Source</label>
+                    {/* Tabs: Record (default) | YouTube */}
+                    <div className="flex gap-1 mb-3 bg-stone-100 p-1 rounded-xl w-fit">
+                      <button type="button" onClick={() => setVideoTab("record")}
+                        className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${videoTab === "record" ? "bg-white text-primary shadow-sm" : "text-stone-500 hover:text-stone-700"}`}>
+                        <span className="flex items-center gap-1.5">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                          Record Video
+                        </span>
+                      </button>
+                      <button type="button" onClick={() => setVideoTab("youtube")}
+                        className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${videoTab === "youtube" ? "bg-white text-primary shadow-sm" : "text-stone-500 hover:text-stone-700"}`}>
+                        <span className="flex items-center gap-1.5">
+                          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                          YouTube Link
+                        </span>
+                      </button>
+                    </div>
+
+                    {/* Record Video Tab */}
+                    {videoTab === "record" && (
+                      <div className="border border-stone-200 rounded-2xl p-4 space-y-3 bg-stone-50">
+                        {/* Video preview / live view */}
+                        <div className="relative aspect-video bg-stone-900 rounded-xl overflow-hidden flex items-center justify-center">
+                          <video
+                            ref={vidRec.videoPreviewRef}
+                            className="w-full h-full object-cover"
+                            playsInline
+                            muted
+                          />
+                          {vidRec.state === "idle" && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-white/60">
+                              <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                              </svg>
+                              <p className="text-sm">Click "Start Recording" to capture video</p>
+                            </div>
+                          )}
+                          {vidRec.state === "recording" && (
+                            <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-red-600 text-white px-2.5 py-1 rounded-full text-xs font-bold">
+                              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                              REC
+                            </div>
+                          )}
+                          {vidRec.state === "stopped" && vidRec.videoUrl && (
+                            <video src={vidRec.videoUrl} controls className="w-full h-full object-contain" />
+                          )}
+                        </div>
+
+                        {/* Timer */}
+                        <div className="text-center">
+                          <span className="font-mono text-3xl font-bold text-primary tabular-nums">{vidRec.fmt(vidRec.elapsed)}</span>
+                          <p className="text-xs text-text-muted mt-1">
+                            {vidRec.state === "idle" && "Ready to record"}
+                            {vidRec.state === "recording" && "● Recording video + audio…"}
+                            {vidRec.state === "paused" && "⏸ Paused"}
+                            {vidRec.state === "stopped" && "✓ Recording complete"}
+                          </p>
+                        </div>
+
+                        {vidRec.errorMsg && (
+                          <p className="text-xs text-red-500 text-center">{vidRec.errorMsg}</p>
+                        )}
+
+                        {/* Controls */}
+                        <div className="flex gap-2 justify-center flex-wrap">
+                          {vidRec.state === "idle" && (
+                            <button type="button" onClick={vidRec.start}
+                              className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors">
+                              <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
+                              Start Recording
+                            </button>
+                          )}
+                          {vidRec.state === "recording" && (<>
+                            <button type="button" onClick={vidRec.pause}
+                              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl font-semibold text-sm">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
+                              Pause
+                            </button>
+                            <button type="button" onClick={vidRec.stop}
+                              className="flex items-center gap-2 bg-stone-700 hover:bg-stone-800 text-white px-4 py-2.5 rounded-xl font-semibold text-sm">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z" /></svg>
+                              Stop
+                            </button>
+                          </>)}
+                          {vidRec.state === "paused" && (<>
+                            <button type="button" onClick={vidRec.resume}
+                              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                              Resume
+                            </button>
+                            <button type="button" onClick={vidRec.stop}
+                              className="flex items-center gap-2 bg-stone-700 hover:bg-stone-800 text-white px-4 py-2.5 rounded-xl font-semibold text-sm">
+                              Stop
+                            </button>
+                          </>)}
+                          {vidRec.state === "stopped" && (
+                            <button type="button" onClick={vidRec.reset}
+                              className="text-sm text-stone-400 hover:text-stone-600 underline">Record again</button>
+                          )}
+                        </div>
+
+                        {/* Upload + save options */}
+                        {vidRec.videoUrl && vidRec.state === "stopped" && (
+                          <div className="space-y-2">
+                            {form.videoUrl && form.videoUrl.startsWith("http") ? (
+                              <p className="text-xs text-green-600 font-semibold text-center">
+                                ✓ Video uploaded — click &ldquo;Save Sermon&rdquo; below to publish
+                              </p>
+                            ) : (
+                              <div className="space-y-2">
+                                <button type="button" onClick={handleUploadVideoRecording} disabled={uploading}
+                                  className="w-full bg-primary text-white py-2.5 rounded-xl font-semibold text-sm disabled:opacity-50 hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+                                  {uploading ? (
+                                    <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>{uploadProgress || "Uploading…"}</>
+                                  ) : (
+                                    <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>Upload Video to Cloud (Permanent)</>
+                                  )}
+                                </button>
+                                <p className="text-xs text-text-muted text-center">After upload, click &ldquo;Save Sermon&rdquo; to publish</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* YouTube Tab */}
+                    {videoTab === "youtube" && (
+                      <div>
+                        <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">YouTube Video ID or URL</label>
+                        <input
+                          value={form.youtubeId}
+                          onChange={e => {
+                            let val = e.target.value;
+                            // Allow full YouTube URLs and extract the ID
+                            const ytMatch = val.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
+                            if (ytMatch) val = ytMatch[1];
+                            setForm(p => ({ ...p, youtubeId: val, videoUrl: "" }));
+                          }}
+                          className="input-field"
+                          placeholder="e.g. dQw4w9WgXcQ or paste full YouTube URL"
+                        />
+                        {form.youtubeId && form.youtubeId.length >= 11 && (
+                          <div className="mt-2 rounded-xl overflow-hidden border border-stone-200">
+                            <img
+                              src={`https://img.youtube.com/vi/${form.youtubeId.substring(0, 11)}/mqdefault.jpg`}
+                              alt="YouTube thumbnail"
+                              className="w-full h-32 object-cover"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* Audio */}
+                {/* ── AUDIO TYPE ── */}
                 {form.type === "audio" && (
                   <div>
                     <label className="block text-xs font-semibold text-primary mb-2 uppercase tracking-wide">Audio</label>
@@ -268,7 +505,6 @@ export default function AdminSermonsPage() {
 
                     {audioTab === "record" && (
                       <div className="border border-stone-200 rounded-2xl p-4 space-y-3 bg-stone-50">
-                        {/* Timer */}
                         <div className="text-center">
                           <span className="font-mono text-4xl font-bold text-primary tabular-nums">{rec.fmt(rec.elapsed)}</span>
                           <p className="text-xs text-text-muted mt-1">
@@ -278,8 +514,6 @@ export default function AdminSermonsPage() {
                             {rec.state === "stopped" && "✓ Recording complete"}
                           </p>
                         </div>
-
-                        {/* Controls */}
                         <div className="flex gap-2 justify-center flex-wrap">
                           {rec.state === "idle" && (
                             <button type="button" onClick={rec.start}
@@ -316,56 +550,43 @@ export default function AdminSermonsPage() {
                               className="text-sm text-stone-400 hover:text-stone-600 underline">Record again</button>
                           )}
                         </div>
-
-                        {/* Playback + save options */}
                         {rec.audioUrl && rec.state === "stopped" && (
                           <div className="space-y-3">
                             <audio controls src={rec.audioUrl} className="w-full rounded-lg" />
-
-                            {form.audioUrl && form.audioUrl === rec.audioUrl ? (
+                            {form.audioUrl && form.audioUrl.startsWith("http") ? (
                               <p className="text-xs text-green-600 font-semibold text-center">
-                                ✓ Recording ready — click &ldquo;Save Sermon&rdquo; below to publish
+                                ✓ Audio uploaded — click &ldquo;Save Sermon&rdquo; below to publish
                               </p>
                             ) : (
-                              <div className="space-y-2">
-                                {/* Primary: upload to cloud for permanent storage */}
-                                <button type="button" onClick={handleUploadRecording} disabled={uploading}
-                                  className="w-full bg-primary text-white py-2.5 rounded-xl font-semibold text-sm disabled:opacity-50 hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
-                                  {uploading ? (
-                                    <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>{uploadProgress}</>
-                                  ) : (
-                                    <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>Upload to Cloud (Permanent)</>
-                                  )}
-                                </button>
-
-                                {/* Secondary: use local blob — works now but won't persist after reload */}
-                                <button type="button" onClick={handleSaveLocalRecording}
-                                  className="w-full border border-stone-300 text-stone-600 py-2 rounded-xl font-medium text-sm hover:border-stone-400 transition-colors">
-                                  Use Recording Now
-                                  <span className="block text-[10px] text-stone-400 font-normal">Audio will work until you close this tab</span>
-                                </button>
-                              </div>
+                              <button type="button" onClick={handleUploadAudioRecording} disabled={uploading}
+                                className="w-full bg-primary text-white py-2.5 rounded-xl font-semibold text-sm disabled:opacity-50 hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+                                {uploading ? (
+                                  <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>Uploading…</>
+                                ) : (
+                                  <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>Upload to Cloud (Permanent)</>
+                                )}
+                              </button>
                             )}
                           </div>
                         )}
                       </div>
                     )}
-
-                    {form.audioUrl && (
-                      <p className="text-xs text-green-600 mt-1.5 font-semibold flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                        {form.audioUrl.startsWith("blob:") ? "Recording set (session only — upload to cloud for permanent storage)" : "Audio ready"}
-                      </p>
-                    )}
                   </div>
                 )}
+              </div>
 
-                <button onClick={handleSave} disabled={!form.title.trim() || saving}
-                  className="w-full bg-primary text-white py-3 rounded-xl font-semibold text-sm disabled:opacity-40 hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
-                  {saving ? <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>Saving…</> : editingId ? "Save Changes" : "Add Sermon"}
-                </button>
+              {/* Footer */}
+              <div className="p-6 border-t border-stone-100 bg-stone-50 rounded-b-3xl sticky bottom-0">
+                <div className="flex gap-3">
+                  <button onClick={handleSave} disabled={saving}
+                    className="flex-1 bg-primary text-white py-3 rounded-xl font-semibold text-sm disabled:opacity-50 hover:bg-primary/90 transition-colors">
+                    {saving ? "Saving…" : (editingId ? "Save Changes" : "Save Sermon")}
+                  </button>
+                  <button onClick={() => { setShowForm(false); rec.reset(); vidRec.reset(); }}
+                    className="px-5 py-3 rounded-xl border border-stone-200 text-text-muted hover:bg-stone-100 text-sm font-medium transition-colors">
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -391,6 +612,12 @@ export default function AdminSermonsPage() {
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${s.type === "audio" ? "bg-blue-50 text-blue-600" : "bg-red-50 text-red-600"}`}>
                       {s.type}
                     </span>
+                    {s.viewCount !== undefined && s.viewCount > 0 && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-600 flex-shrink-0 flex items-center gap-0.5">
+                        <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        {s.viewCount}
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-text-muted mt-0.5">
                     {s.preacher && <span>{s.preacher} · </span>}

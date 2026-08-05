@@ -23,7 +23,7 @@ export default function R2Uploader({
   label = "Upload File",
   onUploaded,
   onError,
-  maxMB = 20,
+  maxMB = 100,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -57,7 +57,7 @@ export default function R2Uploader({
 
     try {
       // Fake progress tick while uploading
-      const ticker = setInterval(() => setProgress(p => Math.min(p + 10, 85)), 400);
+      const ticker = setInterval(() => setProgress(p => Math.min(p + 5, 90)), 500);
       const url = await uploadToR2(file, folder);
       clearInterval(ticker);
       setProgress(100);

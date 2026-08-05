@@ -60,7 +60,6 @@ service cloud.firestore {
       allow write: if request.auth != null;
     }
 
-
     // Site config (Pastor's Word, etc.) — public read, admin write
     match /site_config/{docId} {
       allow read: if true;
@@ -90,6 +89,13 @@ service cloud.firestore {
     match /activity_log/{logId} {
       allow read: if request.auth != null;
       allow create: if request.auth != null;
+      allow update, delete: if request.auth != null;
+    }
+
+    // Content views (analytics) — anyone can create (track views), admin can read
+    match /content_views/{viewId} {
+      allow create: if true;
+      allow read: if request.auth != null;
       allow update, delete: if request.auth != null;
     }
 

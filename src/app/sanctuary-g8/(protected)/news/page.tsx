@@ -15,6 +15,7 @@ const emptyForm: Omit<NewsPost, "id"> = {
   body: "",
   images: [],
   videoUrl: "",
+  featuredVideo: false,
   featured: false,
   active: true,
   author: "",
@@ -121,6 +122,7 @@ export default function AdminNewsPage() {
       body: p.body,
       images: p.images || [],
       videoUrl: p.videoUrl || "",
+      featuredVideo: p.featuredVideo ?? false,
       featured: p.featured ?? false,
       active: p.active ?? true,
       author: p.author || "",
@@ -557,6 +559,23 @@ export default function AdminNewsPage() {
                             onUploaded={(url) => setForm(p => ({ ...p, videoUrl: url }))}
                           />
                         </div>
+
+                        {/* Featured Video Checkbox — only shown when video is attached */}
+                        {form.videoUrl && (
+                          <div className="flex items-center gap-2 bg-purple-50 border border-purple-200 rounded-xl p-3">
+                            <input
+                              type="checkbox"
+                              id="featuredVideo"
+                              checked={form.featuredVideo}
+                              onChange={e => setForm(p => ({ ...p, featuredVideo: e.target.checked }))}
+                              className="w-4 h-4 rounded border-purple-300 accent-purple-600"
+                            />
+                            <label htmlFor="featuredVideo" className="text-sm text-primary font-semibold cursor-pointer select-none">
+                              Use video as featured content
+                            </label>
+                            <span className="text-xs text-purple-500 ml-auto">When checked, video replaces the first image as the post thumbnail</span>
+                          </div>
+                        )}
 
                         <div className="grid grid-cols-2 gap-4 pt-2">
                           <div className="flex items-center gap-2">

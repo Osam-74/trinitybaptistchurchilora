@@ -159,18 +159,28 @@ export default function NewsListingPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredPosts.map((post) => {
                 const coverImage = post.images && post.images.length > 0 ? post.images[0] : "/church-building.jpg";
+                const showVideoThumb = post.featuredVideo && post.videoUrl;
                 return (
                   <article
                     key={post.id}
                     className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-stone-100 transition-all duration-300 flex flex-col h-full"
                   >
-                    {/* Cover image & Category badge */}
+                    {/* Cover — video if featuredVideo is checked, otherwise first image */}
                     <div className="relative aspect-video overflow-hidden bg-stone-100">
-                      <img
-                        src={coverImage}
-                        alt={post.title}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                      />
+                      {showVideoThumb ? (
+                        <video
+                          src={post.videoUrl}
+                          className="w-full h-full object-contain"
+                          controls
+                          preload="metadata"
+                        />
+                      ) : (
+                        <img
+                          src={coverImage}
+                          alt={post.title}
+                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                        />
+                      )}
                       <div className="absolute top-4 left-4 flex flex-wrap gap-2">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/95 text-primary border border-stone-100 ${getCategoryColor(post.category)}`}>
                           {post.category}

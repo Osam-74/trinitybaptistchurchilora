@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -9,6 +9,7 @@ import ShareButton from "@/components/ShareButton";
 import { NewsPost } from "@/types";
 import { listPublishedPosts } from "@/lib/news";
 import { formatDate } from "@/lib/utils";
+import { trackView } from "@/lib/analytics";
 
 export default function NewsDetailPage() {
   const params = useParams();
@@ -18,6 +19,7 @@ export default function NewsDetailPage() {
   const [loading, setLoading] = useState(true);
   const [post, setPost] = useState<NewsPost | null>(null);
   const [recentPosts, setRecentPosts] = useState<NewsPost[]>([]);
+  const trackedRef = useRef(false);
 
   useEffect(() => {
     if (!id) return;
@@ -27,6 +29,10 @@ export default function NewsDetailPage() {
         const found = allPosts.find((p) => p.id === id);
         if (found) {
           setPost(found);
+          if (!trackedRef.current) {
+            trackedRef.current = true;
+            trackView({ collection: "news_posts", docId: found.id, title: found.title });
+          }
           // Show 2-3 other recent posts
           const others = allPosts.filter((p) => p.id !== id).slice(0, 3);
           setRecentPosts(others);
@@ -138,9 +144,13 @@ export default function NewsDetailPage() {
       <section className="py-16 md:py-24 bg-bg">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           
-          {/* Cover Image */}
-          <div className="relative rounded-3xl overflow-hidden shadow-xl mb-12 aspect-video img-zoom bg-stone-100">
-            <img src={coverImage} alt={post.title} className="w-full h-full object-contain" />
+          {/* Cover — Video if featuredVideo is checked, otherwise image */}
+          <div className="relative rounded-3xl overflow-hidden shadow-xl mb-12 aspect-video bg-stone-100">
+            {post.featuredVideo && post.videoUrl ? (
+              <video src={post.videoUrl} controls className="w-full h-full object-contain" />
+            ) : (
+              <img src={coverImage} alt={post.title} className="w-full h-full object-contain img-zoom" />
+            )}
           </div>
 
           {/* Article Body */}

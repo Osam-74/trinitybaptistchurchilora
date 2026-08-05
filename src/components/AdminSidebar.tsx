@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut, onAuthStateChanged, User as FbUser } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, onSnapshot, query, where } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { getSiteSettings } from "@/lib/settings";
 import { Permission } from "@/types";
@@ -14,7 +14,7 @@ type NavItem = {
   label: string;
   icon: string;
   permission?: Permission; // undefined = always visible (Dashboard)
-  badge?: string;
+  badgeKey?: "messages" | "bookings";
 };
 
 const navigationGroups: { group: string; items: NavItem[] }[] = [
@@ -46,8 +46,8 @@ const navigationGroups: { group: string; items: NavItem[] }[] = [
   {
     group: "EVENTS",
     items: [
-      { href: "/sanctuary-g8/bookings", label: "Bookings", icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", permission: "manage_bookings" },
-      { href: "/sanctuary-g8/contacts", label: "Messages", icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", permission: "manage_contacts" },
+      { href: "/sanctuary-g8/bookings", label: "Bookings", icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", permission: "manage_bookings", badgeKey: "bookings" },
+      { href: "/sanctuary-g8/contacts", label: "Messages", icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", permission: "manage_contacts", badgeKey: "messages" },
       { href: "/sanctuary-g8/announcements", label: "Announcements", icon: "M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z", permission: "manage_announcements" },
       { href: "/sanctuary-g8/calendar", label: "Calendar", icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", permission: "manage_calendar" },
       { href: "/sanctuary-g8/activities", label: "Activities", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2", permission: "manage_activities" },
@@ -97,6 +97,8 @@ export default function AdminSidebar() {
   const [currentUserEmail, setCurrentUserEmail] = useState<string>("");
   const [userProfile, setUserProfile] = useState<AdminProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [newBookings, setNewBookings] = useState(0);
 
   // Load site logo + current user's admin profile (permissions)
   useEffect(() => {
@@ -121,9 +123,6 @@ export default function AdminSidebar() {
             const data = snap.data() as Omit<AdminProfile, "uid">;
             setUserProfile({ uid: fbUser.uid, ...data });
           } else {
-            // No admin_users document — this is likely the original super admin
-            // who was set up before the user-management system existed.
-            // Default to full access so we don't lock anyone out.
             setUserProfile(null);
           }
         }
@@ -135,6 +134,25 @@ export default function AdminSidebar() {
     return () => unsub();
   }, []);
 
+  // ── Badge counters: unread messages + requested bookings ──
+  useEffect(() => {
+    if (!db) return;
+
+    // Listen to unread contact messages
+    const msgQ = query(collection(db, "contact_messages"), where("read", "==", false));
+    const unsubMsg = onSnapshot(msgQ, snap => {
+      setUnreadMessages(snap.size);
+    }, () => {});
+
+    // Listen to requested bookings (status === "requested")
+    const bookQ = query(collection(db, "bookings"), where("status", "==", "requested"));
+    const unsubBook = onSnapshot(bookQ, snap => {
+      setNewBookings(snap.size);
+    }, () => {});
+
+    return () => { unsubMsg(); unsubBook(); };
+  }, []);
+
   const handleSignOut = async () => {
     if (!auth) return;
     await signOut(auth);
@@ -142,20 +160,17 @@ export default function AdminSidebar() {
   };
 
   // ── Permission filtering ──
-  // master_admin (or no profile found = original admin) sees everything.
-  // Everyone else sees Dashboard + only items matching their permissions.
   const isMasterAdmin =
-    !userProfile ||                              // no profile = original admin → full access
+    !userProfile ||
     userProfile.roles?.includes("master_admin") ||
     userProfile.roles?.includes("super_admin");
 
   const hasPermission = (perm?: Permission): boolean => {
-    if (!perm) return true;                      // Dashboard — always visible
-    if (isMasterAdmin) return true;              // master admin sees everything
+    if (!perm) return true;
+    if (isMasterAdmin) return true;
     return userProfile?.permissions?.includes(perm) ?? false;
   };
 
-  // Filter groups + items, and drop empty groups entirely
   const visibleGroups = navigationGroups
     .map((group) => ({
       ...group,
@@ -163,8 +178,6 @@ export default function AdminSidebar() {
     }))
     .filter((group) => group.items.length > 0);
 
-  // While loading the profile, show the full menu so there's no flash of
-  // an empty sidebar. Once loaded, it snaps to the filtered set.
   const groupsToRender = profileLoading ? navigationGroups : visibleGroups;
 
   const roleLabel = isMasterAdmin
@@ -172,6 +185,12 @@ export default function AdminSidebar() {
     : userProfile?.roles?.[0]
       ? userProfile.roles[0].replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
       : "Administrator";
+
+  const getBadge = (key?: "messages" | "bookings") => {
+    if (key === "messages" && unreadMessages > 0) return unreadMessages;
+    if (key === "bookings" && newBookings > 0) return newBookings;
+    return null;
+  };
 
   return (
     <>
@@ -248,6 +267,7 @@ export default function AdminSidebar() {
               <div className="space-y-0.5">
                 {group.items.map((item) => {
                   const active = pathname === item.href;
+                  const badge = getBadge(item.badgeKey);
                   return (
                     <Link
                       key={item.href}
@@ -271,16 +291,22 @@ export default function AdminSidebar() {
                         >
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon}/>
                         </svg>
-                        <div className="flex flex-col md:hidden lg:flex transition-opacity duration-300">
+                        <div className="flex items-center gap-2 md:hidden lg:flex transition-opacity duration-300">
                           <span className="text-sm font-medium">
                             {item.label}
                           </span>
+                          {badge !== null && (
+                            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-[#EF4444] text-white text-[10px] font-bold rounded-full leading-none">
+                              {badge > 99 ? "99+" : badge}
+                            </span>
+                          )}
                         </div>
                       </div>
 
-                      {item.badge && (
-                        <span className="bg-[#EF4444] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full md:hidden lg:inline-block">
-                          {item.badge}
+                      {/* Collapsed mode badge (icon only) */}
+                      {badge !== null && (
+                        <span className="hidden md:flex lg:hidden absolute top-1 right-1 w-4 h-4 bg-[#EF4444] text-white text-[9px] font-bold rounded-full items-center justify-center leading-none">
+                          {badge > 9 ? "9+" : badge}
                         </span>
                       )}
                     </Link>

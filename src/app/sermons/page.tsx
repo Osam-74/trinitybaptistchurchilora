@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ShareButton from "@/components/ShareButton";
@@ -8,6 +8,7 @@ import { Sermon } from "@/types";
 import { formatDate, getYouTubeThumbnail } from "@/lib/utils";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import { trackView } from "@/lib/analytics";
 
 function formatDuration(sec?: number) {
   if (!sec) return null;
@@ -33,6 +34,7 @@ export default function SermonsPage() {
   const [filter, setFilter] = useState<"all" | "audio" | "video">("all");
   const [search, setSearch] = useState("");
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+  const trackedSermonsRef = useRef<Set<string>>(new Set());
 
   const filtered = sermons.filter((s) => {
     const matchesFilter = filter === "all" || s.type === filter;
@@ -133,6 +135,12 @@ export default function SermonsPage() {
                       <div className="absolute inset-0 bg-black/45 flex items-center justify-center opacity-85 group-hover:opacity-100 transition-opacity">
                         <a
                           href={`https://youtube.com/watch?v=${sermon.youtubeId}`}
+                          onClick={() => {
+                            if (!trackedSermonsRef.current.has(sermon.id)) {
+                              trackedSermonsRef.current.add(sermon.id);
+                              trackView({ collection: "sermons", docId: sermon.id, title: sermon.title });
+                            }
+                          }}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="w-14 h-14 rounded-full bg-accent flex items-center justify-center hover:bg-accent-light transition-all shadow-2xl hover:scale-105"
@@ -143,6 +151,18 @@ export default function SermonsPage() {
                         </a>
                       </div>
                     </>
+                  ) : sermon.type === "video" && sermon.videoUrl ? (
+                    <video
+                      src={sermon.videoUrl}
+                      controls
+                      className="w-full h-full object-cover"
+                      onClick={() => {
+                        if (!trackedSermonsRef.current.has(sermon.id)) {
+                          trackedSermonsRef.current.add(sermon.id);
+                          trackView({ collection: "sermons", docId: sermon.id, title: sermon.title });
+                        }
+                      }}
+                    />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary to-primary-light p-6">
                       <div className="text-center">
@@ -151,7 +171,13 @@ export default function SermonsPage() {
                         </svg>
                         {sermon.audioUrl && (
                           <button
-                            onClick={() => setPlayingAudio(playingAudio === sermon.id ? null : sermon.id)}
+                            onClick={() => {
+                            setPlayingAudio(playingAudio === sermon.id ? null : sermon.id);
+                            if (!trackedSermonsRef.current.has(sermon.id)) {
+                              trackedSermonsRef.current.add(sermon.id);
+                              trackView({ collection: "sermons", docId: sermon.id, title: sermon.title });
+                            }
+                          }}
                             className="w-12 h-12 rounded-full bg-accent flex items-center justify-center hover:bg-accent-light transition-all shadow-xl mx-auto hover:scale-105"
                           >
                             {playingAudio === sermon.id ? (

@@ -24,6 +24,7 @@ export interface Post {
   createdAt: string;
   authorUid: string;
   authorName?: string;
+  viewCount?: number;
 }
 
 export interface LiveStream {
@@ -92,9 +93,11 @@ export interface Sermon {
   series?: string;
   type: "audio" | "video";
   audioUrl?: string;
+  videoUrl?: string;
   youtubeId?: string;
   durationSec?: number;
   featured: boolean;
+  viewCount?: number;
 }
 
 export interface Activity {
@@ -132,8 +135,8 @@ export interface SiteSettings {
   };
   gmailSenderEmail?: string;
   bookingEnabled?: boolean;
-  liveEnabled?: boolean;      // controls Live button visibility in navbar
-  announcements?: string[];   // list of announcement strings for the ticker
+  liveEnabled?: boolean;
+  announcements?: string[];
 }
 
 export interface Hymn {
@@ -141,7 +144,7 @@ export interface Hymn {
   number: number;
   category: "english" | "yoruba";
   title: string;
-  lyrics: string; // verses separated by a blank line; use "Chorus:" / "Ègbè:" to label a repeated chorus
+  lyrics: string;
   author?: string;
   composer?: string;
   createdAt?: string;
@@ -159,7 +162,6 @@ export interface CalendarEvent {
   createdBy: string;
 }
 
-
 export interface Leader {
   id: string;
   name: string;
@@ -175,8 +177,8 @@ export interface ChoirMember {
   fullName: string;
   email: string;
   phone?: string;
-  department: string; // e.g. "Choir", "Media Team", "Instrumentalist"
-  section?: string;   // e.g. "Soprano", "Alto", "Tenor", "Bass", or instrument
+  department: string;
+  section?: string;
   photoUrl?: string;
   bio?: string;
   dateJoined?: string;
@@ -236,9 +238,20 @@ export interface NewsPost {
   body: string;
   images: string[];
   videoUrl?: string;
+  featuredVideo?: boolean;
   featured: boolean;
   active: boolean;
   author?: string;
   publishedAt?: string;
   createdAt?: string;
+  viewCount?: number;
+}
+
+export interface ViewEvent {
+  id: string;
+  collection: "sermons" | "news_posts" | "posts";
+  docId: string;
+  title: string;
+  viewedAt: string;
+  referrer?: string;
 }

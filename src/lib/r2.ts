@@ -32,9 +32,9 @@ export async function uploadToR2(
   // bookingId is used as namespace — we repurpose it as folder name
   form.append("bookingId", `trinity-${folder}`);
 
-  // Timeout after 60 seconds for large audio files
+  // Timeout after 5 minutes for large audio files
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 60000);
+  const timeoutId = setTimeout(() => controller.abort(), 300000);
 
   let res: Response;
   try {
@@ -46,7 +46,7 @@ export async function uploadToR2(
   } catch (fetchErr: unknown) {
     clearTimeout(timeoutId);
     if (fetchErr instanceof DOMException && fetchErr.name === "AbortError") {
-      throw new Error("Upload timed out after 60 seconds. The file may be too large or the server is unreachable.");
+      throw new Error("Upload timed out after 5 minutes. The file may be too large or the server is unreachable.");
     }
     throw new Error(`Cannot reach upload server. Check your connection and try again. (${(fetchErr as Error)?.message ?? "network error"})`);
   }

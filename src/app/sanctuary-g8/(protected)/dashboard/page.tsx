@@ -9,6 +9,7 @@ import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { getRecentActivity, ActivityEntry } from "@/lib/activityLog";
+import { getAnalyticsSummary, AnalyticsSummary } from "@/lib/analytics";
 
 export default function AdminDashboardPage() {
   const [greeting, setGreeting] = useState("Hello");
@@ -25,6 +26,8 @@ export default function AdminDashboardPage() {
   const [annSuccess, setAnnSuccess] = useState(false);
   const [announcements, setAnnouncements] = useState<string[]>([]);
   const [activities, setActivities] = useState<ActivityEntry[]>([]);
+  const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
 
   useEffect(() => {
     const hr = new Date().getHours();
@@ -59,6 +62,9 @@ export default function AdminDashboardPage() {
 
     // Load recent activity log
     getRecentActivity(15).then(setActivities).catch(() => {});
+
+    // Load analytics
+    getAnalyticsSummary().then(s => { setAnalytics(s); setAnalyticsLoading(false); }).catch(() => setAnalyticsLoading(false));
   }, []);
 
   const toggleLive = async () => {
@@ -149,6 +155,101 @@ export default function AdminDashboardPage() {
                 <p className="text-stone-500 text-sm mt-1 font-medium">{stat.label}</p>
               </Link>
             ))}
+          </div>
+
+          {/* ── Analytics Dashboard ── */}
+          <div className="bg-white rounded-2xl border border-[#E8EDE8] shadow-sm p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="font-serif text-lg font-bold text-[#0B2C22]">📊 Content Analytics</h2>
+                <p className="text-stone-400 text-xs mt-0.5">Track views across sermons, news posts, and faith articles</p>
+              </div>
+              {!analyticsLoading && analytics && (
+                <span className="text-xs text-stone-400 font-medium">Total: {analytics.totalViews} views</span>
+              )}
+            </div>
+
+            {analyticsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="w-8 h-8 border-4 border-[#0D4A35]/20 border-t-[#0D4A35] rounded-full animate-spin" />
+              </div>
+            ) : !analytics || analytics.totalViews === 0 ? (
+              <div className="py-12 text-center">
+                <svg className="w-12 h-12 text-stone-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <p className="text-stone-400 text-sm">No views tracked yet. Analytics will appear here as visitors read your content.</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* View counts by type */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-[#0D4A35]/5 rounded-xl p-4 border border-[#0D4A35]/10">
+                    <p className="text-2xl font-bold text-[#0B2C22]">{analytics.totalViews}</p>
+                    <p className="text-xs text-stone-500 font-medium mt-0.5">Total Views</p>
+                  </div>
+                  <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-100">
+                    <p className="text-2xl font-bold text-indigo-600">{analytics.sermonViews}</p>
+                    <p className="text-xs text-stone-500 font-medium mt-0.5">Sermon Views</p>
+                  </div>
+                  <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                    <p className="text-2xl font-bold text-blue-600">{analytics.newsViews}</p>
+                    <p className="text-xs text-stone-500 font-medium mt-0.5">News & Event Views</p>
+                  </div>
+                  <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
+                    <p className="text-2xl font-bold text-emerald-600">{analytics.postViews}</p>
+                    <p className="text-xs text-stone-500 font-medium mt-0.5">Faith Article Views</p>
+                  </div>
+                </div>
+
+                {/* 7-day chart */}
+                <div>
+                  <h4 className="text-xs font-bold text-[#0B2C22] uppercase tracking-wider mb-3">Last 7 Days</h4>
+                  <div className="flex items-end gap-2 h-32">
+                    {analytics.last7Days.map((day, i) => {
+                      const maxViews = Math.max(...analytics.last7Days.map(d => d.views), 1);
+                      const heightPct = (day.views / maxViews) * 100;
+                      const label = new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' });
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
+                          <div className="flex-1 w-full flex items-end">
+                            <div
+                              className="w-full rounded-t-lg bg-gradient-to-t from-[#0D4A35] to-[#C8E63A] transition-all duration-500 hover:opacity-80"
+                              style={{ height: `${Math.max(heightPct, 3)}%`, minHeight: '4px' }}
+                              title={`${day.views} views on ${day.date}`}
+                            />
+                          </div>
+                          <span className="text-[10px] text-stone-400 font-medium">{label}</span>
+                          <span className="text-[10px] text-[#0B2C22] font-bold">{day.views}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Top content */}
+                {analytics.topContent.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-bold text-[#0B2C22] uppercase tracking-wider mb-3">Top Content</h4>
+                    <div className="space-y-2">
+                      {analytics.topContent.map((item, i) => (
+                        <div key={i} className="flex items-center gap-3 p-3 bg-stone-50 rounded-xl border border-[#E8EDE8]">
+                          <span className="w-6 h-6 rounded-full bg-[#0D4A35] text-white text-xs flex items-center justify-center font-bold flex-shrink-0">{i + 1}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-[#0B2C22] truncate">{item.title}</p>
+                            <p className="text-xs text-stone-400 capitalize">{item.collection.replace('_', ' ')}</p>
+                          </div>
+                          <span className="flex items-center gap-1 text-sm font-bold text-[#0D4A35] flex-shrink-0">
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            {item.views}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Main grid */}
