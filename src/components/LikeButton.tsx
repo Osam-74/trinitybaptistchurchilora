@@ -46,10 +46,8 @@ export default function LikeButton({ collection, docId, initialCount = 0, size =
     <button
       onClick={handleLike}
       disabled={loading}
-      className={`inline-flex items-center gap-1.5 transition-all ${pad} rounded-full font-medium border ${loading ? "opacity-50" : ""} ${
-        liked
-          ? "bg-accent/20 text-accent border-accent/30 hover:bg-accent/25"
-          : "bg-primary text-white border-primary hover:bg-primary-dark"
+      className={`inline-flex items-center gap-1.5 transition-all ${pad} rounded-full font-medium border bg-primary border-primary hover:bg-primary-dark ${loading ? "opacity-50" : ""} ${
+        liked ? "text-accent" : "text-white"
       }`}
       aria-label={liked ? "Unlike" : "Like"}
     >
