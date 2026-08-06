@@ -96,14 +96,14 @@ export default function DailyDeclarationModal({ onClose }: Props) {
           src="/icons/click-pointer.png"
           alt=""
           aria-hidden="true"
-          className="amen-pointer-anim absolute pointer-events-none select-none"
+          className="amen-pointer-anim amen-glow-anim absolute pointer-events-none select-none rounded-full"
           style={{
             width: compact ? 42 : 48,
             height: compact ? 42 : 48,
             top: compact ? 4 : 2,
             right: compact ? -10 : -12,
             zIndex: 10,
-            filter: "brightness(0) sepia(1) saturate(7) hue-rotate(30deg)",
+            filter: "invert(1) sepia(1) saturate(6) hue-rotate(30deg)",
           }}
         />
       )}
@@ -157,7 +157,7 @@ export default function DailyDeclarationModal({ onClose }: Props) {
           <div className="flex flex-col md:flex-row" style={{ maxHeight: "90vh", overflow: "hidden" }}>
             {/* LEFT: Pastor Image */}
             <div className="relative flex-shrink-0 h-48 md:h-auto md:w-2/5 overflow-hidden">
-              <img src={imageUrl} alt="Pastor's Daily Declaration" className="w-full h-full object-cover" />
+              <img src={imageUrl} alt="Pastor's Daily Declaration" className="w-full h-full object-cover object-top" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0D4A35]/60 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-[#0D4A35]/20" />
               <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6">
                 <div className="glass-card rounded-full px-4 py-2 flex items-center gap-2">
