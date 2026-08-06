@@ -98,11 +98,12 @@ export default function DailyDeclarationModal({ onClose }: Props) {
           aria-hidden="true"
           className="amen-pointer-anim absolute pointer-events-none select-none"
           style={{
-            width: compact ? 26 : 30,
-            height: compact ? 26 : 30,
-            top: compact ? -16 : -18,
-            right: compact ? -6 : -8,
+            width: compact ? 42 : 48,
+            height: compact ? 42 : 48,
+            top: compact ? -8 : -10,
+            right: compact ? -10 : -12,
             zIndex: 10,
+            filter: "brightness(0) invert(1)",
           }}
         />
       )}
