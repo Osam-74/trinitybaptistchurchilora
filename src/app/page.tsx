@@ -1,5 +1,7 @@
 "use client";
 import PastorSpeaksPopup from '@/components/PastorSpeaksPopup';
+import DailyDeclarationModal from '@/components/DailyDeclarationModal';
+import { useSearchParams } from "next/navigation";
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -91,6 +93,23 @@ export default function HomePage() {
 
   // 1. LIVE FEED: Subscription to settings/main doc in Firestore
   const [isLive, setIsLive] = useState(false);
+
+  // Pastor's Daily Declaration popup (separate from Pastor's Word)
+  const searchParams = useSearchParams();
+  const [showDeclaration, setShowDeclaration] = useState(false);
+
+  useEffect(() => {
+    const force = searchParams.get("declaration") === "true";
+    if (force) {
+      setShowDeclaration(true);
+    } else {
+      const seen = sessionStorage.getItem("declaration_seen");
+      if (!seen) {
+        setShowDeclaration(true);
+        sessionStorage.setItem("declaration_seen", "1");
+      }
+    }
+  }, [searchParams]);
 
 
   useEffect(() => {
@@ -997,6 +1016,11 @@ export default function HomePage() {
 
       {/* 10. Footer */}
       <Footer />
+    {/* Daily Declaration popup (separate from Pastor's Word) */}
+    {showDeclaration && (
+      <DailyDeclarationModal onClose={() => setShowDeclaration(false)} />
+    )}
+
     <PastorSpeaksPopup />
   </div>
   );

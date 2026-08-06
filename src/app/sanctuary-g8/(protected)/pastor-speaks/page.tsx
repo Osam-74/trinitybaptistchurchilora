@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import AdminShell from '@/components/AdminShell';
 import PermissionGuard from "@/components/PermissionGuard";
-import { getPastorSpeaks, savePastorSpeaks, deletePastorSpeaks, seedPastorSpeaksIfEmpty, PASTOR_DEFAULTS, PastorSpeak } from '@/lib/pastorSpeaks';
+import { getPastorSpeaks, savePastorSpeaks, deletePastorSpeaks, PASTOR_DEFAULTS, PastorSpeak } from '@/lib/pastorSpeaks';
 import { auth } from '@/lib/firebase';
 import { logActivity } from '@/lib/activityLog';
 
@@ -21,13 +21,10 @@ export default function PastorSpeaksAdmin() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    (async () => {
-      // Auto-seed the pastor's prayer if no message exists yet
-      await seedPastorSpeaksIfEmpty();
-      const d = await getPastorSpeaks();
+    getPastorSpeaks().then(d => {
       if (d) setData({ ...d, pastorName: d.pastorName || PASTOR_DEFAULTS.pastorName, pastorImageUrl: d.pastorImageUrl || PASTOR_DEFAULTS.pastorImageUrl });
       setLoading(false);
-    })().catch(() => setLoading(false));
+    }).catch(() => setLoading(false));
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
