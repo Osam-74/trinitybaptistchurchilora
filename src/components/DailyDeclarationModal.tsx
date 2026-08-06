@@ -100,10 +100,10 @@ export default function DailyDeclarationModal({ onClose }: Props) {
           style={{
             width: compact ? 42 : 48,
             height: compact ? 42 : 48,
-            top: compact ? -8 : -10,
+            top: compact ? -2 : -4,
             right: compact ? -10 : -12,
             zIndex: 10,
-            filter: "brightness(0) invert(1)",
+            filter: "brightness(0) sepia(1) saturate(7) hue-rotate(30deg)",
           }}
         />
       )}
