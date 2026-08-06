@@ -87,20 +87,51 @@ export default function DailyDeclarationModal({ onClose }: Props) {
 
   const imageUrl = declaration.imageUrl || DEFAULT_PASTOR_IMAGE;
 
+  // Reusable Amen button — reduced to half size, click-pointer icon pulsing on top
+  const AmenButton = ({ compact }: { compact?: boolean }) => (
+    <div className="relative inline-flex items-center">
+      {/* Click pointer icon — sits ON TOP of the button, pulsing, points to it */}
+      {!hasAmened && (
+        <img
+          src="/icons/click-pointer.png"
+          alt=""
+          aria-hidden="true"
+          className="amen-pointer-anim absolute pointer-events-none select-none"
+          style={{
+            width: compact ? 26 : 30,
+            height: compact ? 26 : 30,
+            top: compact ? -16 : -18,
+            right: compact ? -6 : -8,
+            zIndex: 10,
+          }}
+        />
+      )}
+      <button
+        onClick={handleAmen}
+        disabled={hasAmened}
+        className={`flex items-center gap-1.5 bg-[#C8E63A] text-[#0D4A35] font-bold rounded-lg transition-all ${compact ? "px-2.5 py-1 text-[11px]" : "px-3 py-1.5 text-xs"} ${amenPulse ? "scale-110 shadow-[0_0_16px_rgba(200,230,58,0.7)]" : "shadow-md"} ${hasAmened ? "opacity-90 cursor-default" : "amen-glow-anim hover:-translate-y-0.5"}`}
+      >
+        <span>Amen</span>
+        <span className={`flex items-center justify-center rounded-full bg-[#0D4A35] text-[#C8E63A] font-bold transition-all ${compact ? "min-w-[16px] h-[14px] text-[9px] px-1" : "min-w-[18px] h-[16px] text-[10px] px-1"} ${amenPulse ? "scale-125" : ""}`}>
+          {amenCount > 999 ? `${(amenCount / 1000).toFixed(1)}K` : amenCount}
+        </span>
+      </button>
+    </div>
+  );
+
   return (
     <>
       <style>{`
-        @keyframes amen-finger-blink {
-          0%, 100% { opacity: 1; transform: translateX(0) scale(1); }
-          45% { opacity: 0.2; transform: translateX(-6px) scale(0.9); }
-          55% { opacity: 0.2; transform: translateX(-6px) scale(0.9); }
+        @keyframes amen-pointer-pulse {
+          0%, 100% { opacity: 1; transform: translateY(0) scale(1); }
+          50% { opacity: 0.55; transform: translateY(3px) scale(0.92); }
         }
-        .amen-finger-anim {
-          animation: amen-finger-blink 1.2s ease-in-out infinite;
+        .amen-pointer-anim {
+          animation: amen-pointer-pulse 1.1s ease-in-out infinite;
         }
         @keyframes amen-glow {
-          0%, 100% { box-shadow: 0 0 10px rgba(200,230,58,0.3); }
-          50% { box-shadow: 0 0 25px rgba(200,230,58,0.7); }
+          0%, 100% { box-shadow: 0 0 6px rgba(200,230,58,0.3); }
+          50% { box-shadow: 0 0 16px rgba(200,230,58,0.65); }
         }
         .amen-glow-anim {
           animation: amen-glow 2s ease-in-out infinite;
@@ -135,12 +166,18 @@ export default function DailyDeclarationModal({ onClose }: Props) {
               </div>
             </div>
 
-            {/* RIGHT: Prayer text — Amen button floats inside this */}
+            {/* RIGHT: Prayer text */}
             <div className="relative flex-1 p-6 md:p-10 overflow-y-auto" style={{ maxHeight: "90vh" }}>
-              {/* Header */}
+              {/* Header — mobile: Amen button sits on the same line as the "Pastor's Prayer" label, right under the image */}
               <div className="mb-4">
-                <p className="text-[#C8E63A] text-xs font-bold uppercase tracking-widest mb-2">Pastor's Prayer</p>
-                <h2 className="font-serif text-xl md:text-2xl text-white font-bold leading-tight">My Prayer for You Today</h2>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[#C8E63A] text-xs font-bold uppercase tracking-widest">Pastor's Prayer</p>
+                  {/* Mobile-only Amen button — same line as label, right-aligned, right under image */}
+                  <div className="md:hidden">
+                    <AmenButton compact />
+                  </div>
+                </div>
+                <h2 className="font-serif text-xl md:text-2xl text-white font-bold leading-tight mt-2">My Prayer for You Today</h2>
                 <div className="w-16 h-0.5 bg-[#C8E63A]/40 mt-3" />
               </div>
 
@@ -162,18 +199,11 @@ export default function DailyDeclarationModal({ onClose }: Props) {
                 })}
               </div>
 
-              {/* Spacer so text doesn't hide behind the floating Amen button */}
-              <div style={{ height: hasAmened ? 20 : 80 }} className="transition-all" />
+              {/* Spacer so text doesn't hide behind the floating desktop Amen button */}
+              <div className="hidden md:block" style={{ height: hasAmened ? 20 : 70 }} />
 
-              {/* ── FLOATING AMEN BUTTON — absolute positioned, right side, in front of text ── */}
-              <div
-                className="absolute flex items-center gap-2 z-20"
-                style={{
-                  right: "1.5rem",
-                  bottom: "1.5rem",
-                }}
-              >
-                {/* Share button — subtle */}
+              {/* Desktop/tablet — Amen button floats bottom-right of the text area (unchanged position) */}
+              <div className="hidden md:flex absolute items-center gap-2 z-20" style={{ right: "1.5rem", bottom: "1.5rem" }}>
                 <button
                   onClick={handleShare}
                   className="flex items-center gap-1.5 text-white/50 hover:text-[#C8E63A] transition-colors text-xs font-medium mr-1"
@@ -183,32 +213,19 @@ export default function DailyDeclarationModal({ onClose }: Props) {
                   </svg>
                   Share
                 </button>
+                <AmenButton />
+              </div>
 
-                {/* Blinking pointing finger — disappears after Amen */}
-                {!hasAmened && (
-                  <div className="amen-finger-anim flex items-center" aria-hidden="true">
-                    <svg width="36" height="36" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      {/* Pointing hand — index finger pointing right */}
-                      <path
-                        d="M6 18c0-2 1.5-3.5 3.5-3.5h14l-2.5-4c-1-1.5.3-3.5 2-3.5 1 0 2 .5 2.5 1.3l6 7c1 1.2 1.5 2.7 1.5 4.2v10c0 3.3-2.7 6-6 6H17c-1.7 0-3.3-.9-4.2-2.3l-5.2-8C7.2 23.5 7 22.8 7 22v-1.5z"
-                        fill="#C8E63A"
-                      />
-                      {/* Fingernail highlight */}
-                      <ellipse cx="24" cy="14" rx="1.5" ry="1" fill="#E8FF7A" opacity="0.6" />
-                    </svg>
-                  </div>
-                )}
-
-                {/* Amen counter button */}
+              {/* Mobile — Share link sits quietly under the text, since Amen already moved to the top */}
+              <div className="md:hidden mt-4 pt-3 border-t border-white/10 flex justify-end">
                 <button
-                  onClick={handleAmen}
-                  disabled={hasAmened}
-                  className={`flex items-center gap-2.5 bg-[#C8E63A] text-[#0D4A35] font-bold px-5 py-3 rounded-xl text-sm transition-all ${amenPulse ? "scale-110 shadow-[0_0_24px_rgba(200,230,58,0.7)]" : "shadow-lg"} ${hasAmened ? "opacity-90 cursor-default" : "amen-glow-anim hover:-translate-y-0.5"} `}
+                  onClick={handleShare}
+                  className="flex items-center gap-1.5 text-white/50 hover:text-[#C8E63A] transition-colors text-xs font-medium"
                 >
-                  <span>Amen</span>
-                  <span className={`flex items-center justify-center min-w-[28px] h-[22px] px-1.5 rounded-full bg-[#0D4A35] text-[#C8E63A] text-xs font-bold transition-all ${amenPulse ? "scale-125" : ""}`}>
-                    {amenCount > 999 ? `${(amenCount / 1000).toFixed(1)}K` : amenCount}
-                  </span>
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
+                  Share
                 </button>
               </div>
             </div>
