@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ShareButton from "@/components/ShareButton";
 import { Sermon } from "@/types";
-import { sampleSermons } from "@/lib/seed-data";
 import { formatDate, getYouTubeThumbnail } from "@/lib/utils";
+import { db } from "@/lib/firebase";
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import { trackView } from "@/lib/analytics";
+import LikeButton from "@/components/LikeButton";
 
 function formatDuration(sec?: number) {
   if (!sec) return null;
@@ -15,10 +19,23 @@ function formatDuration(sec?: number) {
 }
 
 export default function SermonsPage() {
-  const [sermons] = useState<Sermon[]>(sampleSermons.map((s, i) => ({ ...s, id: `sermon-${i}` })));
+  const [sermons, setSermons] = useState<Sermon[]>([]);
+
+  // Live sync from Firestore
+  useEffect(() => {
+    if (!db) return;
+    const q = query(collection(db, "sermons"), orderBy("createdAt", "desc"));
+    const unsub = onSnapshot(q, snap => {
+      setSermons(snap.docs.map(d => ({ id: d.id, ...d.data() } as Sermon)));
+    }, (error) => {
+      console.error("Error fetching sermons:", error);
+    });
+    return unsub;
+  }, []);
   const [filter, setFilter] = useState<"all" | "audio" | "video">("all");
   const [search, setSearch] = useState("");
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+  const trackedSermonsRef = useRef<Set<string>>(new Set());
 
   const filtered = sermons.filter((s) => {
     const matchesFilter = filter === "all" || s.type === filter;
@@ -95,7 +112,9 @@ export default function SermonsPage() {
             <svg className="w-16 h-16 text-stone-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
             </svg>
-            <p className="text-stone-500 text-lg">No sermons match your criteria.</p>
+            <p className="text-stone-500 text-lg">
+              {sermons.length === 0 ? "No sermons available yet." : "No sermons match your criteria."}
+            </p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -117,6 +136,12 @@ export default function SermonsPage() {
                       <div className="absolute inset-0 bg-black/45 flex items-center justify-center opacity-85 group-hover:opacity-100 transition-opacity">
                         <a
                           href={`https://youtube.com/watch?v=${sermon.youtubeId}`}
+                          onClick={() => {
+                            if (!trackedSermonsRef.current.has(sermon.id)) {
+                              trackedSermonsRef.current.add(sermon.id);
+                              trackView({ collection: "sermons", docId: sermon.id, title: sermon.title });
+                            }
+                          }}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="w-14 h-14 rounded-full bg-accent flex items-center justify-center hover:bg-accent-light transition-all shadow-2xl hover:scale-105"
@@ -127,15 +152,33 @@ export default function SermonsPage() {
                         </a>
                       </div>
                     </>
+                  ) : sermon.type === "video" && sermon.videoUrl ? (
+                    <video
+                      src={sermon.videoUrl}
+                      controls
+                      className="w-full h-full object-cover"
+                      onClick={() => {
+                        if (!trackedSermonsRef.current.has(sermon.id)) {
+                          trackedSermonsRef.current.add(sermon.id);
+                          trackView({ collection: "sermons", docId: sermon.id, title: sermon.title });
+                        }
+                      }}
+                    />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary to-primary-light p-6">
                       <div className="text-center">
                         <svg className="w-14 h-14 text-accent/25 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                         </svg>
                         {sermon.audioUrl && (
                           <button
-                            onClick={() => setPlayingAudio(playingAudio === sermon.id ? null : sermon.id)}
+                            onClick={() => {
+                            setPlayingAudio(playingAudio === sermon.id ? null : sermon.id);
+                            if (!trackedSermonsRef.current.has(sermon.id)) {
+                              trackedSermonsRef.current.add(sermon.id);
+                              trackView({ collection: "sermons", docId: sermon.id, title: sermon.title });
+                            }
+                          }}
                             className="w-12 h-12 rounded-full bg-accent flex items-center justify-center hover:bg-accent-light transition-all shadow-xl mx-auto hover:scale-105"
                           >
                             {playingAudio === sermon.id ? (
@@ -197,10 +240,17 @@ export default function SermonsPage() {
                       <span>{formatDate(sermon.date)}</span>
                     </div>
 
-                    <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
+                    <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-2">
                       <span className="inline-block bg-bg-alt text-primary-light text-[11px] font-bold px-3 py-1 rounded-lg">
                         📖 {sermon.scripture}
                       </span>
+                      <div className="flex items-center gap-2">
+                        <LikeButton collection="sermons" docId={sermon.id} initialCount={sermon.likeCount ?? 0} size="sm" />
+                        <ShareButton
+                          url={typeof window !== 'undefined' ? window.location.href : ''}
+                          title={sermon.title}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -214,7 +264,7 @@ export default function SermonsPage() {
           <div className="absolute inset-0 pattern-overlay opacity-5" />
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div>
-              <span className="text-accent text-xs font-bold uppercase tracking-widest mb-2 block">SPIRITUAL GROWTH</span>
+              <span className="text-primary bg-primary/5 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border border-primary/10 inline-block mb-2">SPIRITUAL GROWTH</span>
               <h3 className="font-serif text-2xl lg:text-3xl font-bold mb-3">Subscribe to Our Podcast</h3>
               <p className="text-white/70 max-w-lg text-sm leading-relaxed">
                 Take the Word of God with you wherever you go. Listen to sermons, devotionals, and church teachings on the go.

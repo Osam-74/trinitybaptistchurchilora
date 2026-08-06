@@ -1,34 +1,36 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { getSiteSettings } from "@/lib/settings";
+import { submitContactMessage } from "@/lib/contacts";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", subject: "General Inquiry", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [settings, setSettings] = useState<any>(null);
+  const contactPhone = "08034084270 / 07086454207";
+  const address = "P.O. Box 43, Ilora, Oyo State, Nigeria.";
+  const contactEmail = "trinitybaptistchurchilora@gmail.com";
 
-  useEffect(() => {
-    getSiteSettings().then((s) => {
-      setSettings(s);
-    });
-  }, []);
-
-  const contactEmail = settings?.contactEmail || "trinitybaptistchurchilora@gmail.com";
-  const contactPhone = settings?.contactPhone || "+234 (0) 800 123 4567";
-  const address = settings?.address || "Trinity Baptist Church, Ilora, Oyo State, Nigeria.";
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) {
       setError("Please fill out all required fields.");
       return;
     }
     setError("");
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      await submitContactMessage(formData);
+      setSubmitted(true);
+    } catch (err) {
+      setError("Failed to send message. Please try again or contact us directly.");
+      console.error("Contact form error:", err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -49,7 +51,7 @@ export default function ContactPage() {
               Get In <span className="text-gradient-gold">Touch</span>
             </h1>
             <p className="text-white/60 text-lg animate-fade-in" style={{ animationDelay: "0.2s" }}>
-              We would love to hear from you. Reach out to Trinity Baptist Church, Ilora for prayers, inquiries, and counseling.
+              We would love to hear from you. Reach out for prayers, inquiries, and counseling.
             </p>
           </div>
         </div>
@@ -155,9 +157,10 @@ export default function ContactPage() {
 
                   <button
                     type="submit"
-                    className="w-full btn-shine btn-gold py-4 rounded-2xl font-bold text-base text-primary-dark transition-all"
+                    disabled={submitting}
+                    className="w-full btn-shine btn-gold py-4 rounded-2xl font-bold text-base text-primary-dark transition-all disabled:opacity-60"
                   >
-                    Send Message
+                    {submitting ? "Sending…" : "Send Message"}
                   </button>
                 </form>
               </>
@@ -190,20 +193,36 @@ export default function ContactPage() {
                 <h3 className="font-serif text-lg font-bold text-primary mb-2.5">Service Times</h3>
                 <ul className="space-y-1.5 text-stone-600 text-sm">
                   <li className="flex items-center justify-between gap-4">
-                    <span className="font-semibold text-stone-700">Sunday 1st Service</span>
+                    <span className="font-semibold text-stone-700">Sunday English Service</span>
                     <span>7:30 AM</span>
                   </li>
                   <li className="flex items-center justify-between gap-4">
                     <span className="font-semibold text-stone-700">Sunday School</span>
-                    <span>9:00 AM</span>
+                    <span>9:15 AM</span>
                   </li>
                   <li className="flex items-center justify-between gap-4">
-                    <span className="font-semibold text-stone-700">Sunday 2nd Service</span>
-                    <span>10:00 AM</span>
+                    <span className="font-semibold text-stone-700">Sunday Yoruba Service</span>
+                    <span>10:15 AM</span>
                   </li>
                   <li className="flex items-center justify-between gap-4">
-                    <span className="font-semibold text-stone-700">Wednesday Midweek Service</span>
+                    <span className="font-semibold text-stone-700">Wednesday Prayer Meeting</span>
                     <span>5:00 PM</span>
+                  </li>
+                  <li className="flex items-center justify-between gap-4">
+                    <span className="font-semibold text-stone-700">Wednesday Bible Study</span>
+                    <span>6:00 PM</span>
+                  </li>
+                  <li className="flex items-center justify-between gap-4">
+                    <span className="font-semibold text-stone-700">Sunday Evening Service</span>
+                    <span>6:00 PM</span>
+                  </li>
+                  <li className="flex items-center justify-between gap-4">
+                    <span className="font-semibold text-stone-700">Saturday Convenient Service</span>
+                    <span className="text-right text-xs text-stone-500 leading-tight">6:00 AM<br/><em>1st Sat. monthly</em></span>
+                  </li>
+                  <li className="flex items-center justify-between gap-4 border-t border-stone-100 pt-3 mt-1">
+                    <span className="font-semibold text-stone-700">Church Executive Meeting</span>
+                    <span className="text-right text-xs text-stone-500 leading-tight">6:00 – 7:00 PM<br/><em>1st &amp; 3rd Friday</em></span>
                   </li>
                 </ul>
               </div>

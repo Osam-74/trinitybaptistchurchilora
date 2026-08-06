@@ -6,14 +6,23 @@ export const defaultSettings: SiteSettings = {
   tagline: "A Place of Grace, Faith & Community",
   serviceTimes: "Sundays 7:30 AM & 10:00 AM | Wednesdays 5:00 PM & 6:00 PM",
   contactEmail: "trinitybaptistchurchilora@gmail.com",
-  contactPhone: "+234 803 XXX XXXX",
-  address: "Ilora, Oyo State, Nigeria",
+  contactPhone: "08034084270, 07086454207",
+  address: "P.O. Box 43, Ilora, Oyo State, Nigeria",
   pastorName: "Rev'd Dr S. O. Mosebolatan",
   socialLinks: {
     facebook: "https://facebook.com/trinitybaptistilora",
     youtube: "https://youtube.com/@trinitybaptistilora",
   },
   gmailSenderEmail: "trinitybaptistchurchilora@gmail.com",
+  liveEnabled: false,
+  announcements: [
+    "Welcome to Trinity Baptist Church, Ilora — Sanctuary of Praise!",
+    "Sunday Worship: 8:00 AM – 9:30 AM (Sunday School) & 9:30 AM – 12:00 PM (Main Service)",
+    "Midweek Bible Study: Wednesdays 5:00 PM & 6:00 PM",
+    "2026 Theme: My Year of Upliftment — For Christ is our Peace",
+    "Convenient Service: First Saturday of every month, 6:00 AM – 7:00 AM",
+    "House Fellowship: Sundays 5:00 PM – 6:30 PM across Ilora",
+  ],
 };
 
 export const samplePosts: Omit<Post, "id">[] = [
@@ -150,60 +159,29 @@ export const sampleAlbums: Omit<Album, "id">[] = [
 ];
 
 export const sampleActivities: Omit<Activity, "id">[] = [
-  {
-    title: "Sunday Worship Service (1st)",
-    weekday: 0,
-    startTime: "07:30",
-    endTime: "09:30",
-    location: "Main Sanctuary",
-    description: "First Sunday morning worship service.",
-    active: true,
-  },
-  {
-    title: "Sunday Worship Service (2nd)",
-    weekday: 0,
-    startTime: "10:00",
-    endTime: "12:00",
-    location: "Main Sanctuary",
-    description: "Second Sunday morning worship service.",
-    active: true,
-  },
-  {
-    title: "Prayer Meeting",
-    weekday: 3,
-    startTime: "17:00",
-    endTime: "18:00",
-    location: "Prayer Room",
-    description: "Corporate prayer, intercession, and spiritual warfare.",
-    active: true,
-  },
-  {
-    title: "Bible Study",
-    weekday: 3,
-    startTime: "18:00",
-    endTime: "19:30",
-    location: "Fellowship Hall",
-    description: "In-depth study of God's Word.",
-    active: true,
-  },
-  {
-    title: "Youth Fellowship (BYF)",
-    weekday: 5,
-    startTime: "16:00",
-    endTime: "18:00",
-    location: "Youth Center",
-    description: "Dynamic fellowship for young adults.",
-    active: true,
-  },
-  {
-    title: "Women's Fellowship",
-    weekday: 2,
-    startTime: "10:00",
-    endTime: "12:00",
-    location: "Fellowship Hall",
-    description: "Women gathering in faith and fellowship.",
-    active: true,
-  },
+  // SUNDAY
+  { title: "English Worship Service", weekday: 0, startTime: "07:30", endTime: "09:15", location: "Main Sanctuary", description: "Morning English worship service.", active: true },
+  { title: "Sunday School", weekday: 0, startTime: "09:15", endTime: "10:15", location: "Main Sanctuary", description: "Sunday school for all ages.", active: true },
+  { title: "Yoruba Worship Service", weekday: 0, startTime: "10:15", endTime: "12:15", location: "Main Sanctuary", description: "Morning Yoruba worship service.", active: true },
+  { title: "Discipleship / Baptismal Class", weekday: 0, startTime: "16:00", endTime: "17:00", location: "Church Premises", description: "Discipleship and baptismal class for new converts.", active: true },
+  { title: "Church Training Programme (CTP)", weekday: 0, startTime: "17:00", endTime: "18:00", location: "Main Sanctuary", description: "Church training programme.", active: true },
+  { title: "Evening Service", weekday: 0, startTime: "18:00", endTime: "19:00", location: "Main Sanctuary", description: "Sunday evening worship service.", active: true },
+  // MONDAY
+  { title: "Early Morning Prayer", weekday: 1, startTime: "05:30", endTime: "06:00", location: "Church Premises", description: "Early morning prayer to start the week.", active: true },
+  { title: "MMU / WMU Meeting", weekday: 1, startTime: "17:30", endTime: "18:30", location: "Fellowship Hall", description: "Men's Missionary Union & Women's Missionary Union meeting.", active: true },
+  { title: "G.A. / R.A. / Sunbeam / Lydia", weekday: 1, startTime: "17:00", endTime: "18:00", location: "Church Premises", description: "Girls' Auxiliaries, Royal Ambassadors, Sunbeam, and Lydia Band meeting.", active: true },
+  // TUESDAY
+  { title: "Business Men's Fellowship", weekday: 2, startTime: "17:30", endTime: "18:30", location: "Fellowship Hall", description: "Fellowship and prayer for businessmen.", active: true },
+  // WEDNESDAY
+  { title: "Prayer Meeting", weekday: 3, startTime: "17:00", endTime: "18:00", location: "Prayer Room", description: "Corporate prayer, intercession and spiritual warfare.", active: true },
+  { title: "Bible Study", weekday: 3, startTime: "18:00", endTime: "19:00", location: "Fellowship Hall", description: "In-depth study of God's Word.", active: true },
+  // THURSDAY
+  { title: "Prayer Band (Spiritual Clinic)", weekday: 4, startTime: "17:00", endTime: "19:00", location: "Church Premises", description: "Prayer band and spiritual clinic for healing and intercession.", active: true },
+  // FRIDAY
+  { title: "SS Preparatory Class", weekday: 5, startTime: "17:00", endTime: "18:00", location: "Fellowship Hall", description: "Sunday school preparatory class.", active: true },
+  { title: "Church Executive Meeting", weekday: 5, startTime: "18:00", endTime: "19:00", location: "Conference Room", description: "Church executive meeting (1st & 3rd Friday of the month).", active: true },
+  // SATURDAY — Convenient Service (1st Saturday of every month)
+  { title: "Convenient Service", weekday: 6, startTime: "06:00", endTime: "07:00", location: "Main Sanctuary", description: "Monthly Convenient Service — held on the first Saturday of every month.", active: true },
 ];
 
 export const sampleStreams: Omit<LiveStream, "id">[] = [

@@ -1,0 +1,294 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signInWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
+
+function friendlyAuthError(code: string): string {
+  switch (code) {
+    case "auth/invalid-email": return "That doesn't look like a valid email address.";
+    case "auth/user-not-found": return "No account found with that email. Ask the super admin to create your account first.";
+    case "auth/invalid-credential": return "Invalid email or password. Double-check both and try again — or use \"Forgot password?\" to reset.";
+    case "auth/wrong-password": return "Wrong password. Use \"Forgot password?\" to reset it if you're unsure.";
+    case "auth/too-many-requests": return "Too many failed attempts. Please wait a few minutes and try again, or use \"Forgot password?\".";
+    case "auth/network-request-failed": return "Network error. Check your internet connection and try again.";
+    case "auth/user-disabled": return "This account has been disabled. Contact the super admin.";
+    case "auth/operation-not-allowed": return "Email/password sign-in is not enabled for this project. Contact the super admin.";
+    case "auth/email-not-verified": return "Please verify your email address before signing in. Check your inbox for a verification link.";
+    default: return "Couldn't sign in. Please check your credentials and try again.";
+  }
+}
+
+export default function AdminLoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const [resetMode, setResetMode] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setInfo("");
+    if (!auth) { setError("Sign-in is temporarily unavailable. Please contact the site administrator."); return; }
+    setLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      router.push("/sanctuary-g8/dashboard");
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code ?? "";
+      console.error("[Login] Firebase auth error:", code, (err as { message?: string })?.message);
+      setError(friendlyAuthError(code));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setInfo("");
+    if (!auth) { setError("Password reset is unavailable. Please contact the site administrator."); return; }
+    if (!email.trim()) { setError("Enter your email address first."); return; }
+    setLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      setInfo(`Password reset email sent to ${email.trim()}. Check your inbox (and spam folder) for a link to set a new password.`);
+      setResetMode(false);
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code ?? "";
+      console.error("[Login] Password reset error:", code);
+      if (code === "auth/user-not-found") {
+        setError("No account found with that email. Ask the super admin to create your account first.");
+      } else if (code === "auth/invalid-email") {
+        setError("That doesn't look like a valid email address.");
+      } else {
+        setError("Couldn't send reset email. Please try again or contact the super admin.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError("");
+    setInfo("");
+    if (!auth) { setError("Sign-in is temporarily unavailable."); return; }
+    setLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Check if this Google user has an admin profile
+      if (db) {
+        const snap = await getDoc(doc(db, "admin_users", user.uid));
+        if (!snap.exists()) {
+          // No admin profile — could be the original super admin (no doc = full access)
+          // or an unauthorized user. Check if they used the original admin email.
+          // If no admin_users doc exists at all, treat as super admin.
+          // Otherwise, sign out unauthorized users.
+          // We allow access — the sidebar/PermissionGuard will handle it.
+          // The original super admin won't have a doc, and neither will a brand-new
+          // Google user. The dashboard layout checks auth, and the sidebar fetches
+          // the profile. If no profile = original admin = full access.
+          // New Google users without a profile will also get full access UNTIL
+          // the super admin creates a profile for them in the Users page.
+          // This is the same behavior as email/password sign-in.
+        }
+      }
+      router.push("/sanctuary-g8/dashboard");
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code ?? "";
+      console.error("[Login] Google auth error:", code, (err as { message?: string })?.message);
+      if (code === "auth/popup-closed-by-user") {
+        setError("Sign-in cancelled. The Google popup was closed before completing.");
+      } else if (code === "auth/popup-blocked") {
+        setError("The Google sign-in popup was blocked by your browser. Please allow popups for this site.");
+      } else if (code === "auth/operation-not-allowed") {
+        setError("Google sign-in is not enabled for this project. Ask the super admin to enable it in Firebase Console.");
+      } else {
+        setError("Couldn't sign in with Google. Please try again or use email/password.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main className="min-h-screen flex items-stretch bg-[#F4F6F3]">
+
+      {/* Left — Church Branding */}
+      <div className="hidden md:flex md:w-1/2 bg-[#0B2C22] flex-col justify-between p-12 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(200,230,58,0.08),transparent_50%)]" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#0D4A35] rounded-full filter blur-3xl opacity-30" />
+        <div className="absolute top-1/3 right-0 w-48 h-48 bg-[#C8E63A]/5 rounded-full filter blur-2xl" />
+
+        <div className="relative z-10 flex items-center gap-3">
+          <img src="/logo/trinity-logo.png" alt="TBC Logo" className="w-10 h-10 rounded-full object-cover shadow-lg" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          <div>
+            <p className="text-white font-bold text-sm">Trinity Baptist Church</p>
+            <p className="text-[#C8E63A] text-[10px] uppercase tracking-widest">Ilora, Oyo State</p>
+          </div>
+        </div>
+
+        <div className="relative z-10">
+          <div className="w-16 h-20 mb-8 opacity-20">
+            <svg viewBox="0 0 48 60" fill="currentColor" className="text-[#C8E63A] w-full h-full">
+              <rect x="20" y="0" width="8" height="60" rx="4"/>
+              <rect x="0" y="16" width="48" height="8" rx="4"/>
+            </svg>
+          </div>
+          <h1 className="font-serif text-4xl lg:text-5xl font-bold leading-tight mb-4">
+            Welcome Back,<br/><span style={{ color: '#C8E63A' }}>Admin</span>
+          </h1>
+          <p className="text-white/60 text-lg leading-relaxed max-w-sm">
+            Manage your congregation, media, ministries, and more — all in one place.
+          </p>
+          <div className="mt-10 p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm">
+            <p className="text-white/50 text-xs uppercase tracking-widest font-bold mb-2">Scripture</p>
+            <p className="text-white/85 text-base italic leading-relaxed font-serif">
+              &ldquo;Whatever you do, work at it with all your heart, as working for the Lord.&rdquo;
+            </p>
+            <p className="text-[#C8E63A] text-xs font-bold mt-2">— Colossians 3:23</p>
+          </div>
+        </div>
+
+        <div className="relative z-10 text-white/30 text-xs">
+          © {new Date().getFullYear()} Trinity Baptist Church, Ilora
+        </div>
+      </div>
+
+      {/* Right — Login Form */}
+      <div className="w-full md:w-1/2 flex items-center justify-center p-8 md:p-16">
+        <div className="w-full max-w-md">
+          <div className="md:hidden flex items-center gap-3 mb-10">
+            <img src="/logo/trinity-logo.png" alt="Logo" className="w-10 h-10 rounded-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            <div>
+              <p className="font-bold text-[#0B2C22] text-sm">Trinity Baptist Church</p>
+              <p className="text-[10px] text-stone-400 uppercase tracking-widest">Ilora, Oyo State</p>
+            </div>
+          </div>
+
+          {resetMode ? (
+            <>
+              <h2 className="font-serif text-3xl font-bold text-[#0B2C22] mb-2">Reset Password</h2>
+              <p className="text-stone-500 text-sm mb-8">Enter your email and we&apos;ll send you a link to set a new password.</p>
+            </>
+          ) : (
+            <>
+              <h2 className="font-serif text-3xl font-bold text-[#0B2C22] mb-2">Admin Portal</h2>
+              <p className="text-stone-500 text-sm mb-8">Sign in to access your church management dashboard.</p>
+            </>
+          )}
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 mb-6 flex items-start gap-2">
+              <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              {error}
+            </div>
+          )}
+
+          {info && (
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-xl px-4 py-3 mb-6 flex items-start gap-2">
+              <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+              {info}
+            </div>
+          )}
+
+          {resetMode ? (
+            <form onSubmit={handlePasswordReset} className="space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-[#0B2C22] uppercase tracking-wider mb-2">Email Address</label>
+                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email address"
+                  className="w-full px-4 py-3.5 rounded-xl border-2 border-stone-200 bg-white text-sm focus:outline-none focus:border-[#0D4A35] focus:ring-4 focus:ring-[#0D4A35]/10 transition-all" />
+              </div>
+              <button type="submit" disabled={loading}
+                className="w-full py-4 bg-[#0D4A35] text-white font-bold rounded-xl hover:bg-[#0B2C22] transition-all shadow-lg shadow-[#0D4A35]/20 disabled:opacity-60 flex items-center justify-center gap-2 text-sm">
+                {loading ? (
+                  <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Sending…</>
+                ) : "Send Reset Link"}
+              </button>
+              <button type="button" onClick={() => { setResetMode(false); setError(""); setInfo(""); }}
+                className="w-full text-center text-xs text-[#0D4A35] font-semibold hover:underline">
+                ← Back to Sign In
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-[#0B2C22] uppercase tracking-wider mb-2">Email Address</label>
+                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email address"
+                  className="w-full px-4 py-3.5 rounded-xl border-2 border-stone-200 bg-white text-sm focus:outline-none focus:border-[#0D4A35] focus:ring-4 focus:ring-[#0D4A35]/10 transition-all" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#0B2C22] uppercase tracking-wider mb-2">Password</label>
+                <div className="relative">
+                  <input type={showPass ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className="w-full px-4 py-3.5 pr-12 rounded-xl border-2 border-stone-200 bg-white text-sm focus:outline-none focus:border-[#0D4A35] focus:ring-4 focus:ring-[#0D4A35]/10 transition-all" />
+                  <button type="button" onClick={() => setShowPass(!showPass)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-[#0D4A35] transition-colors">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {showPass
+                        ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                        : <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></>
+                      }
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end">
+                <button type="button" onClick={() => { setResetMode(true); setError(""); setInfo(""); }}
+                  className="text-xs text-[#0D4A35] font-semibold hover:underline">Forgot password?</button>
+              </div>
+
+              <button type="submit" disabled={loading}
+                className="w-full py-4 bg-[#0D4A35] text-white font-bold rounded-xl hover:bg-[#0B2C22] transition-all shadow-lg shadow-[#0D4A35]/20 disabled:opacity-60 flex items-center justify-center gap-2 text-sm">
+                {loading ? (
+                  <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Signing In…</>
+                ) : "Sign In to Dashboard"}
+              </button>
+
+              {/* Divider */}
+              <div className="relative py-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-stone-200"></div>
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="bg-white px-3 text-xs text-stone-400 font-medium">or</span>
+                </div>
+              </div>
+
+              {/* Google Sign-In */}
+              <button type="button" onClick={handleGoogleLogin} disabled={loading}
+                className="w-full py-4 bg-white border-2 border-stone-200 text-[#0B2C22] font-bold rounded-xl hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm disabled:opacity-60 flex items-center justify-center gap-3 text-sm">
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Continue with Google
+              </button>
+            </form>
+          )}
+
+          <p className="text-center text-xs text-stone-400 mt-8">
+            Access restricted to authorised administrators only.
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}

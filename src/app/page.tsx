@@ -1,16 +1,21 @@
 "use client";
+import PastorSpeaksPopup from '@/components/PastorSpeaksPopup';
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LiveBanner from "@/components/LiveBanner";
 import DailyDeclarationModal from "@/components/DailyDeclarationModal";
+import SideRays from "@/components/SideRays";
 import { useSearchParams } from "next/navigation";
 import { getYouTubeThumbnail } from "@/lib/utils";
-import { sampleSermons } from "@/lib/seed-data";
 import { doc, onSnapshot, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { listPublishedPosts } from "@/lib/news";
+import { getPublishedArticles } from "@/lib/posts";
+import { trackView } from "@/lib/analytics";
+import LikeButton from "@/components/LikeButton";
 
 // Custom useScrollReveal Hook
 function useScrollReveal() {
@@ -133,26 +138,52 @@ export default function HomePage() {
     id: string;
     imageUrl?: string;
     photoUrl?: string;
-    createdAt?: any;
+    createdAt?: { seconds: number } | string | null;
   }
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
-  const [loadingPhotos, setLoadingPhotos] = useState(true);
 
-  // Pre-configured backup list of high-quality church/worship photos from Unsplash
-  const placeholderPhotos = [
-    { id: "p1", imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80", createdAt: "July 2026" },
-    { id: "p2", imageUrl: "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=600&q=80", createdAt: "July 2026" },
-    { id: "p3", imageUrl: "https://images.unsplash.com/photo-1478147427282-58a87a120781?w=600&q=80", createdAt: "July 2026" },
-    { id: "p4", imageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&q=80", createdAt: "July 2026" },
-    { id: "p5", imageUrl: "https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=600&q=80", createdAt: "July 2026" },
-    { id: "p6", imageUrl: "https://images.unsplash.com/photo-1460574283810-2aab119d8511?w=600&q=80", createdAt: "July 2026" },
-    { id: "p7", imageUrl: "https://images.unsplash.com/photo-1507692049790-de58290a4334?w=600&q=80", createdAt: "July 2026" },
-    { id: "p8", imageUrl: "https://images.unsplash.com/photo-1473177104440-ffee2f376098?w=600&q=80", createdAt: "July 2026" },
-    { id: "p9", imageUrl: "https://images.unsplash.com/photo-1438232992991-995b671e4427?w=600&q=80", createdAt: "July 2026" },
-    { id: "p10", imageUrl: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=600&q=80", createdAt: "July 2026" },
-    { id: "p11", imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80", createdAt: "July 2026" },
-    { id: "p12", imageUrl: "https://images.unsplash.com/photo-1609743522471-83c84ce23e32?w=600&q=80", createdAt: "July 2026" },
-  ];
+  // NEWS & EVENTS: fetch latest published posts
+  // FAITH ARTICLES: fetch published articles from Firestore (with seed fallback)
+  const [faithArticles, setFaithArticles] = useState<Array<{
+    id: string; title: string; body: string; scripture: string;
+    pinned: boolean; authorName?: string; amenCount: number; likeCount: number; createdAt: string;
+  }>>([]);
+  const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
+
+  useEffect(() => {
+    getPublishedArticles(6).then(articles => {
+      console.log("[homepage] Faith articles loaded:", articles.length, articles.map(a => ({ id: a.id, title: a.title, status: a.status })));
+      setFaithArticles(articles.map(a => ({
+        id: a.id, title: a.title || "", body: a.body || "", scripture: a.scripture || "",
+        pinned: a.pinned || false, authorName: a.authorName, amenCount: a.amenCount || 0,
+        likeCount: (a as { likeCount?: number }).likeCount ?? 0,
+        createdAt: a.createdAt || "",
+      })));
+    }).catch(err => {
+      console.error("[homepage] Failed to load faith articles:", err);
+    });
+  }, []);
+
+  const [newsPosts, setNewsPosts] = useState<Array<{
+    id: string; title: string; category: string; excerpt: string;
+    images: string[]; date: string; author?: string;
+  }>>([]);
+
+  useEffect(() => {
+    listPublishedPosts().then(posts => {
+      setNewsPosts(posts.slice(0, 4).map(p => ({
+        id: p.id, title: p.title, category: p.category,
+        excerpt: p.excerpt, images: p.images || [],
+        date: p.date, author: p.author,
+      })));
+    }).catch(() => {});
+  }, []);
+
+  // Remove a broken photo from state so it vanishes from BOTH carousel rows
+  const handlePhotoError = (photoId: string) => {
+    setGalleryPhotos(prev => prev.filter(p => p.id !== photoId));
+  };
+  const [, setLoadingPhotos] = useState(true);
 
   useEffect(() => {
     async function fetchGallery() {
@@ -166,11 +197,15 @@ export default function HomePage() {
         const photos: GalleryPhoto[] = [];
         querySnapshot.forEach((docSnap) => {
           const data = docSnap.data();
-          photos.push({
-            id: docSnap.id,
-            imageUrl: data.imageUrl || data.photoUrl,
-            createdAt: data.createdAt
-          });
+          const url = data.url || data.imageUrl || data.photoUrl || "";
+          // Skip local/public-folder paths — these can be deleted; only keep http(s) URLs
+          if (url && url.startsWith("http")) {
+            photos.push({
+              id: docSnap.id,
+              imageUrl: url,
+              createdAt: data.createdAt
+            });
+          }
         });
         setGalleryPhotos(photos);
       } catch (err) {
@@ -182,8 +217,9 @@ export default function HomePage() {
     fetchGallery();
   }, []);
 
+
   // Helper function to format timestamp/date for overlay
-  const formatPhotoDate = (createdAt: any) => {
+  const formatPhotoDate = (createdAt: { seconds: number } | string | null | undefined) => {
     if (!createdAt) return "Recent";
     if (typeof createdAt === "string") return createdAt;
     if (createdAt.seconds) {
@@ -199,9 +235,8 @@ export default function HomePage() {
   // 2. Hero Background Image Rotation
   const [currentBg, setCurrentBg] = useState(0);
   const heroBackgrounds = [
-    "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=1920&q=80", // beautiful church interior
-    "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1920&q=80", // worship crowd
-    "https://images.unsplash.com/photo-1478147427282-58a87a120781?w=1920&q=80", // vibrant light / service
+    "/church-building.jpg",
+    "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1920&q=80",
   ];
 
   useEffect(() => {
@@ -240,8 +275,6 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, [scriptures.length]);
 
-  // 4. Extract latest featured sermon
-  const featuredSermon = sampleSermons.find((s) => s.featured) || sampleSermons[0];
 
   return (
     <div className="bg-bg text-primary-dark font-sans overflow-x-hidden min-h-screen flex flex-col">
@@ -253,7 +286,7 @@ export default function HomePage() {
       {/* 1. Navbar */}
       <Navbar />
 
-      {/* 2. Live Banner */}
+            {/* 2. Live Banner */}
       <LiveBanner isLive={isLive} title="Sunday Morning Worship" />
 
       {/* 3. Hero Section */}
@@ -272,6 +305,18 @@ export default function HomePage() {
 
         {/* Hero Overlay */}
         <div className="absolute inset-0 hero-overlay bg-black/65 mix-blend-multiply" />
+
+        {/* Cascadian Side Rays */}
+        <SideRays
+          speed={2.5}
+          rayColor1="#e4af0b"
+          rayColor2="#c4ffc4"
+          intensity={1.5}
+          spread={2.4}
+          origin="top-right"
+          tilt={-4}
+          opacity={0.6}
+        />
 
         {/* Slow-moving background shape particles for depth (very low opacity) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -323,7 +368,7 @@ export default function HomePage() {
 
           {/* Sub-headline */}
           <p className="text-white/90 text-base sm:text-lg md:text-xl font-normal max-w-2xl mx-auto mb-10 leading-relaxed drop-shadow font-sans animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
-            A place of grace, faith, and community in Ilora, Oyo State, Nigeria
+            For Christ is our Peace — Eph. 2:14
           </p>
 
           {/* 3 CTA Buttons */}
@@ -345,42 +390,118 @@ export default function HomePage() {
               Plan Your Visit
             </Link>
             <Link
-              href="/about"
+              href="/activities"
               className="bg-transparent hover:bg-white/10 text-white font-semibold py-4 px-8 rounded-2xl border border-white/30 flex items-center justify-center gap-2 hover:scale-[1.04] transition-all duration-300"
             >
-              Learn More
+              Worship With Us
             </Link>
           </div>
         </div>
       </section>
 
-      {/* 4. Statistics Section (Visual counters with ease-out scroll triggers) */}
-      <section className="bg-primary py-12 md:py-16 text-white border-y border-white/5 relative">
-        <div className="absolute inset-0 opacity-5 bg-[radial-gradient(#C8E63A_1px,transparent_1px)] [background-size:16px_16px]" />
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center relative z-10">
-          <div className="reveal">
-            <h3 className="text-4xl sm:text-5xl font-extrabold text-accent mb-2">
-              <StatCounter target={60} suffix="+" />
-            </h3>
-            <p className="text-white/60 text-xs sm:text-sm font-bold uppercase tracking-wider">Years of Grace</p>
+      {/* 4. Statistics Counter — floats between hero and watchword (overlapping both) */}
+      <div className="relative z-20 -mt-10 -mb-10 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-2xl border border-stone-100 grid grid-cols-2 md:grid-cols-4 divide-x divide-stone-100">
+            {[
+              { target: 60, suffix: "+", label: "Years of Grace" },
+              { target: 1500, suffix: "+", label: "Active Members" },
+              { target: 12, suffix: "+", label: "Ministries & Groups" },
+              { target: 5, suffix: "+", label: "Planted Missions" },
+            ].map((stat, i) => (
+              <div key={stat.label} className={`py-8 px-6 text-center ${i >= 2 ? "border-t border-stone-100 md:border-t-0" : ""}`}>
+                <h3 className="text-4xl sm:text-5xl font-extrabold text-primary mb-1.5">
+                  <StatCounter target={stat.target} suffix={stat.suffix} />
+                </h3>
+                <p className="text-primary/60 text-[11px] sm:text-xs font-bold uppercase tracking-widest">{stat.label}</p>
+              </div>
+            ))}
           </div>
-          <div className="reveal" style={{ animationDelay: "0.1s" }}>
-            <h3 className="text-4xl sm:text-5xl font-extrabold text-accent mb-2">
-              <StatCounter target={1500} suffix="+" />
-            </h3>
-            <p className="text-white/60 text-xs sm:text-sm font-bold uppercase tracking-wider">Active Members</p>
+        </div>
+      </div>
+
+
+      {/* 2026 YEARLY WATCHWORD SECTION */}
+      <section className="pt-24 pb-16 md:pt-28 md:pb-20 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0B2C22 0%, #0D3D2E 50%, #0B2C22 100%)' }}>
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#C8E63A_1px,transparent_1px)] [background-size:20px_20px]" />
+        <div className="absolute top-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(90deg, transparent, #C8E63A, transparent)' }} />
+        <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: 'linear-gradient(90deg, transparent, #C8E63A, transparent)' }} />
+
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
+          {/* Section label */}
+          <div className="text-center mb-10">
+            <span className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 text-primary text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full">
+              ✝ Yearly Watchword — 2026
+            </span>
           </div>
-          <div className="reveal" style={{ animationDelay: "0.2s" }}>
-            <h3 className="text-4xl sm:text-5xl font-extrabold text-accent mb-2">
-              <StatCounter target={12} suffix="+" />
-            </h3>
-            <p className="text-white/60 text-xs sm:text-sm font-bold uppercase tracking-wider">Ministries & Groups</p>
-          </div>
-          <div className="reveal" style={{ animationDelay: "0.3s" }}>
-            <h3 className="text-4xl sm:text-5xl font-extrabold text-accent mb-2">
-              <StatCounter target={5} suffix="+" />
-            </h3>
-            <p className="text-white/60 text-xs sm:text-sm font-bold uppercase tracking-wider">Planted Missions</p>
+
+          {/* Main 2-column layout */}
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+
+            {/* LEFT: Year + Watchword */}
+            <div className="text-center lg:text-left">
+              {/* Big 2026 */}
+              <div className="inline-block relative mb-4">
+                <span className="font-serif font-black leading-none text-white select-none"
+                  style={{ fontSize: 'clamp(5rem, 16vw, 9rem)', WebkitTextStroke: '3px #C8E63A', color: 'transparent', letterSpacing: '-0.02em' }}>
+                  20
+                </span>
+                <span className="font-serif font-black leading-none select-none"
+                  style={{ fontSize: 'clamp(5rem, 16vw, 9rem)', color: '#C8E63A', letterSpacing: '-0.02em' }}>
+                  26
+                </span>
+              </div>
+
+              {/* English watchword */}
+              <div className="mb-3">
+                <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">My Year of</p>
+                <h2 className="font-serif font-black text-white leading-tight"
+                  style={{ fontSize: 'clamp(2.2rem, 6vw, 3.5rem)', textShadow: '0 2px 20px rgba(200,230,58,0.3)' }}>
+                  UPLIFTMENT
+                </h2>
+              </div>
+
+              {/* Yoruba watchword */}
+              <div className="mt-4 inline-block bg-white/5 border border-white/15 rounded-2xl px-6 py-3">
+                <p className="text-accent/70 text-xs font-bold uppercase tracking-widest mb-1">Odun</p>
+                <h3 className="font-serif font-bold text-accent text-2xl md:text-3xl">IGBE-DIDE MI</h3>
+              </div>
+            </div>
+
+            {/* RIGHT: Bible Verse */}
+            <div className="lg:border-l lg:border-white/10 lg:pl-12">
+              <div className="grid sm:grid-cols-2 gap-5">
+                {/* English verse */}
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                  <svg className="w-6 h-6 text-accent mb-3 opacity-60" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M13 14.725c0-5.141 3.892-10.519 10-11.725l.984 2.126c-2.215.835-4.161 2.51-4.884 4.371 1.405.353 2.842 1.34 2.842 3.528 0 2.525-1.748 4.275-4.477 4.275-2.272 0-4.465-1.368-4.465-4.275zm-13 0c0-5.141 3.892-10.519 10-11.725l.984 2.126c-2.215.835-4.161 2.51-4.884 4.371 1.405.353 2.843 1.34 2.843 3.528 0 2.525-1.748 4.275-4.477 4.275-2.272 0-4.465-1.368-4.465-4.275z" />
+                  </svg>
+                  <p className="text-white/85 text-sm leading-relaxed font-serif italic">
+                    &ldquo;Rejoice not against me, O my enemy! when I fall, I shall arise; when I sit in darkness, the LORD shall be a light unto me.&rdquo;
+                  </p>
+                  <p className="text-accent font-bold text-xs uppercase tracking-widest mt-4">MICAH 7:8 (AMPC)</p>
+                </div>
+
+                {/* Yoruba verse */}
+                <div className="bg-white/5 border border-accent/20 rounded-2xl p-6 backdrop-blur-sm">
+                  <svg className="w-6 h-6 text-accent mb-3 opacity-60" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M13 14.725c0-5.141 3.892-10.519 10-11.725l.984 2.126c-2.215.835-4.161 2.51-4.884 4.371 1.405.353 2.842 1.34 2.842 3.528 0 2.525-1.748 4.275-4.477 4.275-2.272 0-4.465-1.368-4.465-4.275zm-13 0c0-5.141 3.892-10.519 10-11.725l.984 2.126c-2.215.835-4.161 2.51-4.884 4.371 1.405.353 2.843 1.34 2.843 3.528 0 2.525-1.748 4.275-4.477 4.275-2.272 0-4.465-1.368-4.465-4.275z" />
+                  </svg>
+                  <p className="text-white/85 text-sm leading-relaxed font-serif italic">
+                    &ldquo;Má yọ mí, Iwọ ọ̀tà mi: nígba tí mo bà ṣubú, emi ò dide; nígba tí mo bà jokoo ní okùnkun, OLUWA yoo jẹ ìmọlẹ fun mi.&rdquo;
+                  </p>
+                  <p className="text-accent font-bold text-xs uppercase tracking-widest mt-4">MIKA 7:8 (ATỌKA)</p>
+                </div>
+              </div>
+
+              {/* Footer quote */}
+              <div className="mt-6 text-center lg:text-left">
+                <p className="text-white/40 text-xs italic">
+                  &ldquo;God bless you as you come again. Amen.&rdquo;
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -394,13 +515,16 @@ export default function HomePage() {
             <div className="lg:col-span-5 relative reveal-left">
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-stone-100 z-10">
                 <img
-                  src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1200&auto=format&fit=crop"
+                  src="/images/pastor-mosebolatan.jpg"
                   alt="Pastoral Greeting"
                   className="w-full h-auto aspect-[4/5] object-cover"
                 />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent p-6 text-white">
-                  <p className="text-accent text-xs font-bold uppercase tracking-widest mb-1">Our Senior Pastor</p>
-                  <h4 className="font-serif text-2xl font-bold leading-tight">Rev&apos;d Dr S. O. Mosebolatan</h4>
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-5 text-white">
+                  <span className="inline-block bg-accent text-primary-dark text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full mb-2">
+                    Senior Pastor
+                  </span>
+                  <h4 className="font-serif text-xl sm:text-2xl font-bold leading-tight">Rev&apos;d Dr S. O. Mosebolatan, PhD. JP</h4>
+                  <p className="text-white/60 text-xs mt-1">Trinity Baptist Church, Ilora</p>
                 </div>
               </div>
               
@@ -411,18 +535,18 @@ export default function HomePage() {
             {/* Right side: Welcome text block */}
             <div className="lg:col-span-7 space-y-6 reveal-right">
               <span className="text-primary-light text-xs font-bold uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10 inline-block">
-                Welcome to Sanctuary of Praise
+                Welcome to Trinity Baptist Church
               </span>
               <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-black text-primary-dark tracking-tight leading-tight">
-                Grace and peace be <br />
-                <span className="text-gradient-gold">multiplied unto you.</span>
+                We&apos;re genuinely <br />
+                <span className="text-primary font-extrabold">glad you&apos;re here.</span>
               </h2>
               <div className="w-16 h-1 bg-accent rounded-full" />
               <p className="text-text-muted text-base sm:text-lg leading-relaxed pt-2">
-                We are delighted to welcome you to the official platform of Trinity Baptist Church, Ilora. Guided by the Holy Spirit and rooted deeply in the unadulterated Word of God, our congregation is a warm sanctuary where lives find purpose, hearts find healing, and souls lift ultimate praises to the Almighty.
+                We&apos;re a community of everyday people passionate about sharing God&apos;s love and growing in our faith together. Our desire is simple: to know Christ more deeply and make Him known in our community. We gather to worship, study Scripture, and encourage one another through every season of life.
               </p>
               <p className="text-text-muted text-base leading-relaxed">
-                Whether you are exploring Christianity for the first time, seeking a spiritual family to call home, or joining us virtually from afar, we pray that you experience the transforming love, overflowing grace, and deep-seated joy of our Lord Jesus Christ today.
+                Come as you are and you&apos;ll be made welcome. We&apos;d love to get to know you. Here, you&apos;ll find friends who care, a God who loves, and a community that prays for one another. Join us this Sunday — we will be happy to fellowship with you.
               </p>
               
               <div className="pt-4 flex flex-wrap gap-4 items-center">
@@ -484,66 +608,156 @@ export default function HomePage() {
               Weekly Services & Fellowship Times
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl font-black text-primary-dark">
-              Join Our <span className="text-gradient-gold">Services & Studies</span>
+              Join Our <span className="text-primary">Services & Studies</span>
             </h2>
             <p className="text-text-muted text-sm sm:text-base mt-3">
               We look forward to worshiping, studying, and praying together with you. Find our weekly schedules below.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 stagger-children">
-            {[
-              {
-                title: "Sunday 1st Service",
-                time: "7:30 AM",
-                location: "Main Sanctuary",
-              },
-              {
-                title: "Sunday 2nd Service",
-                time: "10:00 AM",
-                location: "Main Sanctuary",
-              },
-              {
-                title: "Wednesday Bible Study",
-                time: "6:00 PM",
-                location: "Fellowship Hall",
-              },
-              {
-                title: "Wednesday Prayer Meeting",
-                time: "5:00 PM",
-                location: "Prayer Room",
-              },
-            ].map((srv, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-3xl p-6 border border-stone-200/50 shadow-sm card-hover flex flex-col justify-between reveal"
-              >
-                <div className="flex flex-col h-full justify-between">
-                  <div>
-                    {/* SVG clock icon matching the site's forest-green/gold theme */}
-                    <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center mb-5">
-                      <svg className="w-6 h-6 text-[#0D4A35]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <h3 className="font-serif text-xl font-bold text-primary-dark mb-3">{srv.title}</h3>
-                  </div>
-
-                  <div className="space-y-2 mt-2">
-                    <p className="text-sm font-bold text-primary flex items-center gap-2 uppercase tracking-wide">
-                      <span className="text-amber-600 font-bold">●</span> {srv.time}
-                    </p>
-                    <p className="text-text-muted text-xs flex items-center gap-1.5 font-medium">
-                      <svg className="w-4 h-4 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      {srv.location}
-                    </p>
+          {/* Weekly Programme from Bulletin */}
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {/* SUNDAY */}
+            <div className="bg-white rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, #0B2C22, #0D4A35)' }}>
+                <span className="text-xl">☀️</span>
+                <h3 className="font-serif text-base font-bold text-white">Sunday</h3>
+              </div>
+              <div className="p-5 space-y-2.5 text-sm">
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">English Service</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">7:30 – 9:15am</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Sunday School</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">9:15 – 10:15am</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Yoruba Service</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">10:15am – 12:15pm</span>
+                </div>
+                <div className="border-t border-stone-100 pt-2 mt-2">
+                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2">Evening</p>
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between"><span className="text-stone-600 text-xs">Discipleship / Baptismal Class</span><span className="text-primary text-xs font-semibold">4–5pm</span></div>
+                    <div className="flex justify-between"><span className="text-stone-600 text-xs">Church Training Programme</span><span className="text-primary text-xs font-semibold">5–6pm</span></div>
+                    <div className="flex justify-between"><span className="text-stone-600 text-xs">Evening Service</span><span className="text-primary text-xs font-semibold">6–7pm</span></div>
                   </div>
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* MONDAY */}
+            <div className="bg-white rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, #1a4a35, #0D4A35)' }}>
+                <span className="text-xl">🌅</span>
+                <h3 className="font-serif text-base font-bold text-white">Monday</h3>
+              </div>
+              <div className="p-5 space-y-2.5 text-sm">
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Early Morning Prayer</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:30 – 6:00am</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">MMU / WMU Meeting</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:30 – 6:30pm</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">G.A. / R.A. / Sun. Beam / Lydia</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:00 – 6:00pm</span>
+                </div>
+              </div>
+            </div>
+
+            {/* TUESDAY */}
+            <div className="bg-white rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, #1a3a50, #174060)' }}>
+                <span className="text-xl">💼</span>
+                <h3 className="font-serif text-base font-bold text-white">Tuesday</h3>
+              </div>
+              <div className="p-5 space-y-2.5 text-sm">
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Business Men&apos;s Fellowship</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:30 – 6:30pm</span>
+                </div>
+              </div>
+            </div>
+
+            {/* WEDNESDAY */}
+            <div className="bg-white rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, #3a2a0a, #5a4010)' }}>
+                <span className="text-xl">📖</span>
+                <h3 className="font-serif text-base font-bold text-white">Wednesday</h3>
+              </div>
+              <div className="p-5 space-y-2.5 text-sm">
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Prayer Meeting</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:00 – 6:00pm</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Bible Study</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">6:00 – 7:00pm</span>
+                </div>
+              </div>
+            </div>
+
+            {/* THURSDAY */}
+            <div className="bg-white rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, #2a1a40, #3d2560)' }}>
+                <span className="text-xl">🙌</span>
+                <h3 className="font-serif text-base font-bold text-white">Thursday</h3>
+              </div>
+              <div className="p-5 space-y-2.5 text-sm">
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Prayer Band (Spiritual Clinic)</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:00 – 7:00pm</span>
+                </div>
+              </div>
+            </div>
+
+            {/* FRIDAY */}
+            <div className="bg-white rounded-3xl border border-stone-200/60 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 flex items-center gap-3" style={{ background: 'linear-gradient(135deg, #3a1a10, #5a2818)' }}>
+                <span className="text-xl">🔥</span>
+                <h3 className="font-serif text-base font-bold text-white">Friday</h3>
+              </div>
+              <div className="p-5 space-y-2.5 text-sm">
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Early Morning Prayer</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:30 – 6:00am</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">SS Preparatory Class</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">5:00 – 6:00pm</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-stone-700 font-medium">Church Executive Meeting</span>
+                  <span className="text-primary font-bold text-xs whitespace-nowrap ml-2">6:00 – 7:00pm</span>
+                </div>
+                <p className="text-[10px] text-stone-400 italic">(1st & 3rd Friday)</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Monthly Programme */}
+          <div className="mt-8 bg-primary rounded-3xl p-6 sm:p-8 text-white">
+            <h3 className="font-serif text-xl font-bold mb-5 flex items-center gap-2">
+              <span>📅</span> Monthly Programme
+            </h3>
+            <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              {[
+                { name: "Night Watch Prayer", schedule: "Every Last Friday", time: "6:00pm – 8:00pm" },
+                { name: "Covenant Service", schedule: "Every 1st Saturday", time: "6:00am – 7:00am" },
+                { name: "3 Days Overcomers Service", schedule: "Last Mon to Wed", time: "Monthly" },
+                { name: "Marriage Breakthrough", schedule: "Every Last Sunday", time: "5:00pm – 7:00pm" },
+              ].map((item, i) => (
+                <div key={i} className="bg-white/10 border border-white/10 rounded-2xl p-4">
+                  <p className="font-bold text-accent text-sm mb-1">{item.name}</p>
+                  <p className="text-white/70 text-xs">{item.schedule}</p>
+                  <p className="text-white/60 text-xs mt-0.5">{item.time}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="text-center mt-12 reveal">
@@ -561,93 +775,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 8. Featured Latest Sermon / Media Section */}
-      <section className="py-24 bg-bg">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6 reveal">
-            <div>
-              <span className="text-primary text-xs font-bold uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10 inline-block mb-3">
-                Latest Message
-              </span>
-              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-black text-primary-dark">
-                Hear the <span className="text-gradient-gold">Word of God</span>
-              </h2>
-            </div>
-            <Link
-              href="/sermons"
-              className="text-[#0D4A35] hover:text-[#0B2C22] font-bold text-sm flex items-center gap-1.5 shrink-0"
-            >
-              Browse Sermon Archive
-              <span>&rarr;</span>
-            </Link>
-          </div>
-
-          {featuredSermon && (
-            <div className="grid lg:grid-cols-12 gap-12 items-center reveal">
-              {/* Sermon Video Thumbnail with Play Hover */}
-              <div className="lg:col-span-6 relative rounded-3xl overflow-hidden shadow-xl border border-stone-200/50 bg-stone-100 group">
-                <div className="aspect-video relative w-full overflow-hidden">
-                  <img
-                    src={getYouTubeThumbnail(featuredSermon.youtubeId || "")}
-                    alt={featuredSermon.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  {/* Dark mask overlay on hover */}
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/35 transition-colors duration-300" />
-                  
-                  {/* Play Button Icon */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-accent/95 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 text-primary-dark pl-1">
-                      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sermon Description Details */}
-              <div className="lg:col-span-6 space-y-5">
-                <span className="text-xs font-bold uppercase tracking-wider text-primary bg-accent/15 border border-accent/20 px-3 py-1 rounded-md inline-block">
-                  Featured Message
-                </span>
-                <h3 className="font-serif text-2xl sm:text-3xl font-black text-primary-dark leading-tight">
-                  {featuredSermon.title}
-                </h3>
-                <p className="text-xs font-semibold text-primary">
-                  Preached by {featuredSermon.preacher} &bull; {featuredSermon.date}
-                </p>
-                <p className="text-text-muted text-sm sm:text-base leading-relaxed">
-                  {featuredSermon.description || "Listen to this transformative, Bible-centered message designed to equip you with spiritual insight and lead you into deeper relationship with Jesus Christ."}
-                </p>
-                
-                <div className="pt-2 flex flex-wrap gap-4 items-center">
-                  <Link
-                    href="/sermons"
-                    className="inline-flex items-center gap-2 px-7 py-3 bg-[#0D4A35] hover:bg-[#0B2C22] text-white font-semibold rounded-xl text-sm shadow-md transition-colors"
-                  >
-                    Listen / Watch Now
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </Link>
-                  <Link
-                    href="/sermons"
-                    className="text-[#0D4A35] font-semibold text-sm hover:underline"
-                  >
-                    View All Sermons Series &rarr;
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
-
-        </div>
-      </section>
-
-      {/* GALLERY SECTION: Sunday Shots — Dual-row infinite auto-scroll */}
+      {/* GALLERY SECTION: Sunday Shots — Dual-row infinite auto-scroll (only show when photos exist) */}
+      {galleryPhotos.length > 0 && (
       <section className="py-20 bg-bg border-t border-stone-100 overflow-hidden">
         {/* Header */}
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 mb-10 reveal">
@@ -657,7 +786,7 @@ export default function HomePage() {
                 This Sunday in Pictures
               </span>
               <h2 className="font-serif text-3xl sm:text-4xl font-black text-primary-dark">
-                Moments from our <span className="text-gradient-gold">church family</span>
+                Moments from our <span className="text-primary">church family</span>
               </h2>
             </div>
             <Link
@@ -678,15 +807,17 @@ export default function HomePage() {
               width: "max-content",
             }}
           >
-            {[...(galleryPhotos.length >= 6 ? galleryPhotos : placeholderPhotos), ...(galleryPhotos.length >= 6 ? galleryPhotos : placeholderPhotos)].slice(0, 16).map((photo, i) => (
+            {[...galleryPhotos, ...galleryPhotos].slice(0, 16).map((photo, i) => (
               <div
                 key={`row1-${photo.id}-${i}`}
+                data-photo-card
                 className="relative flex-shrink-0 w-52 h-52 sm:w-60 sm:h-60 rounded-2xl overflow-hidden bg-stone-100 group shadow-sm"
               >
                 <img
-                  src={photo.imageUrl || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80"}
+                  src={photo.imageUrl}
                   alt="Sunday Shot"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  onError={() => handlePhotoError(photo.id)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
                   <span className="text-white text-xs font-semibold">{formatPhotoDate(photo.createdAt)}</span>
@@ -705,15 +836,17 @@ export default function HomePage() {
               width: "max-content",
             }}
           >
-            {[...(galleryPhotos.length >= 6 ? [...galleryPhotos].reverse() : [...placeholderPhotos].reverse()), ...(galleryPhotos.length >= 6 ? [...galleryPhotos].reverse() : [...placeholderPhotos].reverse())].slice(0, 16).map((photo, i) => (
+            {[...[...galleryPhotos].reverse(), ...[...galleryPhotos].reverse()].slice(0, 16).map((photo, i) => (
               <div
                 key={`row2-${photo.id}-${i}`}
+                data-photo-card
                 className="relative flex-shrink-0 w-52 h-52 sm:w-60 sm:h-60 rounded-2xl overflow-hidden bg-stone-100 group shadow-sm"
               >
                 <img
-                  src={photo.imageUrl || "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=600&q=80"}
+                  src={photo.imageUrl}
                   alt="Sunday Shot"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  onError={() => handlePhotoError(photo.id)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
                   <span className="text-white text-xs font-semibold">{formatPhotoDate(photo.createdAt)}</span>
@@ -733,6 +866,129 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+      )}
+
+      {/* Latest News & Events */}
+      {newsPosts.length > 0 && (
+        <section className="py-20 bg-stone-50 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <span className="inline-block text-primary bg-primary/5 font-bold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full border border-primary/10 mb-3">Stay Updated</span>
+              <h2 className="font-serif text-3xl lg:text-4xl text-primary font-bold mb-3">Latest News &amp; Events</h2>
+              <p className="text-text-muted text-sm max-w-xl mx-auto">Catch up on the latest happenings, celebrations, and announcements from Trinity Baptist Church, Ilora.</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {newsPosts.map((post, i) => {
+                const categoryColors: Record<string, string> = {
+                  news: "bg-blue-100 text-blue-700",
+                  event: "bg-green-100 text-green-700",
+                  announcement: "bg-amber-100 text-amber-700",
+                  celebration: "bg-rose-100 text-rose-700",
+                };
+                return (
+                  <Link key={post.id} href={`/news/${post.id}`} className="group block bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <div className="relative w-full overflow-hidden bg-stone-100" style={{ aspectRatio: "4/3" }}>
+                      {post.images && post.images[0] ? (
+                        <img src={post.images[0]} alt={post.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"/>
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 flex items-center justify-center">
+                          <svg className="w-12 h-12 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 12h6m-6 4h2"/></svg>
+                        </div>
+                      )}
+                      <span className={`absolute top-3 left-3 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide rounded-full ${categoryColors[post.category] || "bg-stone-100 text-stone-600"}`}>
+                        {post.category}
+                      </span>
+                    </div>
+                    <div className="p-5">
+                      <p className="text-[11px] text-text-muted mb-2 font-medium">
+                        {new Date(post.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                      </p>
+                      <h3 className="font-serif font-bold text-primary text-base mb-2 line-clamp-2 group-hover:text-accent transition-colors">{post.title}</h3>
+                      <p className="text-text-muted text-xs leading-relaxed line-clamp-3 mb-3">{post.excerpt}</p>
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-accent group-hover:gap-2 transition-all">
+                        Read More
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="text-center mt-10">
+              <Link href="/news" className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-semibold px-7 py-3 rounded-xl shadow-lg hover:-translate-y-0.5 transition-all text-sm">
+                View All News &amp; Events
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Faith Articles */}
+      {faithArticles.length > 0 && (
+        <section className="py-20 bg-white relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <span className="inline-block text-primary bg-primary/5 font-bold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full border border-primary/10 mb-3">Spiritual Nourishment</span>
+              <h2 className="font-serif text-3xl lg:text-4xl text-primary font-bold mb-3">Faith Articles</h2>
+              <p className="text-text-muted text-sm max-w-xl mx-auto">Weekly devotionals, reflections, and messages from our pastor to encourage your walk with Christ.</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {faithArticles.map((article, i) => {
+                const isExpanded = expandedArticle === article.id;
+                return (
+                  <div
+                    key={article.id}
+                    className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 flex flex-col animate-fade-in-up transition-all duration-300 hover:shadow-md"
+                    style={{ transitionDelay: `${i * 0.08}s` }}
+                  >
+                    {article.pinned && (
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary/5 px-2.5 py-1 rounded-full mb-3 w-fit border border-primary/10">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        Pinned
+                      </span>
+                    )}
+                    <h3 className="font-serif text-xl font-bold text-primary mb-2 leading-tight">{article.title}</h3>
+                    {article.scripture && (
+                      <p className="text-accent text-xs font-semibold italic mb-3 border-l-2 border-accent/30 pl-2">{article.scripture}</p>
+                    )}
+                    <div className={"text-text-muted text-sm leading-relaxed flex-1 " + (isExpanded ? "" : "line-clamp-4")}>
+                      {article.body}
+                    </div>
+                    <button
+                      onClick={() => {
+                        const newId = isExpanded ? null : article.id;
+                        setExpandedArticle(newId);
+                        if (newId) {
+                          trackView({ collection: "faith_articles", docId: article.id, title: article.title });
+                        }
+                      }}
+                      className="mt-4 text-xs font-semibold text-accent hover:text-primary transition-colors inline-flex items-center gap-1 w-fit"
+                    >
+                      {isExpanded ? "Show Less" : "Read More"}
+                      <svg className={"w-3.5 h-3.5 transition-transform " + (isExpanded ? "rotate-180" : "")} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div className="mt-4 pt-3 border-t border-stone-50 flex items-center justify-between">
+                      {article.authorName ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                            {article.authorName.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="text-xs text-text-muted font-medium">{article.authorName}</span>
+                        </div>
+                      ) : <span />}
+                      <LikeButton collection="faith_articles" docId={article.id} initialCount={article.likeCount ?? 0} size="sm" />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 9. Contact / Action CTA section */}
       <section className="bg-primary-dark text-white py-20 relative overflow-hidden">
@@ -766,6 +1022,7 @@ export default function HomePage() {
 
       {/* 10. Footer */}
       <Footer />
-    </div>
+    <PastorSpeaksPopup />
+  </div>
   );
 }

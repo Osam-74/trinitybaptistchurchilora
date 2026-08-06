@@ -58,13 +58,13 @@ export default function TeamPage() {
               <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
-              OUR TEAM
+              CHURCH EXECUTIVES
             </div>
             <h1 className="font-serif text-4xl lg:text-6xl text-white font-bold mb-5 animate-fade-in-up">
-              Servants of <span className="text-gradient-gold">God</span>
+              Church <span className="text-gradient-gold">Leadership</span>
             </h1>
             <p className="text-white/60 text-lg animate-fade-in" style={{ animationDelay: "0.2s" }}>
-              Dedicated spiritual leaders shepherding and serving the flock of God with holy diligence.
+              Dedicated executives and spiritual leaders shepherding and serving the flock of God with holy diligence.
             </p>
           </div>
         </div>
@@ -76,11 +76,11 @@ export default function TeamPage() {
           {leadPastor && (
             <div className="bg-white rounded-3xl overflow-hidden border border-stone-200/50 shadow-xl mb-16 p-8 lg:p-12 relative group card-hover">
               <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-                <div className="lg:col-span-5 h-[340px] rounded-3xl overflow-hidden relative shadow-md bg-primary-dark">
+                <div className="lg:col-span-5 rounded-3xl overflow-hidden relative shadow-md bg-primary-dark aspect-square">
                   <img
                     src={leadPastor.photoUrl}
                     alt={leadPastor.name}
-                    className="w-full h-full object-cover img-zoom"
+                    className="w-full h-full object-cover object-top img-zoom"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/60 via-transparent to-transparent" />
                 </div>
@@ -119,11 +119,11 @@ export default function TeamPage() {
                     key={leader.id}
                     className="bg-white rounded-3xl overflow-hidden border border-stone-100 shadow-sm hover:border-accent transition-all duration-300 card-hover group"
                   >
-                    <div className="relative h-56 bg-primary-dark overflow-hidden">
+                    <div className="relative aspect-square bg-primary-dark overflow-hidden">
                       <img
                         src={leader.photoUrl}
                         alt={leader.name}
-                        className="w-full h-full object-cover img-zoom"
+                        className="w-full h-full object-cover object-top img-zoom"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/70 via-transparent to-transparent" />
                       <div className="absolute bottom-4 left-4">
@@ -163,11 +163,11 @@ export default function TeamPage() {
                     key={member.id}
                     className="bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm hover:border-accent transition-all duration-300 card-hover group"
                   >
-                    <div className="relative h-48 bg-primary-dark overflow-hidden">
+                    <div className="relative aspect-square bg-primary-dark overflow-hidden">
                       <img
                         src={member.photoUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face"}
                         alt={member.fullName}
-                        className="w-full h-full object-cover img-zoom"
+                        className="w-full h-full object-cover object-top img-zoom"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/70 via-transparent to-transparent" />
                       {member.section && (

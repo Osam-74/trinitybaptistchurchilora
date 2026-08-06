@@ -11,7 +11,7 @@
 
 const WORKER_URL = process.env.NEXT_PUBLIC_CF_WORKER_URL ?? "";
 
-export type UploadFolder = "gallery" | "sermons" | "headshots" | "posts" | "logos" | "leaders" | "choir" | "declarations";
+export type UploadFolder = "gallery" | "sermons" | "headshots" | "posts" | "logos" | "leaders" | "choir" | "declarations" | "members" | "pastor" | "news-events";
 
 /**
  * Upload a file to R2 via the Cloudflare Worker.
@@ -32,14 +32,29 @@ export async function uploadToR2(
   // bookingId is used as namespace — we repurpose it as folder name
   form.append("bookingId", `trinity-${folder}`);
 
-  const res = await fetch(`${WORKER_URL}/upload`, {
-    method: "POST",
-    body: form,
-  });
+  // Timeout after 5 minutes for large audio files
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 300000);
+
+  let res: Response;
+  try {
+    res = await fetch(`${WORKER_URL}/upload`, {
+      method: "POST",
+      body: form,
+      signal: controller.signal,
+    });
+  } catch (fetchErr: unknown) {
+    clearTimeout(timeoutId);
+    if (fetchErr instanceof DOMException && fetchErr.name === "AbortError") {
+      throw new Error("Upload timed out after 5 minutes. The file may be too large or the server is unreachable.");
+    }
+    throw new Error(`Cannot reach upload server. Check your connection and try again. (${(fetchErr as Error)?.message ?? "network error"})`);
+  }
+  clearTimeout(timeoutId);
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error((err as Record<string,string>)?.error ?? `Upload failed: ${res.status}`);
+    throw new Error((err as Record<string,string>)?.error ?? `Upload failed: ${res.status} ${res.statusText}`);
   }
 
   const data = (await res.json()) as { ok: boolean; url: string };

@@ -4,24 +4,41 @@ import { useState } from "react";
 import { createChoirMember } from "@/lib/choir";
 import R2Uploader from "@/components/R2Uploader";
 
+const DEPARTMENTS = ["Senior Choir", "Youth Choir", "Instrumentalist", "Media Team"];
+const SECTIONS = ["Soprano", "Alto", "Tenor", "Bass", "Instrumentalist", "Media Team"];
+
 export default function SignUpModal({ dept, onClose }: { dept: string; onClose: () => void }) {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", dateJoined: "", bio: "", section: dept, department: dept });
+  const [form, setForm] = useState({
+    name: "", email: "", phone: "", dateJoined: "", bio: "",
+    departments: dept ? [dept] : [] as string[],
+    section: "",
+  });
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  const toggleDept = (d: string) => {
+    setForm(prev => ({
+      ...prev,
+      departments: prev.departments.includes(d)
+        ? prev.departments.filter(x => x !== d)
+        : [...prev.departments, d],
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!form.name.trim() || !form.email.trim()) { setError("Name and email are required."); return; }
+    if (form.departments.length === 0) { setError("Please select at least one department."); return; }
     setSubmitting(true);
     try {
       await createChoirMember({
         fullName: form.name.trim(),
         email: form.email.trim(),
         phone: form.phone || undefined,
-        department: form.department,
+        department: form.departments.join(", "),
         section: form.section || undefined,
         photoUrl: photoUrl || undefined,
         bio: form.bio || undefined,
@@ -54,7 +71,7 @@ export default function SignUpModal({ dept, onClose }: { dept: string; onClose: 
               </svg>
             </div>
             <h3 className="font-serif text-xl font-bold text-primary mb-2">Registration Submitted!</h3>
-            <p className="text-text-muted mb-6">Your registration is pending approval from the Music Director. You will be contacted once reviewed.</p>
+            <p className="text-text-muted mb-6">Your registration is pending approval from the Music Director.</p>
             <button onClick={onClose} className="btn-gold px-6 py-2.5 rounded-xl font-semibold text-sm">Close</button>
           </div>
         ) : (
@@ -80,26 +97,31 @@ export default function SignUpModal({ dept, onClose }: { dept: string; onClose: 
               </div>
             ))}
 
+            {/* Department — multi-select checkboxes */}
             <div>
-              <label className="block text-sm font-medium text-primary mb-1.5">Department</label>
-              <select value={form.department} onChange={e => setForm(prev => ({ ...prev, department: e.target.value }))}
-                className="input-field bg-white">
-                <option value="Choir">Choir</option>
-                <option value="Media Team">Media Team</option>
-                <option value="Instrumentalist">Instrumentalist</option>
-              </select>
+              <label className="block text-sm font-medium text-primary mb-2">Department(s) *</label>
+              <p className="text-xs text-text-muted mb-2">Select all that apply</p>
+              <div className="grid grid-cols-2 gap-2">
+                {DEPARTMENTS.map(d => (
+                  <label key={d} className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all text-sm ${form.departments.includes(d) ? 'border-primary bg-primary/5 text-primary font-semibold' : 'border-stone-200 text-stone-600 hover:border-primary/40'}`}>
+                    <input
+                      type="checkbox"
+                      checked={form.departments.includes(d)}
+                      onChange={() => toggleDept(d)}
+                      className="w-4 h-4 rounded accent-amber-600"
+                    />
+                    {d}
+                  </label>
+                ))}
+              </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-primary mb-1.5">Section / Voice Part</label>
               <select value={form.section} onChange={e => setForm(prev => ({ ...prev, section: e.target.value }))}
                 className="input-field bg-white">
-                <option value="Soprano">Soprano</option>
-                <option value="Alto">Alto</option>
-                <option value="Tenor">Tenor</option>
-                <option value="Bass">Bass</option>
-                <option value="Instrumentalist">Instrumentalist</option>
-                <option value="Media Team">Media Team</option>
+                <option value="">— Select —</option>
+                {SECTIONS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
 
@@ -114,9 +136,7 @@ export default function SignUpModal({ dept, onClose }: { dept: string; onClose: 
               <strong>Note:</strong> Your registration will be pending approval from the Music Director before activation.
             </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>
-            )}
+            {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">{error}</div>}
             <button type="submit" disabled={submitting} className="w-full btn-gold py-3.5 rounded-xl font-semibold text-base disabled:opacity-50">
               {submitting ? "Submitting…" : "Submit Registration"}
             </button>

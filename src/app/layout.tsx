@@ -5,10 +5,21 @@ export const metadata: Metadata = {
   title: "Trinity Baptist Church, Ilora | Sanctuary of Praise",
   description: "Welcome to Trinity Baptist Church, Ilora — Sanctuary of Praise. Join us for worship, fellowship, and spiritual growth under the leadership of Rev'd Dr S. O. Mosebolatan.",
   keywords: ["Trinity Baptist Church", "Ilora", "Oyo State", "Nigeria", "church", "worship", "sermon", "pastor", "Sanctuary of Praise"],
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    shortcut: "/favicon.ico",
+    other: [{ rel: "manifest", url: "/site.webmanifest" }],
+  },
   openGraph: {
     title: "Trinity Baptist Church, Ilora",
-    description: "Sanctuary of Praise — A Place of Grace, Faith & Community",
+    description: "Sanctuary of Praise — A place of worship, fellowship, and spiritual growth in Ilora, Oyo State.",
     type: "website",
+    images: [{ url: "/logo/trinity-logo.png" }],
   },
 };
 

@@ -10,10 +10,14 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "dom-to-image-more": "^3.10.2",
     "firebase": "^11.0.0",
+    "html-to-image": "^1.11.13",
+    "html2canvas": "^1.4.1",
     "next": "^15.5.20",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -23,6 +27,6 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.19",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5.9.3"
   }
 }

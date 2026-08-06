@@ -19,6 +19,10 @@ import type { PastorDeclaration } from "@/types/declaration";
 export const DEFAULT_PASTOR_IMAGE =
   "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80";
 
+// The pastor's photo provided for the first seeded declaration
+const SEED_DECLARATION_IMAGE =
+  "https://media.base44.com/images/public/6a53c65f6b543a313fd66f15/2bb790fd8_IMG-20260806-WA0003.jpg";
+
 // The initial seed declaration — written to Firestore on first admin visit.
 // After that, admin manages everything from the dashboard.
 export const SEED_DECLARATION_TEXT = `My Prayer for you today
@@ -146,7 +150,7 @@ export async function seedDeclarationIfEmpty(): Promise<boolean> {
     if (snap.size > 0) return false; // Already has data
     await addDoc(collection(db, "pastor_declarations"), {
       text: SEED_DECLARATION_TEXT,
-      imageUrl: null, // No image seeded — falls back to DEFAULT_PASTOR_IMAGE
+      imageUrl: SEED_DECLARATION_IMAGE, // Pastor's photo for the first declaration
       published: false, // Admin must publish
       createdAt: new Date().toISOString(),
       date: "6/8/2026",

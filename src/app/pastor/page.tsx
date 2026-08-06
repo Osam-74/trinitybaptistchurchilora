@@ -43,9 +43,9 @@ function useCounter(target: number, duration = 2000) {
 }
 
 const stats = [
-  { label: "Years in Ministry", target: 30, suffix: "+" },
-  { label: "Lives Transformed", target: 1200, suffix: "+" },
-  { label: "Community Outreaches", target: 85, suffix: "+" },
+  { label: "Years in Ministry", target: 20, suffix: "+" },
+  { label: "Lives Transformed", target: 5000, suffix: "+" },
+  { label: "Community Outreaches", target: 15, suffix: "+" },
 ];
 
 const philosophy = [
@@ -87,14 +87,14 @@ export default function PastorPage() {
             <div className="lg:col-span-2 reveal-left">
               <div className="relative rounded-3xl overflow-hidden shadow-2xl img-zoom">
                 <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80"
-                  alt="Rev'd Dr S. O. Mosebolatan — Senior Pastor"
+                  src="/images/pastor-mosebolatan.jpg"
+                  alt="Rev. Solomon Olugbenga Mosebolatan — Senior Pastor"
                   className="w-full h-[520px] object-cover object-top"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/70 via-transparent to-transparent"/>
                 <div className="absolute bottom-6 left-6 right-6">
                   <div className="glass-card p-4 rounded-2xl text-white">
-                    <p className="text-accent font-bold text-sm">REV'D DR S. O. MOSEBOLATAN</p>
+                    <p className="text-accent font-bold text-sm">REV. SOLOMON OLUGBENGA MOSEBOLATAN PhD JP</p>
                     <p className="text-xs text-white/80">Senior Pastor, Trinity Baptist Church, Ilora</p>
                   </div>
                 </div>
@@ -112,23 +112,25 @@ export default function PastorPage() {
             {/* Bio Text */}
             <div className="lg:col-span-3 reveal-right">
               <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>SENIOR PASTOR</div>
-              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-primary mb-2 leading-tight">Rev&apos;d Dr S. O.<br/>Mosebolatan</h2>
+              <h2 className="font-serif text-4xl lg:text-5xl font-bold text-primary mb-2 leading-tight">Rev. Solomon Olugbenga<br/>Mosebolatan PhD JP</h2>
               <div className="gold-divider max-w-xs mb-8"/>
               <div className="space-y-5 text-stone-600 leading-relaxed">
-                <p>Rev&apos;d Dr S. O. Mosebolatan is a devoted servant of God who has faithfully shepherded Trinity Baptist Church, Ilora with wisdom, compassion, and unwavering vision. A scholar of the Word and a preacher of remarkable depth, his ministry has touched hundreds of lives across Ilora and Oyo State.</p>
-                <p>Ordained and recognised under the Nigerian Baptist Convention, Pastor Mosebolatan carries a burning passion for discipleship, missions, and the transformational power of the Gospel. Under his leadership, Trinity Baptist Church has experienced significant spiritual growth, expanded its community outreach programmes, and deepened its commitment to raising kingdom leaders.</p>
-                <p>Known for his accessibility, pastoral warmth, and Spirit-filled preaching, he is not just a pastor who preaches from a pulpit — he walks alongside his congregation through life&apos;s most tender moments, celebrating victories and providing godly counsel in seasons of challenge.</p>
+                <p>Rev. Solomon Olugbenga Mosebolatan is a devoted Christian minister, preacher, author, public speaker, social critic, and ethicist whose life and work have been shaped by a deep commitment to faith, learning, service, and community development. With more than 24 years of experience in Christian ministry and pastoral leadership, he has dedicated much of his life to preaching the Word of God and serving people. He currently serves as the full-time pastor of Trinity Baptist Church, Ilora, Oyo State, where he has faithfully provided pastoral leadership for over two decades.</p>
+                <p>He is a native of Ilora, Oyo State, where his journey began. His academic and theological pursuits have since taken him through a diverse range of disciplines and institutions. He holds a Bachelor of Theology (B.Th.), Master of Theology (M.Th.), and Doctor of Philosophy (Ph.D.) from the Nigerian Baptist Theological Seminary, Ogbomoso. He also holds Bachelor of Arts degrees from Ajayi Crowther University and Olabisi Onabanjo University, a Master of Arts (M.A.) from the University of Jos, a Postgraduate Diploma in Education (PGDE) from Ekiti State University, and a National Diploma (ND) from the Federal School of Surveying, Oyo</p>
+                <p>Although his primary calling is rooted in pastoral ministry, Rev. Mosebolatan's influence extends beyond the local church. He is an international speaker who has ministered in Côte d’Ivoire, Ghana, Togo, and Israel, sharing his message with audiences across different cultural and national contexts. His commitment to service also extends to practical humanitarian intervention. In 2020, he established an empowerment foundation dedicated to supporting individuals and families in need through the distribution of relief materials, grants, and other forms of assistance.</p>
+                <p>Rev. Mosebolatan is also recognised for his engagement with important social, moral, and ethical issues. As a public speaker, social commentator, and ethicist, he continues to contribute to conversations that affect individuals, families, the church, and society at large. He is also an author whose published works include Four Stages of Marriage, alongside other articles and writings.</p>
+                <p>He is happily married to Mrs. Olubunmi Esther Mosebolatan, and their union is blessed with four children: AyoOluwa, Akinola, Oluwapamilerinayo, and Oluwafeyikemi.</p>
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-3 gap-4 mt-10">
+              <div className="grid grid-cols-3 gap-3 mt-10">
                 {stats.map((stat) => {
                   // eslint-disable-next-line react-hooks/rules-of-hooks
                   const { count, ref } = useCounter(stat.target);
                   return (
-                    <div key={stat.label} ref={ref} className="bg-bg-alt rounded-2xl p-5 text-center border border-stone-100">
-                      <p className="counter-num text-3xl lg:text-4xl text-primary">{count}{stat.suffix}</p>
-                      <p className="text-stone-500 text-xs mt-1 font-medium">{stat.label}</p>
+                    <div key={stat.label} ref={ref} className="bg-bg-alt rounded-2xl p-3 sm:p-5 text-center border border-stone-100">
+                      <p className="counter-num text-xl sm:text-2xl lg:text-4xl text-primary font-extrabold break-words">{count}{stat.suffix}</p>
+                      <p className="text-stone-500 text-[10px] sm:text-xs mt-1 font-medium leading-tight">{stat.label}</p>
                     </div>
                   );
                 })}

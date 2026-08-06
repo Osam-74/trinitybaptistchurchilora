@@ -24,6 +24,8 @@ export interface Post {
   createdAt: string;
   authorUid: string;
   authorName?: string;
+  viewCount?: number;
+  likeCount?: number;
 }
 
 export interface LiveStream {
@@ -92,9 +94,12 @@ export interface Sermon {
   series?: string;
   type: "audio" | "video";
   audioUrl?: string;
+  videoUrl?: string;
   youtubeId?: string;
   durationSec?: number;
   featured: boolean;
+  viewCount?: number;
+  likeCount?: number;
 }
 
 export interface Activity {
@@ -131,6 +136,9 @@ export interface SiteSettings {
     youtube?: string;
   };
   gmailSenderEmail?: string;
+  bookingEnabled?: boolean;
+  liveEnabled?: boolean;
+  announcements?: string[];
 }
 
 export interface Hymn {
@@ -138,7 +146,7 @@ export interface Hymn {
   number: number;
   category: "english" | "yoruba";
   title: string;
-  lyrics: string; // verses separated by a blank line; use "Chorus:" / "Ègbè:" to label a repeated chorus
+  lyrics: string;
   author?: string;
   composer?: string;
   createdAt?: string;
@@ -156,7 +164,6 @@ export interface CalendarEvent {
   createdBy: string;
 }
 
-
 export interface Leader {
   id: string;
   name: string;
@@ -172,8 +179,8 @@ export interface ChoirMember {
   fullName: string;
   email: string;
   phone?: string;
-  department: string; // e.g. "Choir", "Media Team", "Instrumentalist"
-  section?: string;   // e.g. "Soprano", "Alto", "Tenor", "Bass", or instrument
+  department: string;
+  section?: string;
   photoUrl?: string;
   bio?: string;
   dateJoined?: string;
@@ -192,6 +199,13 @@ export const PERMISSIONS = [
   "manage_activities",
   "manage_settings",
   "manage_calendar",
+  "manage_pastor_speaks",
+  "manage_announcements",
+  "manage_hymns",
+  "manage_leadership",
+  "manage_members",
+  "manage_ministry_members",
+  "manage_contacts",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -200,16 +214,47 @@ export const ROLE_DEFAULTS: Record<string, Permission[]> = {
   master_admin: [
     "manage_users", "manage_posts", "manage_bookings", "manage_availability",
     "manage_streams", "manage_gallery", "manage_sermons", "manage_activities",
-    "manage_settings", "manage_calendar",
+    "manage_settings", "manage_calendar", "manage_pastor_speaks", "manage_announcements",
+    "manage_hymns", "manage_leadership", "manage_members", "manage_ministry_members",
+    "manage_contacts",
   ],
   pastor: [
     "manage_posts", "manage_bookings", "manage_availability",
-    "manage_streams", "manage_sermons",
+    "manage_streams", "manage_sermons", "manage_pastor_speaks",
+    "manage_leadership", "manage_members", "manage_contacts", "manage_calendar",
   ],
   media_team: [
-    "manage_gallery", "manage_sermons", "manage_streams",
+    "manage_gallery", "manage_sermons", "manage_streams", "manage_hymns",
   ],
   editor: [
-    "manage_posts", "manage_activities",
+    "manage_posts", "manage_activities", "manage_announcements", "manage_hymns",
   ],
 };
+
+export interface NewsPost {
+  id: string;
+  title: string;
+  category: "news" | "event" | "announcement" | "celebration";
+  date: string;
+  excerpt: string;
+  body: string;
+  images: string[];
+  videoUrl?: string;
+  featuredVideo?: boolean;
+  featured: boolean;
+  active: boolean;
+  author?: string;
+  publishedAt?: string;
+  createdAt?: string;
+  viewCount?: number;
+  likeCount?: number;
+}
+
+export interface ViewEvent {
+  id: string;
+  collection: "sermons" | "news_posts" | "posts";
+  docId: string;
+  title: string;
+  viewedAt: string;
+  referrer?: string;
+}

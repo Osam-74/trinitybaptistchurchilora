@@ -19,11 +19,10 @@ function stripUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
 }
 
 export const defaultLeaders: Leader[] = [
-  { id: "l1", name: "Rev'd Dr S. O. Mosebolatan", role: "Senior Pastor", bio: "A revered shepherd of the Trinity Baptist Church, Ilora flock, Rev'd Dr Mosebolatan has led the church with wisdom, grace, and unwavering faith for decades.", order: 1, active: true, photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face" },
-  { id: "l2", name: "Pastor Mrs. Mosebolatan", role: "Co-Pastor / Women's Leader", bio: "A pillar of strength and encouragement, Pastor Mrs. Mosebolatan leads the women's ministry with passion and dedication to nurturing spiritual growth.", order: 2, active: true, photoUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&crop=face" },
-  { id: "l3", name: "Deacon J. Adeyemi", role: "Church Secretary", bio: "Serving with diligence and integrity, Deacon Adeyemi ensures the smooth administrative operation of the church's affairs.", order: 3, active: true, photoUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face" },
-  { id: "l4", name: "Deaconess F. Ogunleye", role: "Treasurer", bio: "Faithful steward of the church's resources, ensuring transparent and godly management of all financial matters.", order: 4, active: true, photoUrl: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=400&fit=crop&crop=face" },
-  { id: "l5", name: "Rev'd Johnson Oyetunde", role: "Music Director / Choir Pastor", bio: "Rev'd Johnson Oyetunde leads the Music Ministry of Trinity Baptist Church, Ilora with exceptional skill and spiritual depth. A gifted choral conductor, music educator, and worship leader, he oversees the Senior Choir, Youth Choir, and all music-related activities of the church.", order: 5, active: true, photoUrl: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=400&h=400&fit=crop&crop=face" }
+  { id: "l1", name: "Rev. Solomon Olugbenga Mosebolatan", role: "Senior Pastor", bio: "Rev. Solomon Olugbenga Mosebolatan is a passionate preacher with over 24 years of pulpit experience. He holds a Ph.D. from the Nigerian Baptist Theological Seminary, Ogbomoso and has ministered internationally across Cote d'Ivoire, Ghana, Togo, and Israel. Reachable at 08034084270.", order: 1, active: true, photoUrl: "/images/pastor-mosebolatan.jpg" },
+  { id: "l2", name: "Rev'd Johnson Oyetunde", role: "Music Minister", bio: "Rev'd Johnson Oyetunde leads the Music Ministry of Trinity Baptist Church with exceptional skill and spiritual depth, overseeing all choral and music-related activities. Tel: 08063868592.", order: 2, active: true, photoUrl: "/images/music-minister-oyetunde.jpg" },
+  { id: "l3", name: "Mr. Tunji Oladosu", role: "Church Secretary", bio: "Serving with diligence and integrity, Mr. Tunji Oladosu ensures the smooth administrative operation of the church's affairs and correspondence. Tel: 08136980692.", order: 3, active: true, photoUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face" },
+  { id: "l4", name: "Deaconess F. Ogunleye", role: "Treasurer", bio: "Faithful steward of the church's resources, ensuring transparent and godly management of all financial matters entrusted to the congregation.", order: 4, active: true, photoUrl: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=400&fit=crop&crop=face" },
 ];
 
 const activeDefaults = () => defaultLeaders.filter(l => l.active).sort((a, b) => a.order - b.order);
@@ -46,10 +45,22 @@ export async function listAllLeaders(): Promise<Leader[]> {
   try {
     if (!db) return [...defaultLeaders].sort((a, b) => a.order - b.order);
     const snap = await getDocs(collection(db, "leaders"));
-    if (snap.empty) return [...defaultLeaders].sort((a, b) => a.order - b.order);
+    if (snap.empty) {
+      // Seed the default leaders into Firestore so admin can edit/hide/delete them
+      console.log("[leaders] Seeding default leaders into Firestore...");
+      for (const leader of defaultLeaders) {
+        const { id, ...data } = leader;
+        await addDoc(collection(db, "leaders"), stripUndefined(data as Record<string, unknown>));
+      }
+      // Re-fetch after seeding
+      const freshSnap = await getDocs(collection(db, "leaders"));
+      const items = freshSnap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<Leader, "id">) })) as Leader[];
+      return items.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+    }
     const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<Leader, "id">) })) as Leader[];
     return items.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
-  } catch {
+  } catch (err) {
+    console.error("[leaders] listAllLeaders failed:", err);
     return [...defaultLeaders].sort((a, b) => a.order - b.order);
   }
 }

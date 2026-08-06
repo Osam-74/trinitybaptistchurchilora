@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getSiteSettings } from "@/lib/settings";
+import AnnouncementTicker from "@/components/AnnouncementTicker";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -12,20 +13,19 @@ const navLinks = [
   { href: "#", label: "Ministries", isDropdown: true },
   { href: "/hymns", label: "Hymns" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/team", label: "Our Team" },
-  { href: "/pastor", label: "Pastor" },
+  { href: "/team", label: "Executives" },
   { href: "/contact", label: "Contact" },
 ];
 
 const ministries = [
-  { name: "Royal Ambassadors (RA)", slug: "royal-ambassadors" },
-  { name: "Girls' Auxiliaries (GA)", slug: "girls-auxiliaries" },
-  { name: "Lydia Band", slug: "lydia-band" },
-  { name: "Men's Missionary Union (MMU)", slug: "mens-missionary-union" },
-  { name: "Women Missionary Union (WMU)", slug: "womens-missionary-union" },
-  { name: "Youth Fellowship (BYF)", slug: "youth-fellowship" },
-  { name: "Sunday School", slug: "sunday-school" },
-  { name: "Choir & Music Ministry", slug: "choir" },
+  { name: "Royal Ambassadors (RA)", slug: "royal-ambassadors", href: "/ministries/royal-ambassadors" },
+  { name: "Girls' Auxiliaries (GA)", slug: "girls-auxiliary", href: "/ministries/girls-auxiliary" },
+  { name: "Lydia Auxiliary", slug: "lydia-auxiliary", href: "/ministries/lydia-auxiliary" },
+  { name: "Men's Missionary Union (MMU)", slug: "mmu", href: "/ministries/mmu" },
+  { name: "Women Missionary Union (WMU)", slug: "wmu", href: "/ministries/wmu" },
+  { name: "Youth Fellowship (BYF)", slug: "youth-fellowship", href: "/ministries/youth-fellowship" },
+  { name: "Sunday School", slug: "sunday-school", href: "/ministries/sunday-school" },
+  { name: "Choir & Music Ministry", slug: "choir", href: "/ministries/choir" },
 ];
 
 function useScrolled(threshold = 60) {
@@ -39,15 +39,36 @@ function useScrolled(threshold = 60) {
   return scrolled;
 }
 
+function useIsMobile(breakpoint = 1280) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < breakpoint);
+    check();
+    window.addEventListener("resize", check, { passive: true });
+    return () => window.removeEventListener("resize", check);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 export default function Navbar() {
   const scrolled = useScrolled(60);
+  const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string>("/logo/trinity-logo.png");
+  const [isLive, setIsLive] = useState(false);
+  const [tickerVisible, setTickerVisible] = useState(true);
   const pathname = usePathname();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    getSiteSettings().then((s) => { if (s.logoUrl) setLogoUrl(s.logoUrl); });
+    getSiteSettings().then((s) => {
+      if (s.logoUrl) setLogoUrl(s.logoUrl);
+      if ((s as {liveEnabled?: boolean}).liveEnabled !== undefined) {
+        setIsLive(!!(s as {liveEnabled?: boolean}).liveEnabled);
+      }
+    });
   }, []);
 
   useEffect(() => { setIsOpen(false); setIsDropdownOpen(false); }, [pathname]);
@@ -57,54 +78,128 @@ export default function Navbar() {
     return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
 
-  return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "nav-glass shadow-xl" : "nav-transparent"}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
+  const handleDropdownEnter = () => {
+    if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current);
+    setIsDropdownOpen(true);
+  };
 
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
-            <div className="relative w-10 h-10 flex-shrink-0">
-              {logoUrl ? (
-                <img src={logoUrl} alt="Trinity Baptist Church, Ilora logo" className="w-10 h-10 rounded-full object-cover group-hover:scale-110 transition-transform shadow-lg" />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                  <svg className="w-5 h-5 text-primary-dark" viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="10.5" y="2" width="3" height="20" rx="1.5"/>
-                    <rect x="2" y="8" width="20" height="3" rx="1.5"/>
-                  </svg>
-                </div>
-              )}
-              <div className="absolute inset-0 rounded-full bg-accent/20 animate-pulse-glow -z-10"/>
-            </div>
-            <div>
-              <h1 className="text-white font-serif text-base lg:text-lg font-bold leading-tight whitespace-nowrap">
-                Trinity Baptist Church, Ilora
-              </h1>
-              <p className="text-accent text-[10px] uppercase tracking-widest font-medium">Sanctuary of Praise</p>
-            </div>
-          </Link>
+  const handleDropdownLeave = () => {
+    dropdownTimerRef.current = setTimeout(() => {
+      setIsDropdownOpen(false);
+    }, 200);
+  };
+
+  return (
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "nav-glass shadow-xl" : "nav-transparent"}`} >
+      {tickerVisible && <AnnouncementTicker onDismiss={() => setTickerVisible(false)} />}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" >
+        <div className="relative flex items-center justify-between h-16 lg:h-20">
+
+          {/* ── LEFT ZONE (mobile: flex-1 to push hamburger right; desktop: auto) ── */}
+          <div className="relative flex-1 xl:flex-none flex items-center" style={{ minWidth: 0 }}>
+
+            {/* LAYER A — logo + text: visible at rest, fades OUT when scrolled on mobile */}
+            <Link
+              href="/"
+              className="flex items-center gap-3 group flex-shrink-0"
+              style={{
+                opacity: isMobile && scrolled ? 0 : 1,
+                pointerEvents: isMobile && scrolled ? 'none' : 'auto',
+                transition: 'opacity 0.35s ease',
+              }}
+            >
+              <div className="relative w-10 h-10 flex-shrink-0">
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Trinity Baptist Church, Ilora logo" className="w-10 h-10 rounded-full object-cover shadow-lg" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center shadow-lg">
+                    <svg className="w-5 h-5 text-primary-dark" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="10.5" y="2" width="3" height="20" rx="1.5"/>
+                      <rect x="2" y="8" width="20" height="3" rx="1.5"/>
+                    </svg>
+                  </div>
+                )}
+                <div className="absolute inset-0 rounded-full bg-accent/20 animate-pulse-glow -z-10"/>
+              </div>
+              <div>
+                <h1 className="text-white font-serif text-base lg:text-lg font-bold leading-tight whitespace-nowrap">
+                  Trinity Baptist Church, Ilora
+                </h1>
+                <p className="text-accent text-[10px] uppercase tracking-widest font-medium">For Christ is our Peace</p>
+              </div>
+            </Link>
+
+          </div>
+
+          {/* LAYER B — centred logo, mobile-only. Positioned absolute relative to the full nav row
+              so left:50% is true screen centre (not centre of left-zone). Fades in on scroll,
+              fades out when menu is open. Drops below the nav bottom with dark green circle. */}
+          {isMobile && (
+            <Link
+              href="/"
+              tabIndex={scrolled && !isOpen ? 0 : -1}
+              className="xl:hidden"
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: 'translateX(-50%) translateY(-22px)',
+                opacity: scrolled && !isOpen ? 1 : 0,
+                pointerEvents: scrolled && !isOpen ? 'auto' : 'none',
+                transition: 'opacity 0.35s ease',
+                zIndex: 45,
+              }}
+            >
+              {/* Dark green circle backdrop — no border, just pure dark green + shadow */}
+              <div style={{
+                position: 'absolute',
+                inset: '-8px',
+                borderRadius: '50%',
+                background: 'rgba(11,44,34,0.95)',
+                boxShadow: '0 6px 24px rgba(0,0,0,0.45)',
+              }} />
+              {/* Logo: 64px (was the bg size before), bg is now 80px (64 + 2×8px padding) */}
+              <div className="relative w-16 h-16">
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Trinity Baptist Church, Ilora logo" className="w-16 h-16 rounded-full object-cover shadow-lg" />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center shadow-lg">
+                    <svg className="w-7 h-7 text-primary-dark" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="10.5" y="2" width="3" height="20" rx="1.5"/>
+                      <rect x="2" y="8" width="20" height="3" rx="1.5"/>
+                    </svg>
+                  </div>
+                )}
+              </div>
+            </Link>
+          )}
 
           {/* Desktop Nav */}
           <div className="hidden xl:flex items-center gap-0.5">
             {navLinks.map((link) => {
               if (link.isDropdown) {
                 return (
-                  <div key={link.label} className="relative"
-                    onMouseEnter={() => setIsDropdownOpen(true)}
-                    onMouseLeave={() => setIsDropdownOpen(false)}>
+                  <div
+                    key={link.label}
+                    className="relative"
+                    ref={dropdownRef}
+                    onMouseEnter={handleDropdownEnter}
+                    onMouseLeave={handleDropdownLeave}
+                  >
                     <button className="px-2.5 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 flex items-center gap-1 transition-all duration-300">
                       {link.label}
                       <svg className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
-                    <div className={`absolute top-full left-0 w-72 bg-primary-dark border border-accent/15 rounded-2xl shadow-2xl py-2 mt-2 transition-all duration-300 transform origin-top-left ${isDropdownOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}>
+                    {/* Bridge gap between button and dropdown to prevent accidental close */}
+                    <div className="absolute top-full left-0 w-72 h-3" style={{ display: isDropdownOpen ? 'block' : 'none' }} />
+                    <div className={`absolute top-full left-0 w-72 bg-primary-dark border border-accent/15 rounded-2xl shadow-2xl py-2 mt-3 transition-all duration-300 transform origin-top-left ${isDropdownOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"}`}>
                       <div className="px-4 py-2 border-b border-white/10 mb-1">
                         <Link href="/ministries" className="text-xs font-bold text-accent uppercase tracking-wider">View All Ministries →</Link>
                       </div>
                       {ministries.map((m) => (
-                        <Link key={m.slug} href={`/ministries#${m.slug}`}
+                        <Link key={m.slug} href={m.href}
                           className="block px-4 py-2.5 text-sm text-white/80 hover:text-accent hover:bg-white/5 transition-colors">
                           {m.name}
                         </Link>
@@ -122,11 +217,13 @@ export default function Navbar() {
                 </Link>
               );
             })}
-            <Link href="/live"
-              className="ml-2 px-3 py-1.5 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-all flex items-center gap-1.5 shadow-lg hover:shadow-red-600/30 hover:scale-105">
-              <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-              Live
-            </Link>
+            {isLive && (
+              <Link href="/live"
+                className="ml-2 px-3 py-1.5 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-all flex items-center gap-1.5 shadow-lg hover:shadow-red-600/30 hover:scale-105">
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                Live
+              </Link>
+            )}
             <Link href="/give"
               className="ml-1.5 px-3 py-1.5 bg-accent text-primary-dark text-sm font-bold rounded-lg hover:bg-accent-light transition-all shadow-lg hover:shadow-accent/30 hover:scale-105">
               Give
@@ -151,9 +248,19 @@ export default function Navbar() {
         style={{ background: 'rgba(11,44,34,0.5)', backdropFilter: 'blur(8px)' }}
         onClick={() => setIsOpen(false)} />
 
-      {/* Mobile menu panel — 75% width, slides from right */}
+      {/* Mobile menu panel */}
       <div className={`xl:hidden fixed top-0 right-0 bottom-0 w-[75%] sm:w-[50%] bg-primary-dark border-l border-accent/15 shadow-2xl z-50 transition-transform duration-300 ease-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
-        <div className="flex flex-col h-full justify-between p-6 pt-24 overflow-y-auto">
+        {/* Close X button at top of panel */}
+        <button
+          onClick={() => setIsOpen(false)}
+          className="absolute top-4 right-4 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-colors"
+          aria-label="Close menu"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <div className="flex flex-col h-full justify-between p-6 pt-20 overflow-y-auto">
           <div className="space-y-1.5">
             {navLinks.map((link) => {
               if (link.isDropdown) {
@@ -168,7 +275,7 @@ export default function Navbar() {
                     </button>
                     <div className={`pl-4 space-y-1 transition-all duration-300 overflow-hidden ${isDropdownOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
                       {ministries.map((m) => (
-                        <Link key={m.slug} href={`/ministries#${m.slug}`}
+                        <Link key={m.slug} href={m.href}
                           className="block px-4 py-2 text-sm text-white/60 hover:text-accent transition-colors">
                           {m.name}
                         </Link>
@@ -180,32 +287,23 @@ export default function Navbar() {
               const isActive = pathname === link.href;
               return (
                 <Link key={link.href} href={link.href}
-                  className={`block px-4 py-2.5 rounded-xl text-base font-semibold transition-all ${isActive ? "text-accent bg-white/5 border border-accent/10" : "text-white/80 hover:text-white hover:bg-white/5"}`}>
+                  className={`block px-4 py-2.5 rounded-xl text-base font-semibold transition-all ${isActive ? "text-accent bg-white/5 border border-accent/20" : "text-white/80 hover:text-white hover:bg-white/5"}`}>
                   {link.label}
                 </Link>
               );
             })}
           </div>
-          <div className="space-y-3 mt-6">
-            <Link href="/live"
-              className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-all">
-              <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-              Watch Live
+          <div className="space-y-3 pt-6 border-t border-white/10">
+            {isLive && (
+              <Link href="/live" onClick={() => setIsOpen(false)}
+                className="flex items-center justify-center gap-2 w-full py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors">
+                <span className="w-2 h-2 bg-white rounded-full animate-pulse"/>Watch Live
+              </Link>
+            )}
+            <Link href="/give" onClick={() => setIsOpen(false)}
+              className="flex items-center justify-center w-full py-3 bg-accent text-primary-dark font-bold rounded-xl hover:bg-accent-light transition-colors">
+              Give / Donate
             </Link>
-            <Link href="/give"
-              className="flex items-center justify-center w-full px-4 py-3 bg-accent text-primary-dark font-bold rounded-xl hover:bg-accent-light transition-all">
-              Give Online
-            </Link>
-            <div className="flex justify-center gap-4 pt-4 border-t border-white/10">
-              {[
-                { label: "Facebook", path: "M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" },
-                { label: "YouTube", path: "M22.54 6.42a2.78 2.78 0 00-1.95-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 11.75a29 29 0 00.46 5.33A2.78 2.78 0 003.4 19.13C5.12 19.56 12 19.56 12 19.56s6.88 0 8.6-.46a2.78 2.78 0 001.94-2 29 29 0 00.46-5.25 29 29 0 00-.46-5.43z" },
-              ].map((s) => (
-                <a key={s.label} href="#" className="text-white/50 hover:text-accent transition-colors">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d={s.path}/></svg>
-                </a>
-              ))}
-            </div>
           </div>
         </div>
       </div>

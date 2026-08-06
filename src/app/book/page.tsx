@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { submitBooking } from "@/lib/bookings";
+import { getSiteSettings } from "@/lib/settings";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DAYS_SHORT = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -39,7 +41,14 @@ function useScrollReveal() {
 export default function BookPage() {
   useScrollReveal();
   const today = new Date();
+  const [bookingEnabled, setBookingEnabled] = useState<boolean | null>(null); // null = loading
   const [currentStep, setCurrentStep] = useState(1); // 1. Select Date, 2. Your Details, 3. Confirm
+
+  useEffect(() => {
+    getSiteSettings().then(s => {
+      setBookingEnabled(s.bookingEnabled !== false); // default true
+    }).catch(() => setBookingEnabled(true));
+  }, []);
 
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
@@ -134,14 +143,21 @@ export default function BookPage() {
     e.preventDefault();
     setSubmitting(true);
     setFormError("");
-
-    // Simulate API booking submission
     try {
-      // In a real application, you would make an API POST call here:
-      // await fetch('/api/book', { method: 'POST', body: JSON.stringify({...}) });
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await submitBooking({
+        clientName: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        preferredDate: selectedDate ? selectedDate.toISOString().split("T")[0] : "",
+        startTime: selectedTime || "",
+        bookingType: "pastoral_counseling",
+        sessionType: formData.meetingType,
+        notes: formData.topic + (formData.notes ? `
+${formData.notes}` : ""),
+      });
       setSubmitted(true);
-    } catch {
+    } catch (err) {
+      console.error("Booking error:", err);
       setFormError("Failed to submit request. Please try again.");
     } finally {
       setSubmitting(false);
@@ -152,8 +168,8 @@ export default function BookPage() {
     <main className="min-h-screen bg-bg text-primary">
       <Navbar />
 
-      {/* Hero: Compact header */}
-      <section className="bg-primary-dark pt-32 pb-16 overflow-hidden pattern-overlay">
+      {/* Hero — always visible regardless of booking status */}
+      <section className="bg-primary-dark overflow-hidden pattern-overlay" style={{ paddingTop: "calc(30px + 80px + 2rem)", paddingBottom: "4rem" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="reveal inline-flex items-center gap-2 glass-card rounded-full px-4 py-1 mb-4 text-accent-light text-xs font-semibold uppercase tracking-wider">
             🤝 One-On-One Sessions
@@ -163,6 +179,28 @@ export default function BookPage() {
           </h1>
         </div>
       </section>
+
+      {/* Booking disabled notice — body only, hero stays above */}
+      {bookingEnabled === false && (
+        <div className="py-24 flex items-center justify-center px-4">
+          <div className="max-w-lg w-full bg-white rounded-3xl shadow-xl border border-stone-100 p-12 text-center">
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h2 className="font-serif text-2xl font-bold text-primary mb-3">Bookings Paused</h2>
+            <p className="text-stone-600 leading-relaxed mb-6">
+              Pastoral session bookings are temporarily unavailable. Please check back soon or contact us directly.
+            </p>
+            <a href="/contact" className="inline-block btn-gold px-8 py-3 rounded-xl font-bold text-primary-dark text-sm">
+              Contact Us Instead
+            </a>
+          </div>
+        </div>
+      )}
+
+      {bookingEnabled !== false && <>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {submitted ? (
@@ -579,6 +617,7 @@ export default function BookPage() {
       </div>
 
       <Footer />
+    </>}
     </main>
   );
 }

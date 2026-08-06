@@ -1,10 +1,3 @@
-/**
- * Hymn library — backed by Firestore ("hymns" collection) so admins can add,
- * edit, or bulk-import songs from Admin → Hymns. The public Hymns page loads
- * the full library from /public/hymns-library.json and merges Firestore entries
- * on top.
- */
-
 import {
   collection,
   getDocs,
@@ -17,17 +10,23 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Hymn } from "@/types";
+import { seedHymns } from "@/lib/hymns-data";
 
 const HYMNS_COLLECTION = "hymns";
 
 export async function listHymnsFromFirestore(): Promise<Hymn[]> {
   try {
-    if (!db) return [];
+    if (!db) return seedHymns.map((h, i) => ({ ...h, id: `seed-${i}` }));
     const q = query(collection(db, HYMNS_COLLECTION), orderBy("number", "asc"));
     const snap = await getDocs(q);
+    if (snap.empty) {
+      // No hymns in Firestore yet — return seed data so the page isn't blank
+      return seedHymns.map((h, i) => ({ ...h, id: `seed-${i}` }));
+    }
     return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Hymn, "id">) }));
   } catch {
-    return [];
+    // On any error (network, permissions, etc.) fall back to seed data
+    return seedHymns.map((h, i) => ({ ...h, id: `seed-${i}` }));
   }
 }
 
@@ -50,19 +49,6 @@ export async function deleteHymn(id: string): Promise<void> {
   await deleteDoc(doc(db, HYMNS_COLLECTION, id));
 }
 
-/**
- * Bulk import from pasted text. Format — one hymn per block, blocks separated
- * by a line of three dashes (---):
- *
- *   123 | English | Hymn Title
- *   Verse one line one
- *   Verse one line two
- *
- *   Verse two line one
- *   ---
- *   124 | Yoruba | Orin Miran
- *   ...
- */
 export function parseBulkHymns(raw: string): Omit<Hymn, "id">[] {
   const blocks = raw.split(/\n\s*---\s*\n/g);
   const results: Omit<Hymn, "id">[] = [];

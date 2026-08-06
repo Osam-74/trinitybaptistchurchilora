@@ -11,18 +11,11 @@ const givingReasons = [
   { title: "Building Fund", desc: "Contribute to the expansion and maintenance of our sanctuary and facilities — a lasting legacy for generations.", icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" },
 ];
 
-const faqItems = [
-  { q: "Is my giving tax deductible?", a: "Trinity Baptist Church, Ilora is a registered faith-based organisation under the Nigerian Baptist Convention. Please speak with the church secretary for documentation." },
-  { q: "How are donated funds used?", a: "All funds are managed transparently by the church finance committee. They support ministry operations, community outreach, building maintenance, and missions work — all overseen by the church leadership." },
-  { q: "Can I give online or via bank transfer?", a: "Yes! You can give via bank transfer using the account details on this page. We are also working to make online giving available soon. Contact us if you need help." },
-];
-
 export default function GivePage() {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText("0123456789");
+    navigator.clipboard.writeText("2023471801");
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
@@ -54,7 +47,7 @@ export default function GivePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>WHY WE GIVE<div className="w-8 h-px bg-primary-light/40"/></div>
-            <h2 className="font-serif text-4xl font-bold text-primary">Your Gift Makes a <span className="text-gradient-gold">Difference</span></h2>
+            <h2 className="font-serif text-4xl font-bold text-primary">Your Gift Makes a <span className="text-primary">Difference</span></h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {givingReasons.map((item, i) => (
@@ -75,7 +68,7 @@ export default function GivePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>HOW TO GIVE<div className="w-8 h-px bg-primary-light/40"/></div>
-            <h2 className="font-serif text-4xl font-bold text-primary">Giving <span className="text-gradient-gold">Methods</span></h2>
+            <h2 className="font-serif text-4xl font-bold text-primary">Giving <span className="text-primary">Methods</span></h2>
           </div>
           <div className="grid md:grid-cols-2 gap-8">
             {/* Bank Transfer */}
@@ -86,20 +79,22 @@ export default function GivePage() {
                 </div>
                 <h3 className="font-serif text-xl font-bold text-primary">Bank Transfer</h3>
               </div>
-              <div className="space-y-4 bg-bg rounded-2xl p-5 border border-stone-100">
-                {[
-                  { label: "Bank Name", value: "First Bank of Nigeria Plc" },
-                  { label: "Account Name", value: "Trinity Baptist Church Ilora" },
-                  { label: "Account Number", value: "0123456789" },
-                ].map((row) => (
-                  <div key={row.label} className="flex justify-between items-center">
-                    <span className="text-xs text-stone-500 font-semibold uppercase tracking-wider">{row.label}</span>
-                    <span className="text-primary font-bold text-sm">{row.value}</span>
-                  </div>
-                ))}
+              <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-2xl p-6 border border-stone-100 space-y-4">
+                <div className="text-center pb-3 border-b border-stone-100">
+                  <p className="text-xs text-stone-500 font-semibold uppercase tracking-wider mb-1">Bank</p>
+                  <p className="text-primary font-bold text-lg">First Bank of Nigeria</p>
+                </div>
+                <div className="text-center pb-3 border-b border-stone-100">
+                  <p className="text-xs text-stone-500 font-semibold uppercase tracking-wider mb-1">Account Name</p>
+                  <p className="text-primary font-bold">Trinity Baptist Church, Ilora</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-stone-500 font-semibold uppercase tracking-wider mb-1">Account Number</p>
+                  <p className="text-primary font-bold text-2xl tracking-wider font-mono">2023471801</p>
+                </div>
               </div>
               <button onClick={handleCopy}
-                className={`mt-5 w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${copied ? "bg-green-100 text-green-700 border border-green-200" : "bg-accent text-primary-dark hover:bg-accent-light"}`}>
+                className={`mt-5 w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${copied ? "bg-green-100 text-green-700 border border-green-200" : "bg-accent text-primary-dark hover:bg-accent-light"}`}>
                 {copied ? (
                   <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>Account Number Copied!</>
                 ) : (
@@ -143,31 +138,6 @@ export default function GivePage() {
             Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver.
           </p>
           <p className="text-accent font-bold text-sm mt-4 tracking-wider">— 2 CORINTHIANS 9:7</p>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="py-24 bg-bg">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 text-primary-light text-sm font-semibold mb-4"><div className="w-8 h-px bg-primary-light/40"/>GIVING FAQ<div className="w-8 h-px bg-primary-light/40"/></div>
-            <h2 className="font-serif text-4xl font-bold text-primary">Common <span className="text-gradient-gold">Questions</span></h2>
-          </div>
-          <div className="space-y-4">
-            {faqItems.map((item, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
-                <button className="w-full flex items-center justify-between px-6 py-5 text-left" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                  <span className="font-serif text-base font-bold text-primary pr-4">{item.q}</span>
-                  <div className={`w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 transition-transform duration-300 ${openFaq === i ? "rotate-180" : ""}`}>
-                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
-                  </div>
-                </button>
-                <div className={`overflow-hidden transition-all duration-300 ${openFaq === i ? "max-h-40" : "max-h-0"}`}>
-                  <p className="px-6 pb-5 text-stone-600 text-sm leading-relaxed">{item.a}</p>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 

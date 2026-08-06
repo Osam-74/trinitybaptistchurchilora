@@ -4,6 +4,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Helper: allows public updates that ONLY change the likeCount field
+    function isPublicLikeUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount']);
+    }
+
     // Hymns — public read, admin write
     match /hymns/{hymnId} {
       allow read: if true;
@@ -23,18 +28,89 @@ service cloud.firestore {
     }
 
     // Choir & Media Team members
-    // Public can read (the /team page shows approved members to visitors)
-    // and create (sign-up form). Only admins can update/delete.
     match /choir_members/{memberId} {
       allow read: if true;
       allow create: if true;
       allow update, delete: if request.auth != null;
     }
 
-    // Admin user profiles — only signed-in admins can read/write
+    // Gallery albums — public read, admin write
+    match /gallery_albums/{albumId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Gallery photos — public read, admin write
+    match /gallery_photos/{photoId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Contact messages — anyone can create (submit form), admin reads/deletes
+    match /contact_messages/{messageId} {
+      allow create: if true;
+      allow read, delete: if request.auth != null;
+      allow update: if request.auth != null;
+    }
+
+    // Bookings — anyone can create (submit booking), admin reads/updates/deletes
+    match /bookings/{bookingId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+
+    // Admin user profiles
     match /admin_users/{userId} {
       allow read: if request.auth != null;
       allow write: if request.auth != null;
+    }
+
+    // Site config (Pastor's Word, etc.) — public read, admin write
+    match /site_config/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Latest News & Events — public read, admin write, public like updates
+    match /news_posts/{postId} {
+      allow read: if true;
+      allow create, delete: if request.auth != null;
+      allow update: if request.auth != null || isPublicLikeUpdate();
+    }
+
+    // Sermons — public read, admin write, public like updates
+    match /sermons/{sermonId} {
+      allow read: if true;
+      allow create, delete: if request.auth != null;
+      allow update: if request.auth != null || isPublicLikeUpdate();
+    }
+
+    // Faith Articles — public read, admin write, public like updates
+    match /faith_articles/{articleId} {
+      allow read: if true;
+      allow create, delete: if request.auth != null;
+      allow update: if request.auth != null || isPublicLikeUpdate();
+    }
+
+    // Ministry members — public read & create (registration form), admin update/delete
+    match /ministry_members/{memberId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if request.auth != null;
+    }
+
+    // Activity log — admin read/write
+    match /activity_log/{logId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null;
+    }
+
+    // Content views (analytics) — anyone can create (track views), admin can read
+    match /content_views/{viewId} {
+      allow create: if true;
+      allow read: if request.auth != null;
+      allow update, delete: if request.auth != null;
     }
 
     // Deny everything else by default
