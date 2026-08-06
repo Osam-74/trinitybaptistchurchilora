@@ -5,4 +5,5 @@ export interface PastorDeclaration {
   published: boolean;
   createdAt: string;
   date?: string;
+  amenCount: number;
 }

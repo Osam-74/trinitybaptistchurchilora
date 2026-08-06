@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { toPng } from 'html-to-image';
 import { getPastorSpeaks, PASTOR_DEFAULTS, PastorSpeak } from '@/lib/pastorSpeaks';
 
-export default function PastorSpeaksPopup() {
+export default function PastorSpeaksPopup({ trigger }: { trigger?: boolean }) {
   const pathname = usePathname();
   const [data, setData] = useState<PastorSpeak | null>(null);
   const [visible, setVisible] = useState(false);
@@ -12,17 +12,33 @@ export default function PastorSpeaksPopup() {
   const [downloading, setDownloading] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // Pre-fetch data on mount (always, for all pages)
   useEffect(() => {
     if (pathname !== '/') return;
     getPastorSpeaks().then(d => {
       if (d && d.active && d.message) {
         setData(d);
         setMounted(true);
-        const timer = setTimeout(() => setVisible(true), 2000);
-        return () => clearTimeout(timer);
       }
     }).catch(() => {});
   }, [pathname]);
+
+  // When triggered externally (after declaration closes), show after 3.5s
+  // When not triggered, auto-show after 2s (original behavior) — but only if
+  // the declaration popup isn't handling the sequence
+  useEffect(() => {
+    if (!mounted) return;
+    if (trigger === true) {
+      // External trigger from homepage after Daily Declaration closed
+      const timer = setTimeout(() => setVisible(true), 3500);
+      return () => clearTimeout(timer);
+    } else if (trigger === undefined) {
+      // No trigger prop = standalone usage, auto-show after 2s
+      const timer = setTimeout(() => setVisible(true), 2000);
+      return () => clearTimeout(timer);
+    }
+    // trigger === false = waiting, don't show yet
+  }, [trigger, mounted]);
 
   const close = useCallback(() => {
     setVisible(false);

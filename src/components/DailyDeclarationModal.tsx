@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { PastorDeclaration } from "@/types/declaration";
-import { DEFAULT_PASTOR_IMAGE, getLatestDeclaration } from "@/lib/declarations";
+import { DEFAULT_PASTOR_IMAGE, getLatestDeclaration, incrementAmen } from "@/lib/declarations";
 
 interface Props {
   onClose: () => void;
@@ -10,15 +10,21 @@ interface Props {
 
 export default function DailyDeclarationModal({ onClose }: Props) {
   const [declaration, setDeclaration] = useState<PastorDeclaration | null>(null);
+  const [amenCount, setAmenCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(false);
+  const [amening, setAmening] = useState(false);
+  const [amenPulse, setAmenPulse] = useState(false);
 
   useEffect(() => {
     getLatestDeclaration()
-      .then((d) => {
+      .then((d: PastorDeclaration | null) => {
         setDeclaration(d);
+        if (d) {
+          setAmenCount(d.amenCount || 0);
+          setTimeout(() => setVisible(true), 300);
+        }
         setLoading(false);
-        if (d) setTimeout(() => setVisible(true), 300);
       })
       .catch(() => setLoading(false));
   }, []);
@@ -40,6 +46,20 @@ export default function DailyDeclarationModal({ onClose }: Props) {
   const handleClose = () => {
     setVisible(false);
     setTimeout(onClose, 300);
+  };
+
+  const handleAmen = async () => {
+    if (amening) return;
+    setAmening(true);
+    setAmenPulse(true);
+    // Optimistic update
+    setAmenCount((c) => c + 1);
+    // Fire and forget — increment in Firestore
+    if (declaration) {
+      await incrementAmen(declaration.id);
+    }
+    // Close after a short delay so the user sees the Amen animation
+    setTimeout(() => handleClose(), 800);
   };
 
   const shareLink = typeof window !== "undefined" ? `${window.location.origin}/?declaration=true` : "";
@@ -97,7 +117,7 @@ export default function DailyDeclarationModal({ onClose }: Props) {
 
             <div className="flex-1 overflow-y-auto pr-2">
               <div className="space-y-4">
-                {declaration.text.split("\n").map((line, i) => {
+                {declaration.text.split("\n").map((line: string, i: number) => {
                   const trimmed = line.trim();
                   if (!trimmed) return <div key={i} className="h-2" />;
                   if (i === 0 && trimmed.toLowerCase().startsWith("my prayer")) {
@@ -114,13 +134,34 @@ export default function DailyDeclarationModal({ onClose }: Props) {
               </div>
             </div>
 
+            {/* Amen counter + actions */}
             <div className="flex-shrink-0 mt-6 pt-6 border-t border-white/10 flex items-center justify-between gap-4">
+              {/* Share */}
               <button onClick={handleShare} className="flex items-center gap-2 text-white/60 hover:text-[#C8E63A] transition-colors text-sm font-medium">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
                 Share
               </button>
-              <button onClick={handleClose} className="bg-[#C8E63A] hover:bg-[#D4ED5A] text-[#0D4A35] font-bold px-6 py-2.5 rounded-xl text-sm transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">Amen</button>
+
+              {/* Amen counter button */}
+              <button
+                onClick={handleAmen}
+                disabled={amening}
+                className={`flex items-center gap-3 bg-[#C8E63A] text-[#0D4A35] font-bold px-6 py-2.5 rounded-xl text-sm transition-all shadow-lg hover:shadow-xl ${amenPulse ? "scale-110" : "hover:-translate-y-0.5"} ${amening ? "opacity-80" : ""}`}
+              >
+                {/* Praying hands icon */}
+                <svg className={`w-5 h-5 transition-transform ${amenPulse ? "scale-125" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11V7a2 2 0 012-2h0a2 2 0 012 2v4m0 0V5a2 2 0 012-2h0a2 2 0 012 2v6m0 0v1m-6-1v5a3 3 0 003 3h3a3 3 0 003-3v-5" />
+                </svg>
+                <span>Amen</span>
+                {/* Counter badge */}
+                <span className={`flex items-center justify-center min-w-[28px] h-[22px] px-1.5 rounded-full bg-[#0D4A35] text-[#C8E63A] text-xs font-bold transition-all ${amenPulse ? "scale-125" : ""}`}>
+                  {amenCount > 999 ? `${(amenCount / 1000).toFixed(1)}K` : amenCount}
+                </span>
+              </button>
             </div>
+
+            {/* Small hint */}
+            <p className="text-center text-white/30 text-xs mt-3">Click Amen to receive this prayer</p>
           </div>
         </div>
       </div>

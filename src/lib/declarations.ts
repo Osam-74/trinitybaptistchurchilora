@@ -10,6 +10,7 @@ import {
   query,
   where,
   limit,
+  increment,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { PastorDeclaration } from "@/types/declaration";
@@ -60,6 +61,7 @@ export async function getLatestDeclaration(): Promise<PastorDeclaration | null> 
       published: d.data().published ?? false,
       createdAt: d.data().createdAt || new Date().toISOString(),
       date: d.data().date || undefined,
+      amenCount: d.data().amenCount || 0,
     };
   } catch {
     return null;
@@ -80,6 +82,7 @@ export async function getAllDeclarations(): Promise<PastorDeclaration[]> {
         published: d.data().published ?? false,
         createdAt: d.data().createdAt || new Date().toISOString(),
         date: d.data().date || undefined,
+        amenCount: d.data().amenCount || 0,
       });
     });
     items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -100,6 +103,7 @@ export async function createDeclaration(
     published: data.published,
     createdAt: new Date().toISOString(),
     date: data.date || new Date().toLocaleDateString("en-GB"),
+    amenCount: 0,
   });
   return docRef.id;
 }
@@ -107,7 +111,7 @@ export async function createDeclaration(
 /** Update an existing declaration */
 export async function updateDeclaration(
   id: string,
-  data: Partial<{ text: string; imageUrl: string | null; published: boolean; date: string }>
+  data: Partial<{ text: string; imageUrl: string | null; published: boolean; date: string; amenCount: number }>
 ): Promise<void> {
   if (!db) throw new Error("Database not available");
   await updateDoc(doc(db, "pastor_declarations", id), {
@@ -124,6 +128,20 @@ export async function deleteDeclaration(id: string): Promise<void> {
   await deleteDoc(doc(db, "pastor_declarations", id));
 }
 
+
+/** Increment the Amen counter for a declaration (public — anyone can Amen) */
+export async function incrementAmen(declarationId: string): Promise<void> {
+  if (!db) return;
+  try {
+    await updateDoc(doc(db, "pastor_declarations", declarationId), {
+      amenCount: increment(1),
+    });
+  } catch {
+    // Silently fail — the popup still closes regardless
+  }
+}
+
+/** */
 /** Seed the initial declaration if the collection is empty */
 export async function seedDeclarationIfEmpty(): Promise<boolean> {
   if (!db) return false;
@@ -135,6 +153,7 @@ export async function seedDeclarationIfEmpty(): Promise<boolean> {
       imageUrl: SEED_DECLARATION_IMAGE,
       published: false, // Admin must publish
       createdAt: new Date().toISOString(),
+      amenCount: 0,
       date: "6/8/2026",
     });
     return true;

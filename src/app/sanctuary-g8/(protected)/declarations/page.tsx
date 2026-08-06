@@ -37,6 +37,9 @@ export default function AdminDeclarationsPage() {
   };
 
   useEffect(() => {
+    // Set today's date as default
+    const now = new Date();
+    setDate(`${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()}`);
     (async () => {
       await seedDeclarationIfEmpty();
       await loadDeclarations();
@@ -47,7 +50,9 @@ export default function AdminDeclarationsPage() {
     setEditingId(null);
     setText("");
     setImageUrl(null);
-    setDate("");
+    // Auto-fill today's date in DD/MM/YYYY format
+    const now = new Date();
+    setDate(`${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()}`);
     setPublished(false);
   };
 
@@ -147,7 +152,21 @@ export default function AdminDeclarationsPage() {
             {/* Date */}
             <div>
               <label className="block text-sm font-medium text-primary mb-1.5">Date</label>
-              <input type="text" value={date} onChange={(e) => setDate(e.target.value)} placeholder="e.g. 6/8/2026" className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm" />
+              <input
+                type="date"
+                value={date ? (() => { const [d, m, y] = date.split("/"); return `${y}-${m}-${d}`; })() : ""}
+                onChange={(e) => {
+                  // Format as DD/MM/YYYY for display consistency
+                  const val = e.target.value; // yyyy-mm-dd from date picker
+                  if (val) {
+                    const [y, m, d] = val.split("-");
+                    setDate(`${d}/${m}/${y}`);
+                  } else {
+                    setDate("");
+                  }
+                }}
+                className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-accent/30 text-sm"
+              />
             </div>
 
             {/* Text */}

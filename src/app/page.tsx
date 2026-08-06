@@ -97,6 +97,7 @@ export default function HomePage() {
   // Pastor's Daily Declaration popup (separate from Pastor's Word)
   const searchParams = useSearchParams();
   const [showDeclaration, setShowDeclaration] = useState(false);
+  const [showPastorWord, setShowPastorWord] = useState(false);
 
   useEffect(() => {
     const force = searchParams.get("declaration") === "true";
@@ -1016,12 +1017,17 @@ export default function HomePage() {
 
       {/* 10. Footer */}
       <Footer />
-    {/* Daily Declaration popup (separate from Pastor's Word) */}
+    {/* Daily Declaration popup (shows first) */}
     {showDeclaration && (
-      <DailyDeclarationModal onClose={() => setShowDeclaration(false)} />
+      <DailyDeclarationModal onClose={() => {
+        setShowDeclaration(false);
+        // After declaration closes, trigger Pastor's Word 3.5s later
+        setTimeout(() => setShowPastorWord(true), 3500);
+      }} />
     )}
 
-    <PastorSpeaksPopup />
+    {/* Pastor's Word popup (shows after declaration closes) */}
+    <PastorSpeaksPopup trigger={showPastorWord ? true : undefined} />
   </div>
   );
 }
