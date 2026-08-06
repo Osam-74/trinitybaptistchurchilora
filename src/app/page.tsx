@@ -5,6 +5,8 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LiveBanner from "@/components/LiveBanner";
+import DailyDeclarationModal from "@/components/DailyDeclarationModal";
+import { useSearchParams } from "next/navigation";
 import { getYouTubeThumbnail } from "@/lib/utils";
 import { sampleSermons } from "@/lib/seed-data";
 import { doc, onSnapshot, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
@@ -86,6 +88,25 @@ export default function HomePage() {
 
   // 1. LIVE FEED: Subscription to settings/main doc in Firestore
   const [isLive, setIsLive] = useState(false);
+
+  // Pastor's Daily Declaration popup
+  const searchParams = useSearchParams();
+  const [showDeclaration, setShowDeclaration] = useState(false);
+
+  useEffect(() => {
+    const force = searchParams.get("declaration") === "true";
+    if (force) {
+      // ?declaration=true → always show (shareable link)
+      setShowDeclaration(true);
+    } else {
+      // Show once per session
+      const seen = sessionStorage.getItem("declaration_seen");
+      if (!seen) {
+        setShowDeclaration(true);
+        sessionStorage.setItem("declaration_seen", "1");
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!db) return;
@@ -224,6 +245,11 @@ export default function HomePage() {
 
   return (
     <div className="bg-bg text-primary-dark font-sans overflow-x-hidden min-h-screen flex flex-col">
+      {/* Pastor's Daily Declaration popup */}
+      {showDeclaration && (
+        <DailyDeclarationModal onClose={() => setShowDeclaration(false)} />
+      )}
+
       {/* 1. Navbar */}
       <Navbar />
 
