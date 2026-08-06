@@ -13,7 +13,7 @@ export default function DailyDeclarationModal({ onClose }: Props) {
   const [amenCount, setAmenCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(false);
-  const [amening, setAmening] = useState(false);
+  const [hasAmened, setHasAmened] = useState(false);
   const [amenPulse, setAmenPulse] = useState(false);
 
   useEffect(() => {
@@ -49,17 +49,15 @@ export default function DailyDeclarationModal({ onClose }: Props) {
   };
 
   const handleAmen = async () => {
-    if (amening) return;
-    setAmening(true);
+    if (hasAmened) return;
+    setHasAmened(true);
     setAmenPulse(true);
-    // Optimistic update
     setAmenCount((c) => c + 1);
-    // Fire and forget — increment in Firestore
     if (declaration) {
       await incrementAmen(declaration.id);
     }
-    // Close after a short delay so the user sees the Amen animation
-    setTimeout(() => handleClose(), 800);
+    setTimeout(() => setAmenPulse(false), 600);
+    setTimeout(() => handleClose(), 1200);
   };
 
   const shareLink = typeof window !== "undefined" ? `${window.location.origin}/?declaration=true` : "";
@@ -107,14 +105,16 @@ export default function DailyDeclarationModal({ onClose }: Props) {
             </div>
           </div>
 
-          {/* RIGHT: Prayer text */}
+          {/* RIGHT: Prayer text + Amen button */}
           <div className="flex flex-col p-8 md:p-12 overflow-y-auto max-h-[90vh]">
+            {/* Header */}
             <div className="mb-6 flex-shrink-0">
               <p className="text-[#C8E63A] text-xs font-bold uppercase tracking-widest mb-2">Pastor's Prayer</p>
               <h2 className="font-serif text-2xl md:text-3xl text-white font-bold leading-tight">My Prayer for You Today</h2>
               <div className="w-16 h-0.5 bg-[#C8E63A]/40 mt-4" />
             </div>
 
+            {/* Prayer text — takes remaining space */}
             <div className="flex-1 overflow-y-auto pr-2">
               <div className="space-y-4">
                 {declaration.text.split("\n").map((line: string, i: number) => {
@@ -134,24 +134,46 @@ export default function DailyDeclarationModal({ onClose }: Props) {
               </div>
             </div>
 
-            {/* Amen counter + actions */}
-            <div className="flex-shrink-0 mt-6 pt-6 border-t border-white/10 flex items-center justify-between gap-4">
-              {/* Share */}
-              <button onClick={handleShare} className="flex items-center gap-2 text-white/60 hover:text-[#C8E63A] transition-colors text-sm font-medium">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+            {/* Amen button row — right-aligned, same level as end of text */}
+            <div className="flex-shrink-0 mt-4 pt-4 flex items-center justify-end gap-3">
+              {/* Share button — subtle, left side */}
+              <button
+                onClick={handleShare}
+                className="flex items-center gap-1.5 text-white/50 hover:text-[#C8E63A] transition-colors text-xs font-medium"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
                 Share
               </button>
+
+              {/* Blinking pointing finger — disappears after Amen */}
+              {!hasAmened && (
+                <div className="flex items-center" style={{ animation: "amen-point-blink 1s ease-in-out infinite" }}>
+                  <svg
+                    className="w-7 h-7"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    {/* Pointing hand — finger pointing right toward the Amen button */}
+                    <path
+                      d="M14 11V4a2 2 0 00-2-2H12a2 2 0 00-2 2v6H6a2 2 0 00-2 2v4a4 4 0 004 4h6a4 4 0 004-4v-3a2 2 0 00-2-2h-2z"
+                      fill="#C8E63A"
+                      stroke="#C8E63A"
+                      strokeWidth="1.5"
+                      strokeLinejoin="round"
+                      transform="translate(-2, 0)"
+                    />
+                  </svg>
+                </div>
+              )}
 
               {/* Amen counter button */}
               <button
                 onClick={handleAmen}
-                disabled={amening}
-                className={`flex items-center gap-3 bg-[#C8E63A] text-[#0D4A35] font-bold px-6 py-2.5 rounded-xl text-sm transition-all shadow-lg hover:shadow-xl ${amenPulse ? "scale-110" : "hover:-translate-y-0.5"} ${amening ? "opacity-80" : ""}`}
+                disabled={hasAmened}
+                className={`flex items-center gap-2.5 bg-[#C8E63A] text-[#0D4A35] font-bold px-5 py-2.5 rounded-xl text-sm transition-all shadow-lg ${amenPulse ? "scale-110 shadow-[0_0_20px_rgba(200,230,58,0.5)]" : "hover:shadow-xl hover:-translate-y-0.5"} ${hasAmened ? "opacity-90 cursor-default" : ""}`}
               >
-                {/* Praying hands icon */}
-                <svg className={`w-5 h-5 transition-transform ${amenPulse ? "scale-125" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11V7a2 2 0 012-2h0a2 2 0 012 2v4m0 0V5a2 2 0 012-2h0a2 2 0 012 2v6m0 0v1m-6-1v5a3 3 0 003 3h3a3 3 0 003-3v-5" />
-                </svg>
                 <span>Amen</span>
                 {/* Counter badge */}
                 <span className={`flex items-center justify-center min-w-[28px] h-[22px] px-1.5 rounded-full bg-[#0D4A35] text-[#C8E63A] text-xs font-bold transition-all ${amenPulse ? "scale-125" : ""}`}>
@@ -159,12 +181,18 @@ export default function DailyDeclarationModal({ onClose }: Props) {
                 </span>
               </button>
             </div>
-
-            {/* Small hint */}
-            <p className="text-center text-white/30 text-xs mt-3">Click Amen to receive this prayer</p>
           </div>
         </div>
       </div>
+
+      {/* Inline keyframes for the blinking pointing finger */}
+      <style>{`
+        @keyframes amen-point-blink {
+          0%, 100% { opacity: 1; transform: translateX(0); }
+          45% { opacity: 0.3; transform: translateX(-4px); }
+          55% { opacity: 0.3; transform: translateX(-4px); }
+        }
+      `}</style>
     </div>
   );
 }

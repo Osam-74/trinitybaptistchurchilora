@@ -1027,7 +1027,7 @@ export default function HomePage() {
     )}
 
     {/* Pastor's Word popup (shows after declaration closes) */}
-    <PastorSpeaksPopup trigger={showPastorWord ? true : undefined} />
+    <PastorSpeaksPopup trigger={showPastorWord} />
   </div>
   );
 }
