@@ -100,17 +100,9 @@ export default function HomePage() {
   const [showPastorWord, setShowPastorWord] = useState(false);
 
   useEffect(() => {
-    const force = searchParams.get("declaration") === "true";
-    if (force) {
-      setShowDeclaration(true);
-    } else {
-      const seen = sessionStorage.getItem("declaration_seen");
-      if (!seen) {
-        setShowDeclaration(true);
-        sessionStorage.setItem("declaration_seen", "1");
-      }
-    }
-  }, [searchParams]);
+    // Show declaration popup on EVERY homepage visit
+    setShowDeclaration(true);
+  }, []);
 
 
   useEffect(() => {

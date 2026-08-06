@@ -151,7 +151,7 @@ export async function seedDeclarationIfEmpty(): Promise<boolean> {
     await addDoc(collection(db, "pastor_declarations"), {
       text: SEED_DECLARATION_TEXT,
       imageUrl: SEED_DECLARATION_IMAGE,
-      published: false, // Admin must publish
+      published: true, // Auto-published so popup shows immediately
       createdAt: new Date().toISOString(),
       amenCount: 0,
       date: "6/8/2026",
