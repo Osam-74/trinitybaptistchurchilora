@@ -112,6 +112,27 @@ export default function AdminDeclarationsPage() {
     } catch (err) { setError((err as Error).message); }
   };
 
+
+  const handleShare = async (d: PastorDeclaration) => {
+    const url = `${window.location.origin}/?declaration=true`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Pastor's Daily Declaration — Trinity Baptist Church Ilora",
+          text: d.text.split("\n")[0] || "Today's declaration",
+          url,
+        });
+      } catch {}
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        setSuccess("Share link copied to clipboard!");
+      } catch {
+        setSuccess(`Share link: ${url}`);
+      }
+    }
+  };
+
   return (
     <AdminShell>
       <PermissionGuard required="manage_settings">
@@ -215,6 +236,7 @@ export default function AdminDeclarationsPage() {
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button onClick={() => handleTogglePublish(d)} className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-stone-50 hover:bg-stone-100 text-primary transition-colors">{d.published ? "Unpublish" : "Publish"}</button>
                     <button onClick={() => startEdit(d)} className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-stone-50 hover:bg-stone-100 text-primary transition-colors">Edit</button>
+                    <button onClick={() => handleShare(d)} className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors">Share</button>
                     <button onClick={() => handleDelete(d)} className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-50 hover:bg-red-100 text-red-600 transition-colors">Delete</button>
                   </div>
                 </div>
