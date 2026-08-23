@@ -3,6 +3,7 @@
 /**
  * Reusable R2 file uploader component.
  * Drop-in for any page that needs file uploads.
+ * Supports `multiple` for batch uploads — onUploaded fires per file.
  */
 
 import { useRef, useState } from "react";
@@ -15,6 +16,8 @@ interface Props {
   onUploaded: (url: string) => void;
   onError?: (msg: string) => void;
   maxMB?: number;
+  /** When true, allows selecting multiple files at once. onUploaded fires once per file. */
+  multiple?: boolean;
 }
 
 export default function R2Uploader({
@@ -24,6 +27,7 @@ export default function R2Uploader({
   onUploaded,
   onError,
   maxMB = 100,
+  multiple = false,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -31,6 +35,8 @@ export default function R2Uploader({
   const [preview, setPreview] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [batchTotal, setBatchTotal] = useState(0);
+  const [batchDone, setBatchDone] = useState(0);
 
   const handleFile = async (file: File) => {
     setError(null);
@@ -72,15 +78,71 @@ export default function R2Uploader({
     }
   };
 
+  // Handle multiple files sequentially
+  const handleFiles = async (files: FileList) => {
+    setError(null);
+    const fileArray = Array.from(files);
+    setBatchTotal(fileArray.length);
+    setBatchDone(0);
+    setUploading(true);
+    setProgress(5);
+
+    for (let i = 0; i < fileArray.length; i++) {
+      const file = fileArray[i];
+      setFileName(file.name);
+
+      if (file.type.startsWith("image/")) {
+        setPreview(URL.createObjectURL(file));
+      } else {
+        setPreview(null);
+      }
+
+      // Size check per file
+      if (file.size > maxMB * 1024 * 1024) {
+        const msg = `${file.name} too large — max ${maxMB} MB`;
+        setError(msg);
+        onError?.(msg);
+        continue;
+      }
+
+      try {
+        const ticker = setInterval(() => setProgress(p => Math.min(p + 5, 90)), 500);
+        const url = await uploadToR2(file, folder);
+        clearInterval(ticker);
+        onUploaded(url);
+        setBatchDone(i + 1);
+        setProgress(Math.round(((i + 1) / fileArray.length) * 100));
+      } catch (err: unknown) {
+        const msg = (err as Error)?.message ?? `Upload failed for ${file.name}`;
+        setError(msg);
+        onError?.(msg);
+      }
+    }
+
+    setUploading(false);
+    setProgress(0);
+    setBatchTotal(0);
+    setBatchDone(0);
+    setTimeout(() => { setPreview(null); setFileName(null); }, 800);
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) handleFile(file);
+    if (multiple && e.target.files && e.target.files.length > 1) {
+      handleFiles(e.target.files);
+    } else {
+      const file = e.target.files?.[0];
+      if (file) handleFile(file);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (file) handleFile(file);
+    if (multiple && e.dataTransfer.files && e.dataTransfer.files.length > 1) {
+      handleFiles(e.dataTransfer.files);
+    } else {
+      const file = e.dataTransfer.files?.[0];
+      if (file) handleFile(file);
+    }
   };
 
   return (
@@ -102,7 +164,9 @@ export default function R2Uploader({
 
         {uploading ? (
           <div className="space-y-2">
-            <p className="text-sm font-medium text-primary">Uploading…</p>
+            <p className="text-sm font-medium text-primary">
+              {batchTotal > 1 ? `Uploading ${batchDone + 1}/${batchTotal}…` : "Uploading…"}
+            </p>
             <div className="w-full bg-stone-200 rounded-full h-2 overflow-hidden">
               <div
                 className="h-2 bg-accent rounded-full transition-all duration-300"
@@ -126,7 +190,8 @@ export default function R2Uploader({
           <>
             <p className="text-sm font-semibold text-primary">{label}</p>
             <p className="text-xs text-text-muted mt-1">
-              Drag & drop or click — max {maxMB} MB
+              {multiple ? "Select multiple — " : "Drag & drop or click — "}max {maxMB} MB
+              {multiple ? " per file" : ""}
             </p>
           </>
         )}
@@ -141,7 +206,14 @@ export default function R2Uploader({
         </p>
       )}
 
-      <input ref={inputRef} type="file" accept={accept} className="hidden" onChange={handleChange}/>
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        className="hidden"
+        onChange={handleChange}
+        {...(multiple ? { multiple: true } : {})}
+      />
     </div>
   );
 }

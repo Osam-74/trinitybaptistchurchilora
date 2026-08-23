@@ -526,7 +526,8 @@ export default function AdminNewsPage() {
                           )}
                           <R2Uploader
                             folder="news-events"
-                            label={form.images.length > 0 ? "Add Another Image" : "Upload Post Image"}
+                            label={form.images.length > 0 ? "Add More Images" : "Upload Post Images"}
+                            multiple
                             onUploaded={(url) => setForm(p => ({ ...p, images: [...p.images, url] }))}
                           />
                         </div>
