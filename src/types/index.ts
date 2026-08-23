@@ -251,6 +251,16 @@ export interface NewsPost {
   likeCount?: number;
 }
 
+export interface Comment {
+  id: string;
+  postId: string;
+  name: string;
+  text: string;
+  createdAt: string;
+  hidden?: boolean; // admin can hide a comment
+}
+
+
 export interface ViewEvent {
   id: string;
   collection: "sermons" | "news_posts" | "posts";

@@ -11,6 +11,7 @@ import { listPublishedPosts } from "@/lib/news";
 import { formatDate } from "@/lib/utils";
 import { trackView } from "@/lib/analytics";
 import LikeButton from "@/components/LikeButton";
+import CommentSection from "@/components/CommentSection";
 
 export default function NewsDetailPage() {
   const params = useParams();
@@ -204,6 +205,9 @@ export default function NewsDetailPage() {
               />
             </div>
           </div>
+
+          {/* Comments */}
+          <CommentSection postId={post.id} postTitle={post.title} />
 
           {/* More from Trinity Baptist */}
           {recentPosts.length > 0 && (
