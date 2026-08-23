@@ -156,6 +156,13 @@ export default function NewsDetailPage() {
             )}
           </div>
 
+          {/* Excerpt — lead paragraph */}
+          {post.excerpt && (
+            <p className="mb-8 text-stone-800 leading-relaxed text-base sm:text-lg font-medium border-l-4 border-accent pl-4 italic">
+              {post.excerpt}
+            </p>
+          )}
+
           {/* Article Body */}
           <div className="prose max-w-none mb-16">
             {post.body.split("\n\n").map((para, idx) => (
