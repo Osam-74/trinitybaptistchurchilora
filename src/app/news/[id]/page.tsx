@@ -231,52 +231,62 @@ export default function NewsDetailPage() {
           {/* Image Lightbox */}
           {lightboxIdx !== null && additionalImages.length > 0 && (
             <div
-              className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4"
+              className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4"
               onClick={closeLightbox}
             >
-              {/* Image */}
-              <div className="relative max-w-5xl w-full" onClick={e => e.stopPropagation()}>
+              {/* Close button */}
+              <button
+                onClick={closeLightbox}
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors z-10"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              {/* Image + arrows */}
+              <div className="relative flex items-center justify-center w-full max-w-5xl" onClick={e => e.stopPropagation()}>
+                {additionalImages.length > 1 && (
+                  <button
+                    onClick={prevPhoto}
+                    className="flex-shrink-0 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors mr-2"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                )}
+
                 <img
                   src={additionalImages[lightboxIdx]}
                   alt={`${post.title} gallery ${lightboxIdx + 1}`}
-                  className="w-full max-h-[75vh] object-contain rounded-lg"
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg"
                 />
 
-                {/* Prev / Next arrows */}
                 {additionalImages.length > 1 && (
-                  <>
-                    <button
-                      onClick={prevPhoto}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
-                    >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={nextPhoto}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
-                    >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  </>
+                  <button
+                    onClick={nextPhoto}
+                    className="flex-shrink-0 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors ml-2"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
                 )}
-
-                {/* Counter */}
-                <p className="text-white/40 text-sm mt-3 text-center">
-                  {lightboxIdx + 1} / {additionalImages.length}
-                </p>
               </div>
+
+              {/* Counter */}
+              <p className="text-white/40 text-sm mt-3 text-center">
+                {lightboxIdx + 1} / {additionalImages.length}
+              </p>
 
               {/* Thumbnail strip */}
               {additionalImages.length > 1 && (
-                <div className="flex justify-center gap-2 mt-4 overflow-x-auto pb-1 max-w-xl mx-auto">
+                <div className="flex justify-center gap-2 mt-3 overflow-x-auto pb-1 max-w-xl" onClick={e => e.stopPropagation()}>
                   {additionalImages.map((img, i) => (
                     <button
                       key={i}
-                      onClick={(e) => { e.stopPropagation(); setLightboxIdx(i); }}
+                      onClick={() => setLightboxIdx(i)}
                       className={`flex-shrink-0 w-14 h-10 rounded-lg overflow-hidden border-2 transition-all ${i === lightboxIdx ? "border-accent scale-110" : "border-white/20 opacity-60 hover:opacity-100"}`}
                     >
                       <img src={img} alt="" className="w-full h-full object-cover" />
@@ -284,16 +294,6 @@ export default function NewsDetailPage() {
                   ))}
                 </div>
               )}
-
-              {/* Close button */}
-              <button
-                onClick={closeLightbox}
-                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
             </div>
           )}
 
