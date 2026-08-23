@@ -71,7 +71,7 @@ export default function CommentsAdminPage() {
     return (
       <AdminShell>
         <div className="flex items-center justify-center py-20">
-          <div className="w-10 h-10 rounded-full border-4 border-[#C8E63A]/30 border-t-[#C8E63A] animate-spin" />
+          <div className="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
         </div>
       </AdminShell>
     );
@@ -79,35 +79,35 @@ export default function CommentsAdminPage() {
 
   return (
     <AdminShell>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-4xl">
         {/* Header */}
         <div>
-          <h1 className="font-serif text-2xl font-bold text-[#C8E63A]">
+          <h1 className="font-serif text-2xl font-bold text-primary">
             Comment Moderation
           </h1>
-          <p className="text-sm text-white/50 mt-1">
+          <p className="text-sm text-text-muted mt-1">
             Review, hide, or delete comments on news posts.
           </p>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-            <p className="text-2xl font-bold text-white">{comments.length}</p>
-            <p className="text-xs text-white/50 mt-1">Total Comments</p>
+          <div className="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+            <p className="text-2xl font-bold text-primary">{comments.length}</p>
+            <p className="text-xs text-text-muted mt-1">Total Comments</p>
           </div>
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-            <p className="text-2xl font-bold text-green-400">{visibleCount}</p>
-            <p className="text-xs text-white/50 mt-1">Visible</p>
+          <div className="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+            <p className="text-2xl font-bold text-emerald-600">{visibleCount}</p>
+            <p className="text-xs text-text-muted mt-1">Visible</p>
           </div>
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-            <p className="text-2xl font-bold text-amber-400">{hiddenCount}</p>
-            <p className="text-xs text-white/50 mt-1">Hidden</p>
+          <div className="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+            <p className="text-2xl font-bold text-amber-500">{hiddenCount}</p>
+            <p className="text-xs text-text-muted mt-1">Hidden</p>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex gap-2">
             {(["all", "visible", "hidden"] as const).map(f => (
               <button
@@ -115,8 +115,8 @@ export default function CommentsAdminPage() {
                 onClick={() => setFilter(f)}
                 className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors capitalize ${
                   filter === f
-                    ? "bg-[#C8E63A] text-[#0B2C22]"
-                    : "bg-white/5 text-white/60 hover:bg-white/10"
+                    ? "bg-accent text-primary"
+                    : "bg-stone-100 text-text-muted hover:bg-stone-200"
                 }`}
               >
                 {f}
@@ -126,11 +126,11 @@ export default function CommentsAdminPage() {
           <select
             value={postFilter}
             onChange={e => setPostFilter(e.target.value)}
-            className="bg-white/5 border border-white/10 text-white/70 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-[#C8E63A]/50"
+            className="bg-white border border-stone-200 text-primary text-xs rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-accent/30"
           >
-            <option value="all" className="bg-[#0B2C22]">All posts</option>
+            <option value="all">All posts</option>
             {Object.values(posts).map(p => (
-              <option key={p.id} value={p.id} className="bg-[#0B2C22]">
+              <option key={p.id} value={p.id}>
                 {p.title.slice(0, 50)}
               </option>
             ))}
@@ -139,44 +139,44 @@ export default function CommentsAdminPage() {
 
         {/* Comments list */}
         {filtered.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-white/40 text-sm">No comments to display.</p>
+          <div className="text-center py-16 bg-white border border-stone-200 rounded-xl">
+            <p className="text-text-muted text-sm">No comments to display.</p>
           </div>
         ) : (
           <div className="space-y-4">
             {filtered.map(c => (
               <div
                 key={c.id}
-                className={`bg-white/5 border rounded-2xl p-5 transition-colors ${
-                  c.hidden ? "border-amber-500/30 opacity-60" : "border-white/10"
+                className={`bg-white border rounded-xl p-4 sm:p-5 shadow-sm transition-colors ${
+                  c.hidden ? "border-amber-300 bg-amber-50/40" : "border-stone-200"
                 }`}
               >
                 <div className="flex items-start gap-3">
                   {/* Avatar */}
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#C8E63A]/20 flex items-center justify-center text-[#C8E63A] font-bold text-sm">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                     {c.name.charAt(0).toUpperCase()}
                   </div>
 
                   <div className="flex-1 min-w-0">
                     {/* Meta row */}
                     <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <span className="font-semibold text-sm text-white">{c.name}</span>
-                      <span className="text-[11px] text-white/40">{formatRelative(c.createdAt)}</span>
+                      <span className="font-semibold text-sm text-primary">{c.name}</span>
+                      <span className="text-[11px] text-text-muted">{formatRelative(c.createdAt)}</span>
                       {c.hidden && (
-                        <span className="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full font-semibold uppercase">
+                        <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold uppercase">
                           Hidden
                         </span>
                       )}
                     </div>
 
                     {/* Comment text */}
-                    <p className="text-sm text-white/80 leading-relaxed whitespace-pre-line break-words mb-3">
+                    <p className="text-sm text-stone-700 leading-relaxed whitespace-pre-line break-words mb-3">
                       {c.text}
                     </p>
 
                     {/* Post reference */}
-                    <p className="text-[11px] text-white/40 mb-3">
-                      On: <span className="text-[#C8E63A]/70">{getPostTitle(c.postId)}</span>
+                    <p className="text-[11px] text-text-muted mb-3">
+                      On: <span className="text-primary/70 font-medium">{getPostTitle(c.postId)}</span>
                     </p>
 
                     {/* Actions */}
@@ -185,15 +185,15 @@ export default function CommentsAdminPage() {
                         onClick={() => handleToggleHide(c.id, !!c.hidden)}
                         className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors ${
                           c.hidden
-                            ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
-                            : "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
+                            ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                            : "bg-amber-100 text-amber-700 hover:bg-amber-200"
                         }`}
                       >
                         {c.hidden ? "Show" : "Hide"}
                       </button>
                       <button
                         onClick={() => handleDelete(c.id)}
-                        className="text-xs px-3 py-1.5 rounded-lg font-semibold bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+                        className="text-xs px-3 py-1.5 rounded-lg font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
                       >
                         Delete
                       </button>
