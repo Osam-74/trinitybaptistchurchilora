@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -21,6 +21,34 @@ export default function NewsDetailPage() {
   const [loading, setLoading] = useState(true);
   const [post, setPost] = useState<NewsPost | null>(null);
   const [recentPosts, setRecentPosts] = useState<NewsPost[]>([]);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+
+  // Compute gallery images from current post (safe before post is loaded — uses optional chaining)
+  const galleryImages = post?.images && post.images.length > 1 ? post.images.slice(1) : [];
+
+  const closeLightbox = useCallback(() => setLightboxIdx(null), []);
+  const nextPhoto = useCallback(() => {
+    setLightboxIdx(i => i === null || galleryImages.length === 0 ? i : (i + 1) % galleryImages.length);
+  }, [galleryImages.length]);
+  const prevPhoto = useCallback(() => {
+    setLightboxIdx(i => i === null || galleryImages.length === 0 ? i : (i - 1 + galleryImages.length) % galleryImages.length);
+  }, [galleryImages.length]);
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    if (lightboxIdx === null) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') nextPhoto();
+      if (e.key === 'ArrowLeft') prevPhoto();
+    };
+    window.addEventListener('keydown', handler);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handler);
+      document.body.style.overflow = '';
+    };
+  }, [lightboxIdx, closeLightbox, nextPhoto, prevPhoto]);
   const trackedRef = useRef(false);
 
   useEffect(() => {
@@ -101,7 +129,7 @@ export default function NewsDetailPage() {
   }
 
   const coverImage = post.images && post.images.length > 0 ? post.images[0] : "/church-building.jpg";
-  const additionalImages = post.images && post.images.length > 1 ? post.images.slice(1) : [];
+  const additionalImages = galleryImages;
 
   return (
     <main className="min-h-screen bg-bg">
@@ -178,13 +206,94 @@ export default function NewsDetailPage() {
           {additionalImages.length > 0 && (
             <div className="mb-16">
               <h2 className="font-serif text-2xl font-bold text-primary mb-6">Gallery</h2>
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
                 {additionalImages.map((img, idx) => (
-                  <div key={idx} className="relative rounded-2xl overflow-hidden shadow-md aspect-video group img-zoom bg-stone-100">
-                    <img src={img} alt={`${post.title} gallery ${idx + 1}`} className="w-full h-full object-contain" />
-                  </div>
+                  <button
+                    key={idx}
+                    onClick={() => setLightboxIdx(idx)}
+                    className="relative rounded-2xl overflow-hidden shadow-md aspect-video bg-stone-100 group cursor-pointer"
+                  >
+                    <img src={img} alt={`${post.title} gallery ${idx + 1}`} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 rounded-full p-3 shadow-lg">
+                        <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Image Lightbox */}
+          {lightboxIdx !== null && additionalImages.length > 0 && (
+            <div
+              className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4"
+              onClick={closeLightbox}
+            >
+              {/* Image */}
+              <div className="relative max-w-5xl w-full" onClick={e => e.stopPropagation()}>
+                <img
+                  src={additionalImages[lightboxIdx]}
+                  alt={`${post.title} gallery ${lightboxIdx + 1}`}
+                  className="w-full max-h-[75vh] object-contain rounded-lg"
+                />
+
+                {/* Prev / Next arrows */}
+                {additionalImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={prevPhoto}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={nextPhoto}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+
+                {/* Counter */}
+                <p className="text-white/40 text-sm mt-3 text-center">
+                  {lightboxIdx + 1} / {additionalImages.length}
+                </p>
+              </div>
+
+              {/* Thumbnail strip */}
+              {additionalImages.length > 1 && (
+                <div className="flex justify-center gap-2 mt-4 overflow-x-auto pb-1 max-w-xl mx-auto">
+                  {additionalImages.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={(e) => { e.stopPropagation(); setLightboxIdx(i); }}
+                      className={`flex-shrink-0 w-14 h-10 rounded-lg overflow-hidden border-2 transition-all ${i === lightboxIdx ? "border-accent scale-110" : "border-white/20 opacity-60 hover:opacity-100"}`}
+                    >
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Close button */}
+              <button
+                onClick={closeLightbox}
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
           )}
 
