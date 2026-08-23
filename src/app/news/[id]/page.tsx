@@ -109,14 +109,16 @@ export default function NewsDetailPage() {
       <div className="page-hero pt-20">
         <div className="py-16 md:py-20">
           <div className="max-w-4xl mx-auto px-4 text-center">
-            <Link href="/news" className="inline-flex items-center gap-1.5 text-accent hover:text-white transition-colors text-sm font-semibold mb-6">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back to News
-            </Link>
-            <div className={`inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border ${getCategoryColor(post.category)}`}>
-              {post.category}
+            <div className="flex flex-col items-center gap-3 mb-6">
+              <Link href="/news" className="inline-flex items-center gap-1 text-accent hover:text-white transition-colors text-xs sm:text-sm font-semibold">
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to News
+              </Link>
+              <div className={`inline-block px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider border ${getCategoryColor(post.category)}`}>
+                {post.category}
+              </div>
             </div>
             <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-white font-bold leading-tight mb-6">
               {post.title}
@@ -157,7 +159,7 @@ export default function NewsDetailPage() {
           {/* Article Body */}
           <div className="prose max-w-none mb-16">
             {post.body.split("\n\n").map((para, idx) => (
-              <p key={idx} className="mb-6 text-stone-700 leading-relaxed text-lg whitespace-pre-line">
+              <p key={idx} className="mb-6 text-stone-700 leading-relaxed text-sm sm:text-base whitespace-pre-line">
                 {para.trim()}
               </p>
             ))}
@@ -198,8 +200,8 @@ export default function NewsDetailPage() {
           {/* More from Trinity Baptist */}
           {recentPosts.length > 0 && (
             <div className="border-t border-stone-100 pt-16">
-              <h2 className="font-serif text-3xl font-bold text-primary mb-8 text-center">More from Trinity Baptist</h2>
-              <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <h2 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-primary mb-8 text-center leading-tight">More from Trinity Baptist Church Ilora</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                 {recentPosts.map((other) => {
                   const otherCover = other.images && other.images.length > 0 ? other.images[0] : "/church-building.jpg";
                   return (
@@ -217,7 +219,7 @@ export default function NewsDetailPage() {
                       <div className="p-4 flex-1 flex flex-col justify-between">
                         <div>
                           <p className="text-text-muted text-[11px] font-medium mb-1.5">{formatDate(other.date || other.publishedAt || "")}</p>
-                          <h4 className="font-serif font-bold text-primary text-base line-clamp-2 group-hover:text-primary-light transition-colors">
+                          <h4 className="font-serif font-bold text-primary text-sm sm:text-base line-clamp-2 group-hover:text-primary-light transition-colors">
                             {other.title}
                           </h4>
                         </div>

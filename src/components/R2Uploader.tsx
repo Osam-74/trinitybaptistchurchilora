@@ -69,6 +69,8 @@ export default function R2Uploader({
       setProgress(100);
       setTimeout(() => { setUploading(false); setProgress(0); }, 600);
       onUploaded(url);
+      // Reset input so the same file can be re-selected later
+      if (inputRef.current) inputRef.current.value = "";
     } catch (err: unknown) {
       setUploading(false);
       setProgress(0);
@@ -123,11 +125,12 @@ export default function R2Uploader({
     setProgress(0);
     setBatchTotal(0);
     setBatchDone(0);
+    if (inputRef.current) inputRef.current.value = "";
     setTimeout(() => { setPreview(null); setFileName(null); }, 800);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (multiple && e.target.files && e.target.files.length > 1) {
+    if (multiple && e.target.files && e.target.files.length >= 1) {
       handleFiles(e.target.files);
     } else {
       const file = e.target.files?.[0];
@@ -137,7 +140,7 @@ export default function R2Uploader({
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    if (multiple && e.dataTransfer.files && e.dataTransfer.files.length > 1) {
+    if (multiple && e.dataTransfer.files && e.dataTransfer.files.length >= 1) {
       handleFiles(e.dataTransfer.files);
     } else {
       const file = e.dataTransfer.files?.[0];
@@ -212,7 +215,7 @@ export default function R2Uploader({
         accept={accept}
         className="hidden"
         onChange={handleChange}
-        {...(multiple ? { multiple: true } : {})}
+        multiple={multiple}
       />
     </div>
   );
