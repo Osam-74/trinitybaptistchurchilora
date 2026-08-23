@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import AdminShell from "@/components/AdminShell";
 import R2Uploader from "@/components/R2Uploader";
-import { listAllPosts, createPost, updatePost, deletePost } from "@/lib/news";
+import { listAllPosts, createPost, updatePost, deletePost, slugify } from "@/lib/news";
 import { NewsPost } from "@/types";
 import { formatDate } from "@/lib/utils";
 
@@ -13,6 +13,7 @@ const emptyForm: Omit<NewsPost, "id"> = {
   date: "",
   excerpt: "",
   body: "",
+  slug: "",
   images: [],
   videoUrl: "",
   featuredVideo: false,
@@ -116,6 +117,7 @@ export default function AdminNewsPage() {
     setEditing(p);
     setForm({
       title: p.title,
+      slug: p.slug || "",
       category: p.category,
       date: p.date,
       excerpt: p.excerpt,
@@ -447,10 +449,26 @@ export default function AdminNewsPage() {
                             type="text"
                             required
                             value={form.title}
-                            onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
+                            onChange={e => setForm(p => ({ ...p, title: e.target.value, slug: p.slug || slugify(e.target.value) }))}
                             className="input-field"
                             placeholder="e.g. Annual Youth Convention 2026"
                           />
+                        </div>
+
+                        {/* Auto-generated URL slug */}
+                        <div>
+                          <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">URL Slug (auto-generated from title)</label>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-text-muted whitespace-nowrap">/news/</span>
+                            <input
+                              type="text"
+                              value={form.slug || ""}
+                              onChange={e => setForm(p => ({ ...p, slug: e.target.value }))}
+                              className="input-field flex-1 font-mono text-xs"
+                              placeholder="auto-generated-from-title"
+                            />
+                          </div>
+                          <p className="text-[11px] text-text-muted mt-1">Edit only if needed. Existing posts keep their original ID-based links.</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">

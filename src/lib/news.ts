@@ -6,6 +6,18 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase
 import { db } from "@/lib/firebase";
 import { NewsPost } from "@/types";
 
+/** Generate a URL-safe slug from a title. */
+export function slugify(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "") // remove special chars
+    .replace(/\s+/g, "-")           // spaces to dashes
+    .replace(/-+/g, "-")            // collapse repeated dashes
+    .replace(/^-|-$/g, "")          // trim leading/trailing dashes
+    .slice(0, 80);                  // cap length
+}
+
 function stripUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
   const out: Partial<T> = {};
   for (const key of Object.keys(obj) as (keyof T)[]) {
@@ -39,7 +51,12 @@ export async function listPublishedPosts(): Promise<NewsPost[]> {
 
 export async function createPost(data: Omit<NewsPost, "id">): Promise<string> {
   if (!db) throw new Error("Firestore not configured");
-  const ref = await addDoc(collection(db, "news_posts"), stripUndefined(data as Record<string, unknown>));
+  // Auto-generate slug from title if not provided
+  const dataWithSlug = { ...data };
+  if (!dataWithSlug.slug && dataWithSlug.title) {
+    dataWithSlug.slug = slugify(dataWithSlug.title);
+  }
+  const ref = await addDoc(collection(db, "news_posts"), stripUndefined(dataWithSlug as Record<string, unknown>));
   return ref.id;
 }
 

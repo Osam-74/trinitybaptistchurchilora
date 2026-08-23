@@ -158,7 +158,7 @@ export default function HomePage() {
 
   const [newsPosts, setNewsPosts] = useState<Array<{
     id: string; title: string; category: string; excerpt: string;
-    images: string[]; date: string; author?: string;
+    images: string[]; date: string; author?: string; slug?: string;
   }>>([]);
 
   useEffect(() => {
@@ -166,7 +166,7 @@ export default function HomePage() {
       setNewsPosts(posts.slice(0, 4).map(p => ({
         id: p.id, title: p.title, category: p.category,
         excerpt: p.excerpt, images: p.images || [],
-        date: p.date, author: p.author,
+        date: p.date, author: p.author, slug: p.slug,
       })));
     }).catch(() => {});
   }, []);
@@ -874,7 +874,7 @@ export default function HomePage() {
                   celebration: "bg-rose-100 text-rose-700",
                 };
                 return (
-                  <Link key={post.id} href={`/news/${post.id}`} className="group block bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                  <Link key={post.id} href={`/news/${post.slug || post.id}`} className="group block bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                     <div className="relative w-full overflow-hidden bg-stone-100" style={{ aspectRatio: "4/3" }}>
                       {post.images && post.images[0] ? (
                         <img src={post.images[0]} alt={post.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"/>

@@ -232,7 +232,7 @@ export default function NewsListingPage() {
                             title={post.title}
                           />
                           <Link
-                            href={`/news/${post.id}`}
+                            href={`/news/${post.slug || post.id}`}
                             className="btn-shine text-accent hover:text-primary-dark font-bold text-sm inline-flex items-center gap-1 group/btn"
                           >
                             Read More

@@ -233,6 +233,7 @@ export const ROLE_DEFAULTS: Record<string, Permission[]> = {
 
 export interface NewsPost {
   id: string;
+  slug?: string;
   title: string;
   category: "news" | "event" | "announcement" | "celebration";
   date: string;

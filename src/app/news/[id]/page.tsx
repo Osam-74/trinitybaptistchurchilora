@@ -27,7 +27,8 @@ export default function NewsDetailPage() {
 
     listPublishedPosts()
       .then((allPosts) => {
-        const found = allPosts.find((p) => p.id === id);
+        // Look up by slug first, then fall back to ID — so old links keep working
+        const found = allPosts.find((p) => p.slug === id) || allPosts.find((p) => p.id === id);
         if (found) {
           setPost(found);
           if (!trackedRef.current) {
@@ -214,7 +215,7 @@ export default function NewsDetailPage() {
                   return (
                     <Link
                       key={other.id}
-                      href={`/news/${other.id}`}
+                      href={`/news/${other.slug || other.id}`}
                       className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-stone-100 transition-all duration-300 h-full"
                     >
                       <div className="relative aspect-video overflow-hidden bg-stone-100">
