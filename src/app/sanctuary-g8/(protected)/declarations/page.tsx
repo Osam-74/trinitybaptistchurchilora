@@ -135,7 +135,7 @@ export default function AdminDeclarationsPage() {
 
   return (
     <AdminShell>
-      <PermissionGuard required="manage_settings">
+      <PermissionGuard required="manage_declarations">
         <div className="max-w-5xl">
           <div className="mb-6">
             <h1 className="font-serif text-lg font-bold text-primary">Daily Declaration</h1>
