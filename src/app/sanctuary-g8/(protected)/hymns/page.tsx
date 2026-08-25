@@ -30,8 +30,6 @@ export default function AdminHymnsPage() {
 
   useEffect(() => { load(); }, []);
 
-  const seedCount = { english: 333, yoruba: 595 }; // From /public/hymns-library.json
-
   const filtered = hymns.filter((h) => h.category === tab);
 
   const openNew = () => {
@@ -105,13 +103,6 @@ export default function AdminHymnsPage() {
                 + Add Hymn
               </button>
             </div>
-          </div>
-
-          <div className="bg-primary/8 border border-primary/20 rounded-xl px-4 py-3 text-sm text-primary mb-6">
-            The website loads a full hymn library ({seedCount.english} English + {seedCount.yoruba} Yoruba hymns)
-            from a static JSON file. Hymns you add or edit here in Firestore are layered on top of that library
-            and shown on the public Hymns page automatically. Use this page for corrections, additions, or
-            songs not in the standard hymnal.
           </div>
 
           <div className="flex gap-3 mb-6">

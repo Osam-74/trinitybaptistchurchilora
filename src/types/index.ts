@@ -206,6 +206,7 @@ export const PERMISSIONS = [
   "manage_members",
   "manage_ministry_members",
   "manage_contacts",
+  "manage_declarations",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -216,7 +217,7 @@ export const ROLE_DEFAULTS: Record<string, Permission[]> = {
     "manage_streams", "manage_gallery", "manage_sermons", "manage_activities",
     "manage_settings", "manage_calendar", "manage_pastor_speaks", "manage_announcements",
     "manage_hymns", "manage_leadership", "manage_members", "manage_ministry_members",
-    "manage_contacts",
+    "manage_contacts", "manage_declarations",
   ],
   pastor: [
     "manage_posts", "manage_bookings", "manage_availability",
