@@ -1,18 +1,37 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import AdminShell from "@/components/AdminShell";
-import { getAnalyticsSummary, AnalyticsSummary } from "@/lib/analytics";
+import { getAnalyticsSummary, getAnalyticsChart, AnalyticsSummary, DateRange } from "@/lib/analytics";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
+
+const RANGE_OPTIONS: { value: DateRange; label: string }[] = [
+  { value: "7days", label: "7 Days" },
+  { value: "30days", label: "30 Days" },
+  { value: "12weeks", label: "12 Weeks" },
+  { value: "12months", label: "12 Months" },
+];
 
 export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
+  const [chartData, setChartData] = useState<{ date: string; views: number }[]>([]);
+  const [chartLabels, setChartLabels] = useState<string[]>([]);
+  const [range, setRange] = useState<DateRange>("7days");
   const [loading, setLoading] = useState(true);
+  const [chartLoading, setChartLoading] = useState(true);
 
   useEffect(() => {
     getAnalyticsSummary()
       .then(s => { setAnalytics(s); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    setChartLoading(true);
+    getAnalyticsChart(range)
+      .then(res => { setChartData(res.data); setChartLabels(res.labels); setChartLoading(false); })
+      .catch(() => setChartLoading(false));
+  }, [range]);
 
   const formatTime = (dateStr: string) => {
     try {
@@ -30,6 +49,10 @@ export default function AnalyticsPage() {
       return dateStr;
     }
   };
+
+  const chartDataWithLabels = useMemo(() => {
+    return chartData.map((d, i) => ({ ...d, label: chartLabels[i] || d.date }));
+  }, [chartData, chartLabels]);
 
   return (
     <AdminShell>
@@ -76,29 +99,56 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            {/* 7-day chart */}
+            {/* Chart with date range filter */}
             <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6">
-              <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-4">Last 7 Days</h3>
-              <div className="flex items-end gap-3 h-40">
-                {analytics.last7Days.map((day, i) => {
-                  const maxViews = Math.max(...analytics.last7Days.map(d => d.views), 1);
-                  const heightPct = (day.views / maxViews) * 100;
-                  const label = new Date(day.date).toLocaleDateString("en-US", { weekday: "short" });
-                  return (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                      <div className="flex-1 w-full flex items-end">
-                        <div
-                          className="w-full rounded-t-lg bg-gradient-to-t from-[#0D4A35] to-[#C8E63A] transition-all duration-500 hover:opacity-80"
-                          style={{ height: `${Math.max(heightPct, 3)}%`, minHeight: "4px" }}
-                          title={`${day.views} views on ${day.date}`}
-                        />
-                      </div>
-                      <span className="text-[10px] text-text-muted font-medium">{label}</span>
-                      <span className="text-[10px] text-primary font-bold">{day.views}</span>
-                    </div>
-                  );
-                })}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+                <h3 className="text-xs font-bold text-primary uppercase tracking-wider">Views Over Time</h3>
+                <div className="flex gap-2 flex-wrap">
+                  {RANGE_OPTIONS.map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setRange(opt.value)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        range === opt.value
+                          ? "bg-primary text-white"
+                          : "bg-stone-100 text-text-muted hover:bg-stone-200"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {chartLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={chartDataWithLabels} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E8EDE8" vertical={false} />
+                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#78716c" }} axisLine={{ stroke: "#E8EDE8" }} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: "#78716c" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                    <Tooltip
+                      cursor={{ fill: "#0D4A3508" }}
+                      contentStyle={{
+                        backgroundColor: "#fff",
+                        border: "1px solid #E8EDE8",
+                        borderRadius: "12px",
+                        fontSize: "12px",
+                      }}
+                      labelStyle={{ fontWeight: 600, color: "#0B2C22" }}
+                      formatter={(value: any) => [`${value} ${value === 1 ? "view" : "views"}`, "Views"]}
+                    />
+                    <Bar dataKey="views" radius={[6, 6, 0, 0]} maxBarSize={50}>
+                      {chartDataWithLabels.map((_, i) => (
+                        <Cell key={i} fill="#0D4A35" />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

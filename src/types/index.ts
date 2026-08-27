@@ -207,6 +207,7 @@ export const PERMISSIONS = [
   "manage_ministry_members",
   "manage_contacts",
   "manage_declarations",
+  "view_activity_log",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];

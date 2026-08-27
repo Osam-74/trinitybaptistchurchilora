@@ -179,3 +179,91 @@ export async function getViewCounts(collectionName: ContentType): Promise<Record
     return {};
   }
 }
+
+export type DateRange = "7days" | "30days" | "12weeks" | "12months";
+
+export interface AnalyticsChartData {
+  labels: string[];
+  data: { date: string; views: number }[];
+}
+
+/**
+ * Get chart data filtered by date range: 7 days, 30 days, 12 weeks, or 12 months.
+ */
+export async function getAnalyticsChart(range: DateRange): Promise<AnalyticsChartData> {
+  if (!db) return { labels: [], data: [] };
+
+  try {
+    const snap = await getDocs(collection(db, "content_views"));
+    const views: ContentView[] = snap.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        collection: data.collection as ContentType,
+        docId: data.docId || "",
+        title: data.title || "",
+        viewedAt: data.viewedAt instanceof Timestamp ? data.viewedAt.toDate().toISOString() : (data.viewedAt || ""),
+        referrer: data.referrer || "",
+      };
+    });
+
+    const now = new Date();
+    const data: { date: string; views: number }[] = [];
+    const labels: string[] = [];
+
+    if (range === "7days") {
+      for (let i = 6; i >= 0; i--) {
+        const day = new Date(now);
+        day.setDate(now.getDate() - i);
+        const dayStr = day.toISOString().split("T")[0];
+        const dayViews = views.filter(v => v.viewedAt && v.viewedAt.split("T")[0] === dayStr).length;
+        data.push({ date: dayStr, views: dayViews });
+        labels.push(day.toLocaleDateString("en-US", { weekday: "short" }));
+      }
+    } else if (range === "30days") {
+      for (let i = 29; i >= 0; i--) {
+        const day = new Date(now);
+        day.setDate(now.getDate() - i);
+        const dayStr = day.toISOString().split("T")[0];
+        const dayViews = views.filter(v => v.viewedAt && v.viewedAt.split("T")[0] === dayStr).length;
+        data.push({ date: dayStr, views: dayViews });
+        labels.push(day.toLocaleDateString("en-US", { day: "numeric", month: "short" }));
+      }
+    } else if (range === "12weeks") {
+      for (let i = 11; i >= 0; i--) {
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - i * 7 - 6);
+        const weekEnd = new Date(now);
+        weekEnd.setDate(now.getDate() - i * 7);
+        const startStr = weekStart.toISOString().split("T")[0];
+        const endStr = weekEnd.toISOString().split("T")[0];
+        const weekViews = views.filter(v => {
+          if (!v.viewedAt) return false;
+          const d = v.viewedAt.split("T")[0];
+          return d >= startStr && d <= endStr;
+        }).length;
+        data.push({ date: startStr, views: weekViews });
+        labels.push(`W${12 - i}`);
+      }
+    } else if (range === "12months") {
+      for (let i = 11; i >= 0; i--) {
+        const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
+        const startStr = monthDate.toISOString().split("T")[0];
+        const endStr = monthEnd.toISOString().split("T")[0];
+        const monthViews = views.filter(v => {
+          if (!v.viewedAt) return false;
+          const d = v.viewedAt.split("T")[0];
+          return d >= startStr && d <= endStr;
+        }).length;
+        data.push({ date: startStr, views: monthViews });
+        labels.push(monthDate.toLocaleDateString("en-US", { month: "short" }));
+      }
+    }
+
+    return { labels, data };
+  } catch (err) {
+    console.error("[analytics] getAnalyticsChart failed:", err);
+    return { labels: [], data: [] };
+  }
+}

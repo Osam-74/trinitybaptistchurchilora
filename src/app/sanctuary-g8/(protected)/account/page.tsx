@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import AdminShell from "@/components/AdminShell";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider, User } from "firebase/auth";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 export default function AccountPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -45,7 +45,7 @@ export default function AccountPage() {
     if (!user || !db) { setError("Not signed in."); return; }
     setSavingName(true);
     try {
-      await updateDoc(doc(db, "admin_users", user.uid), { displayName: displayName.trim() });
+      await setDoc(doc(db, "admin_users", user.uid), { displayName: displayName.trim() }, { merge: true });
       setMessage("Your name has been updated.");
       setTimeout(() => setMessage(""), 3000);
     } catch (err) {

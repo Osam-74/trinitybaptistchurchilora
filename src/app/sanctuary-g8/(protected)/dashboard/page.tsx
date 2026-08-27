@@ -10,6 +10,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { getRecentActivity, ActivityEntry } from "@/lib/activityLog";
 import { getAnalyticsSummary, AnalyticsSummary } from "@/lib/analytics";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
 
 export default function AdminDashboardPage() {
   const [greeting, setGreeting] = useState("Hello");
@@ -211,26 +212,19 @@ export default function AdminDashboardPage() {
                 {/* 7-day chart */}
                 <div>
                   <h4 className="text-xs font-bold text-[#0B2C22] uppercase tracking-wider mb-3">Last 7 Days</h4>
-                  <div className="flex items-end gap-2 h-32">
-                    {analytics.last7Days.map((day, i) => {
-                      const maxViews = Math.max(...analytics.last7Days.map(d => d.views), 1);
-                      const heightPct = (day.views / maxViews) * 100;
-                      const label = new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' });
-                      return (
-                        <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
-                          <div className="flex-1 w-full flex items-end">
-                            <div
-                              className="w-full rounded-t-lg bg-gradient-to-t from-[#0D4A35] to-[#C8E63A] transition-all duration-500 hover:opacity-80"
-                              style={{ height: `${Math.max(heightPct, 3)}%`, minHeight: '4px' }}
-                              title={`${day.views} views on ${day.date}`}
-                            />
-                          </div>
-                          <span className="text-[10px] text-stone-400 font-medium">{label}</span>
-                          <span className="text-[10px] text-[#0B2C22] font-bold">{day.views}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <BarChart data={analytics.last7Days.map((d, i) => ({ ...d, label: new Date(d.date).toLocaleDateString("en-US", { weekday: "short" }) }))} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#E8EDE8" vertical={false} />
+                      <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#78716c" }} axisLine={{ stroke: "#E8EDE8" }} tickLine={false} />
+                      <YAxis tick={{ fontSize: 10, fill: "#78716c" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                      <Tooltip cursor={{ fill: "#0D4A3508" }} contentStyle={{ backgroundColor: "#fff", border: "1px solid #E8EDE8", borderRadius: "10px", fontSize: "11px" }} formatter={(value: any) => [`${value} ${value === 1 ? "view" : "views"}`, "Views"]} />
+                      <Bar dataKey="views" radius={[4, 4, 0, 0]} maxBarSize={40}>
+                        {analytics.last7Days.map((_, i) => (
+                          <Cell key={i} fill="#0D4A35" />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
 
                 {/* Top content */}
