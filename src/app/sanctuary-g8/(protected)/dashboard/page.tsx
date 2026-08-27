@@ -10,6 +10,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { getRecentActivity, ActivityEntry } from "@/lib/activityLog";
 import { getAnalyticsSummary, AnalyticsSummary } from "@/lib/analytics";
+import { getTodayActivities } from "@/lib/activities";
+import { Activity } from "@/types";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
 
 export default function AdminDashboardPage() {
@@ -29,6 +31,7 @@ export default function AdminDashboardPage() {
   const [activities, setActivities] = useState<ActivityEntry[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  const [todaysActivities, setTodaysActivities] = useState<Activity[]>([]);
 
   useEffect(() => {
     const hr = new Date().getHours();
@@ -46,6 +49,9 @@ export default function AdminDashboardPage() {
 
     // Load recent activity log
     getRecentActivity(15).then(setActivities).catch(() => {});
+
+    // Load today's activities for service timeline
+    getTodayActivities().then(setTodaysActivities).catch(() => {});
 
     // Load analytics — must run before any early return in this effect
     getAnalyticsSummary().then(s => { setAnalytics(s); setAnalyticsLoading(false); }).catch(() => setAnalyticsLoading(false));
@@ -319,27 +325,40 @@ export default function AdminDashboardPage() {
 
               {/* Today's Service Timeline */}
               <div className="bg-white rounded-2xl border border-[#E8EDE8] shadow-sm p-6">
-                <h3 className="font-serif text-lg font-bold text-[#0B2C22] mb-5">Today&apos;s Service Timeline</h3>
-                <div className="relative pl-6 border-l-2 border-[#E8EDE8] space-y-6">
-                  <div className="relative">
-                    <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-[#22C55E] border-4 border-white"/>
-                    <p className="text-xs font-bold text-[#22C55E]">08:00 AM – 09:30 AM</p>
-                    <h4 className="font-semibold text-[#0B2C22] text-sm mt-0.5">Sunday School Preparatory Session</h4>
-                    <p className="text-stone-400 text-xs mt-1">Conducted by the Christian Education Directorate</p>
-                  </div>
-                  <div className="relative">
-                    <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-[#0D4A35] border-4 border-white"/>
-                    <p className="text-xs font-bold text-[#0D4A35]">09:30 AM – 12:00 PM</p>
-                    <h4 className="font-semibold text-[#0B2C22] text-sm mt-0.5">Sunday Worship Service</h4>
-                    <p className="text-stone-400 text-xs mt-1">Main sanctuary service and youth assembly</p>
-                  </div>
-                  <div className="relative">
-                    <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-amber-500 border-4 border-white"/>
-                    <p className="text-xs font-bold text-amber-500">05:00 PM – 06:30 PM</p>
-                    <h4 className="font-semibold text-[#0B2C22] text-sm mt-0.5">House Fellowship Gatherings</h4>
-                    <p className="text-stone-400 text-xs mt-1">Multi-location fellowship cells within Ilora</p>
-                  </div>
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="font-serif text-lg font-bold text-[#0B2C22]">Today&apos;s Service Timeline</h3>
+                  <Link href="/sanctuary-g8/activities" className="text-xs text-[#0D4A35] font-bold hover:underline">Manage →</Link>
                 </div>
+                {todaysActivities.length === 0 ? (
+                  <div className="py-8 text-center">
+                    <svg className="w-10 h-10 text-stone-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <p className="text-stone-400 text-xs">No activities scheduled for today.</p>
+                    <Link href="/sanctuary-g8/activities" className="text-xs text-[#0D4A35] font-bold hover:underline mt-1 inline-block">Add activities →</Link>
+                  </div>
+                ) : (
+                  <div className="relative pl-6 border-l-2 border-[#E8EDE8] space-y-5">
+                    {todaysActivities.map((a, i) => {
+                      const colors = ["#22C55E", "#0D4A35", "#F59E0B", "#3B82F6", "#8B5CF6", "#EC4899"];
+                      const color = colors[i % colors.length];
+                      const formatTime = (t: string) => {
+                        const [h, m] = t.split(":");
+                        const hr = parseInt(h);
+                        const ampm = hr >= 12 ? "PM" : "AM";
+                        const hr12 = hr % 12 || 12;
+                        return `${hr12.toString().padStart(2, "0")}:${m} ${ampm}`;
+                      };
+                      return (
+                        <div key={a.id} className="relative">
+                          <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full border-4 border-white" style={{ backgroundColor: color }} />
+                          <p className="text-xs font-bold" style={{ color }}>{formatTime(a.startTime)} – {formatTime(a.endTime)}</p>
+                          <h4 className="font-semibold text-[#0B2C22] text-sm mt-0.5">{a.title}</h4>
+                          {a.description && <p className="text-stone-400 text-xs mt-1">{a.description}</p>}
+                          {a.location && <p className="text-stone-300 text-xs mt-0.5">📍 {a.location}</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
             </div>

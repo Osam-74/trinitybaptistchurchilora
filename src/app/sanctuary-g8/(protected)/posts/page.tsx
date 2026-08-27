@@ -8,8 +8,10 @@ import { formatDate } from "@/lib/utils";
 import { subscribeArticles, createArticle, updateArticle, deleteArticle, seedArticlesIfEmpty } from "@/lib/posts";
 import { auth } from "@/lib/firebase";
 import { logActivity } from "@/lib/activityLog";
+import { useCurrentUser } from "@/lib/useCurrentUser";
 
 export default function AdminPostsPage() {
+  const currentUser = useCurrentUser();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -71,7 +73,7 @@ export default function AdminPostsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this article?")) return;
     await deleteArticle(id);
-    logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "deleted", target: "Article", section: "Faith Articles" });
+    logActivity({ user: currentUser?.email ?? "unknown", userName: currentUser?.displayName ?? "Admin", action: "deleted", target: "Article", section: "Faith Articles" });
   };
 
   const togglePin = async (id: string) => {

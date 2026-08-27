@@ -5,8 +5,10 @@ import PermissionGuard from "@/components/PermissionGuard";
 import { getPastorSpeaks, savePastorSpeaks, deletePastorSpeaks, PASTOR_DEFAULTS, PastorSpeak } from '@/lib/pastorSpeaks';
 import { auth } from '@/lib/firebase';
 import { logActivity } from '@/lib/activityLog';
+import { useCurrentUser } from "@/lib/useCurrentUser";
 
 export default function PastorSpeaksAdmin() {
+  const currentUser = useCurrentUser();
   const [data, setData] = useState<PastorSpeak>({
     message: '',
     pastorName: PASTOR_DEFAULTS.pastorName,
@@ -33,7 +35,7 @@ export default function PastorSpeaksAdmin() {
     setSaving(true); setError('');
     try {
       await savePastorSpeaks({ ...data, pastorName: PASTOR_DEFAULTS.pastorName, pastorImageUrl: PASTOR_DEFAULTS.pastorImageUrl });
-      logActivity({ user: auth?.currentUser?.email ?? 'admin', userName: auth?.currentUser?.displayName ?? 'Admin', action: 'updated', target: "Pastor's Word", section: 'Pastor\'s Word' });
+      logActivity({ user: currentUser?.email ?? 'unknown', userName: currentUser?.displayName ?? 'Admin', action: 'updated', target: "Pastor's Word", section: 'Pastor\'s Word' });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) { setError((err as Error).message); }
@@ -45,7 +47,7 @@ export default function PastorSpeaksAdmin() {
     setDeleting(true);
     try {
       await deletePastorSpeaks();
-      logActivity({ user: auth?.currentUser?.email ?? 'admin', userName: auth?.currentUser?.displayName ?? 'Admin', action: 'deleted', target: "Pastor's Word", section: 'Pastor\'s Word' });
+      logActivity({ user: currentUser?.email ?? 'unknown', userName: currentUser?.displayName ?? 'Admin', action: 'deleted', target: "Pastor's Word", section: 'Pastor\'s Word' });
       setData({ message: '', pastorName: PASTOR_DEFAULTS.pastorName, pastorImageUrl: PASTOR_DEFAULTS.pastorImageUrl, active: true, updatedAt: '' });
     } catch (err) { setError((err as Error).message); }
     finally { setDeleting(false); }

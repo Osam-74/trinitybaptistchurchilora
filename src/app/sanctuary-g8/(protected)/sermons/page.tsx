@@ -12,6 +12,7 @@ import {
   orderBy, query, serverTimestamp,
 } from "firebase/firestore";
 import { logActivity } from "@/lib/activityLog";
+import { useCurrentUser } from "@/lib/useCurrentUser";
 
 /* ─── Audio Recorder hook (existing) ─── */
 function useAudioRecorder() {
@@ -150,6 +151,7 @@ const EMPTY_FORM = {
 
 /* ─── Page ─── */
 export default function AdminSermonsPage() {
+  const currentUser = useCurrentUser();
   const [sermons, setSermons] = useState<Sermon[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -200,10 +202,10 @@ export default function AdminSermonsPage() {
       };
       if (editingId) {
         await updateDoc(doc(db, "sermons", editingId), payload);
-        logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "updated", target: `Sermon: ${form.title}`, section: "Sermons" });
+        logActivity({ user: currentUser?.email ?? "unknown", userName: currentUser?.displayName ?? "Admin", action: "updated", target: `Sermon: ${form.title}`, section: "Sermons" });
       } else {
         await addDoc(collection(db, "sermons"), { ...payload, createdAt: serverTimestamp() });
-        logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "created", target: `Sermon: ${form.title}`, section: "Sermons" });
+        logActivity({ user: currentUser?.email ?? "unknown", userName: currentUser?.displayName ?? "Admin", action: "created", target: `Sermon: ${form.title}`, section: "Sermons" });
       }
       setShowForm(false); rec.reset(); vidRec.reset(); setForm({ ...EMPTY_FORM }); setEditingId(null);
     } catch (err) {
@@ -214,7 +216,7 @@ export default function AdminSermonsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this sermon?")) return;
     await deleteDoc(doc(db, "sermons", id));
-    logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "deleted", target: `Sermon`, section: "Sermons" });
+    logActivity({ user: currentUser?.email ?? "unknown", userName: currentUser?.displayName ?? "Admin", action: "deleted", target: `Sermon`, section: "Sermons" });
   };
 
   /** Upload audio recording to R2 */

@@ -15,8 +15,10 @@ import {
 import type { PastorDeclaration } from "@/types/declaration";
 import { auth } from "@/lib/firebase";
 import { logActivity } from "@/lib/activityLog";
+import { useCurrentUser } from "@/lib/useCurrentUser";
 
 export default function AdminDeclarationsPage() {
+  const currentUser = useCurrentUser();
   const [declarations, setDeclarations] = useState<PastorDeclaration[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -75,11 +77,11 @@ export default function AdminDeclarationsPage() {
           text, imageUrl: imageUrl || null, published,
           date: date || new Date().toLocaleDateString("en-GB"),
         });
-        logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "updated", target: "Daily Declaration", section: "Daily Declaration" });
+        logActivity({ user: currentUser?.email ?? "unknown", userName: currentUser?.displayName ?? "Admin", action: "updated", target: "Daily Declaration", section: "Daily Declaration" });
         setSuccess("Declaration updated!");
       } else {
         await createDeclaration({ text, imageUrl: imageUrl || undefined, published, date: date || new Date().toLocaleDateString("en-GB") });
-        logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "created", target: "Daily Declaration", section: "Daily Declaration" });
+        logActivity({ user: currentUser?.email ?? "unknown", userName: currentUser?.displayName ?? "Admin", action: "created", target: "Daily Declaration", section: "Daily Declaration" });
         setSuccess("Declaration created!");
       }
       resetForm();
@@ -95,7 +97,7 @@ export default function AdminDeclarationsPage() {
   const handleTogglePublish = async (d: PastorDeclaration) => {
     try {
       await updateDeclaration(d.id, { published: !d.published });
-      logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: d.published ? "unpublished" : "published", target: "Daily Declaration", section: "Daily Declaration" });
+      logActivity({ user: currentUser?.email ?? "unknown", userName: currentUser?.displayName ?? "Admin", action: d.published ? "unpublished" : "published", target: "Daily Declaration", section: "Daily Declaration" });
       setSuccess(d.published ? "Unpublished." : "Published! Now visible on homepage.");
       await loadDeclarations();
     } catch (err) { setError((err as Error).message); }
@@ -105,7 +107,7 @@ export default function AdminDeclarationsPage() {
     if (!confirm("Delete this declaration? This cannot be undone.")) return;
     try {
       await deleteDeclaration(d.id);
-      logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "deleted", target: "Daily Declaration", section: "Daily Declaration" });
+      logActivity({ user: currentUser?.email ?? "unknown", userName: currentUser?.displayName ?? "Admin", action: "deleted", target: "Daily Declaration", section: "Daily Declaration" });
       setSuccess("Deleted.");
       if (editingId === d.id) resetForm();
       await loadDeclarations();

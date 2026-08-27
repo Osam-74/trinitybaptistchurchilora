@@ -12,8 +12,10 @@ import {
 } from "@/lib/gallery";
 import { auth } from "@/lib/firebase";
 import { logActivity } from "@/lib/activityLog";
+import { useCurrentUser } from "@/lib/useCurrentUser";
 
 export default function AdminGalleryPage() {
+  const currentUser = useCurrentUser();
   const [albums, setAlbums] = useState<GalleryAlbum[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeAlbum, setActiveAlbum] = useState<GalleryAlbum | null>(null);
@@ -85,12 +87,12 @@ export default function AdminGalleryPage() {
     try {
       if (editingAlbum) {
         await updateAlbum(editingAlbum.id, albumForm);
-        logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "updated", target: `Album: ${albumForm.title}`, section: "Gallery" });
+        logActivity({ user: currentUser?.email ?? "unknown", userName: currentUser?.displayName ?? "Admin", action: "updated", target: `Album: ${albumForm.title}`, section: "Gallery" });
         setAlbums(prev => prev.map(a => a.id === editingAlbum.id ? { ...a, ...albumForm } : a));
         if (activeAlbum?.id === editingAlbum.id) setActiveAlbum(a => a ? { ...a, ...albumForm } : a);
       } else {
         const id = await createAlbum(albumForm);
-        logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "created", target: `Album: ${albumForm.title}`, section: "Gallery" });
+        logActivity({ user: currentUser?.email ?? "unknown", userName: currentUser?.displayName ?? "Admin", action: "created", target: `Album: ${albumForm.title}`, section: "Gallery" });
         const newAlbum: GalleryAlbum = { id, ...albumForm, createdAt: new Date().toISOString() };
         setAlbums(prev => [newAlbum, ...prev]);
       }
@@ -108,7 +110,7 @@ export default function AdminGalleryPage() {
     const newHidden = !album.hidden;
     try {
       await updateAlbum(album.id, { hidden: newHidden });
-      logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: newHidden ? "hidden" : "unhidden", target: `Album: ${album.title}`, section: "Gallery" });
+      logActivity({ user: currentUser?.email ?? "unknown", userName: currentUser?.displayName ?? "Admin", action: newHidden ? "hidden" : "unhidden", target: `Album: ${album.title}`, section: "Gallery" });
       setAlbums(prev => prev.map(a => a.id === album.id ? { ...a, hidden: newHidden } : a));
     } catch (err) {
       console.error("Toggle hidden error:", err);
@@ -130,7 +132,7 @@ export default function AdminGalleryPage() {
     if (!confirm(warning)) return;
     try {
       await deleteAlbum(album.id);
-      logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "deleted", target: `Album: ${album.title}`, section: "Gallery" });
+      logActivity({ user: currentUser?.email ?? "unknown", userName: currentUser?.displayName ?? "Admin", action: "deleted", target: `Album: ${album.title}`, section: "Gallery" });
       setAlbums(prev => prev.filter(a => a.id !== album.id));
       if (activeAlbum?.id === album.id) { setActiveAlbum(null); setPhotos([]); }
     } catch (err) {
@@ -155,7 +157,7 @@ export default function AdminGalleryPage() {
         newPhotos.push({ id, albumId: activeAlbum.id, url, caption: "", createdAt: new Date().toISOString() });
       }
       setPhotos(prev => [...newPhotos, ...prev]);
-      logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "added", target: `${urls.length} photos in ${activeAlbum.title}`, section: "Gallery" });
+      logActivity({ user: currentUser?.email ?? "unknown", userName: currentUser?.displayName ?? "Admin", action: "added", target: `${urls.length} photos in ${activeAlbum.title}`, section: "Gallery" });
 
       // Set first photo as cover if album has none
       if (!activeAlbum.coverUrl && urls.length > 0) {
@@ -179,7 +181,7 @@ export default function AdminGalleryPage() {
     if (!confirm("Delete this photo?")) return;
     try {
       await deletePhoto(photo.id);
-      logActivity({ user: auth?.currentUser?.email ?? "admin", userName: auth?.currentUser?.displayName ?? "Admin", action: "deleted", target: `Photo from ${activeAlbum?.title ?? "album"}`, section: "Gallery" });
+      logActivity({ user: currentUser?.email ?? "unknown", userName: currentUser?.displayName ?? "Admin", action: "deleted", target: `Photo from ${activeAlbum?.title ?? "album"}`, section: "Gallery" });
       setPhotos(prev => prev.filter(p => p.id !== photo.id));
     } catch (err) {
       console.error("Delete photo error:", err);

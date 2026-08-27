@@ -16,11 +16,12 @@ export interface ActivityEntry {
   action: string;      // e.g. "created", "updated", "deleted"
   target: string;      // what was changed, e.g. "Sermon: Sunday Service"
   section: string;     // e.g. "Sermons", "Gallery", "Posts"
-  createdAt?: unknown; // Firestore timestamp
+  createdAt?: unknown; // Firestore timestamp — can be Timestamp object or Date
 }
 
 /**
  * Log an activity. Call this after a successful admin action.
+ * Pass the user's display name (from useCurrentUser) — falls back to email.
  */
 export async function logActivity(opts: {
   user: string;
@@ -36,13 +37,48 @@ export async function logActivity(opts: {
       createdAt: serverTimestamp(),
     });
   } catch (err) {
-    // Non-blocking — don't fail the parent action if logging fails
     console.error("logActivity: failed to write:", err);
   }
 }
 
 /**
+ * Convert a Firestore Timestamp, Date, or string to an ISO string.
+ * Handles the common Firestore return formats.
+ */
+function toISOString(value: unknown): string | null {
+  if (!value) return null;
+  // Already a string
+  if (typeof value === "string") return value;
+  // Date object
+  if (value instanceof Date) return value.toISOString();
+  // Firestore Timestamp — has toDate() method
+  if (typeof value === "object" && value !== null && "toDate" in value && typeof (value as { toDate: unknown }).toDate === "function") {
+    try {
+      return (value as { toDate: () => Date }).toDate().toISOString();
+    } catch { return null; }
+  }
+  // Firestore Timestamp-like object with _seconds/_nanoseconds
+  if (typeof value === "object" && value !== null && "_seconds" in value) {
+    try {
+      const sec = (value as unknown as { _seconds: number })._seconds;
+      const nan = (value as unknown as { _nanoseconds: number })._nanoseconds || 0;
+      return new Date(sec * 1000 + nan / 1000000).toISOString();
+    } catch { return null; }
+  }
+  // Firestore Timestamp-like object with seconds/nanoseconds (no underscore)
+  if (typeof value === "object" && value !== null && "seconds" in value) {
+    try {
+      const sec = (value as unknown as { seconds: number }).seconds;
+      const nan = (value as unknown as { nanoseconds: number }).nanoseconds || 0;
+      return new Date(sec * 1000 + nan / 1000000).toISOString();
+    } catch { return null; }
+  }
+  return null;
+}
+
+/**
  * Fetch the most recent activity entries (newest first).
+ * Properly converts Firestore Timestamps to ISO strings.
  */
 export async function getRecentActivity(maxCount = 20): Promise<ActivityEntry[]> {
   if (!db) return [];
@@ -53,10 +89,18 @@ export async function getRecentActivity(maxCount = 20): Promise<ActivityEntry[]>
       limit(maxCount)
     );
     const snap = await getDocs(q);
-    return snap.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    } as ActivityEntry));
+    return snap.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        user: data.user || "unknown",
+        userName: data.userName || data.user || "Admin",
+        action: data.action || "",
+        target: data.target || "",
+        section: data.section || "",
+        createdAt: toISOString(data.createdAt) || undefined,
+      } as ActivityEntry;
+    });
   } catch (err) {
     console.error("getRecentActivity: failed:", err);
     return [];
