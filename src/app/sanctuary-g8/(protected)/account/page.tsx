@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import AdminShell from "@/components/AdminShell";
 import { auth, db } from "@/lib/firebase";
-import { onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider, User } from "firebase/auth";
+import { onAuthStateChanged, updatePassword, updateEmail, reauthenticateWithCredential, EmailAuthProvider, User } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
 export default function AccountPage() {
@@ -17,6 +17,10 @@ export default function AccountPage() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [isMasterAdmin, setIsMasterAdmin] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [emailPassword, setEmailPassword] = useState("");
+  const [savingEmail, setSavingEmail] = useState(false);
 
   useEffect(() => {
     if (!auth) { setLoading(false); return; }
@@ -27,8 +31,14 @@ export default function AccountPage() {
         if (db) {
           const snap = await getDoc(doc(db, "admin_users", u.uid));
           if (snap.exists()) {
-            const data = snap.data() as { displayName?: string };
+            const data = snap.data() as { displayName?: string; roles?: string[] };
             if (data.displayName) setDisplayName(data.displayName);
+            if (data.roles?.includes("master_admin") || data.roles?.includes("super_admin")) {
+              setIsMasterAdmin(true);
+            }
+          } else {
+            // No admin_users document — original super admin
+            setIsMasterAdmin(true);
           }
         }
       } catch { /* ignore */ }
@@ -52,6 +62,48 @@ export default function AccountPage() {
       setError((err as Error).message || "Failed to update name.");
     } finally {
       setSavingName(false);
+    }
+  };
+
+  const handleEmailChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+    if (!user) { setError("Not signed in."); return; }
+    if (!newEmail.trim()) { setError("Enter a new email address."); return; }
+    if (newEmail.trim() === user.email) { setError("That\'s already your email."); return; }
+    if (!emailPassword) { setError("Enter your current password to confirm."); return; }
+
+    setSavingEmail(true);
+    try {
+      // Re-authenticate first (required for email change)
+      const credential = EmailAuthProvider.credential(user.email!, emailPassword);
+      await reauthenticateWithCredential(user, credential);
+      // Update email in Firebase Auth
+      await updateEmail(user, newEmail.trim());
+      // Update email in admin_users Firestore doc if it exists
+      if (db) {
+        await setDoc(doc(db, "admin_users", user.uid), { email: newEmail.trim() }, { merge: true });
+      }
+      setMessage("Email updated successfully. Use your new email next time you sign in.");
+      setNewEmail("");
+      setEmailPassword("");
+      setTimeout(() => setMessage(""), 5000);
+    } catch (err) {
+      const code = (err as { code?: string })?.code ?? "";
+      if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
+        setError("Your current password is incorrect.");
+      } else if (code === "auth/email-already-in-use") {
+        setError("That email is already in use by another account.");
+      } else if (code === "auth/invalid-email") {
+        setError("That doesn\'t look like a valid email address.");
+      } else if (code === "auth/requires-recent-login") {
+        setError("Session expired. Please sign out and sign back in, then try again.");
+      } else {
+        setError((err as Error).message || "Failed to change email.");
+      }
+    } finally {
+      setSavingEmail(false);
     }
   };
 
@@ -176,11 +228,35 @@ export default function AccountPage() {
           </form>
         </div>
 
-        {/* Account info */}
+        {/* Account email — editable for master admin */}
         <div className="mt-6 bg-stone-50 rounded-2xl border border-stone-200 p-5">
           <p className="text-xs text-text-muted mb-2 font-semibold uppercase tracking-wide">Account Email</p>
           <p className="text-sm text-primary font-medium">{user?.email}</p>
-          <p className="text-[11px] text-stone-400 mt-2">If you need to change your email address, contact the super admin.</p>
+          {isMasterAdmin ? (
+            <form onSubmit={handleEmailChange} className="mt-3 space-y-3">
+              <p className="text-[11px] text-stone-500">Change your email address below. You&apos;ll need to confirm your current password.</p>
+              <div>
+                <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">New Email Address</label>
+                <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="new.email@example.com"
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-sm focus:outline-none focus:border-[#0D4A35] focus:ring-4 focus:ring-[#0D4A35]/10 transition-all" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Current Password (confirm)</label>
+                <input type="password" value={emailPassword} onChange={(e) => setEmailPassword(e.target.value)}
+                  placeholder="Your current password"
+                  className="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-sm focus:outline-none focus:border-[#0D4A35] focus:ring-4 focus:ring-[#0D4A35]/10 transition-all" />
+              </div>
+              <button type="submit" disabled={savingEmail}
+                className="px-5 py-2.5 bg-[#0D4A35] text-white text-sm font-semibold rounded-xl hover:bg-[#0B2C22] transition-all disabled:opacity-60 flex items-center gap-2">
+                {savingEmail ? (
+                  <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Updating…</>
+                ) : "Update Email"}
+              </button>
+            </form>
+          ) : (
+            <p className="text-[11px] text-stone-400 mt-2">If you need to change your email address, contact the super admin.</p>
+          )}
         </div>
       </div>
     </AdminShell>
