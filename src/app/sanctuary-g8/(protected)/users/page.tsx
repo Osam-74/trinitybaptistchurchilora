@@ -56,7 +56,7 @@ export default function AdminUsersPage() {
 
   const openEdit = (user: AdminUser) => {
     setEditingUser(user);
-    setForm({ email: user.email, displayName: user.displayName, password: "", role: user.roles[0] || "editor", permissions: [...user.permissions], ministryAccess: user.ministryAccess || [] });
+    setForm({ email: user.email || "", displayName: user.displayName || "", password: "", role: (user.roles?.[0]) || "editor", permissions: [...(user.permissions || [])], ministryAccess: user.ministryAccess || [] });
     setError("");
     setSuccess("");
     setShowForm(true);
@@ -340,7 +340,7 @@ export default function AdminUsersPage() {
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
-                              {user.displayName.charAt(0)}
+                              {(user.displayName || user.email || "?").charAt(0)}
                             </div>
                             <div>
                               <p className="font-semibold text-primary text-sm">{user.displayName}</p>
@@ -350,11 +350,11 @@ export default function AdminUsersPage() {
                         </td>
                         <td className="px-5 py-4">
                           <span className="px-2.5 py-1 bg-primary/8 text-primary text-xs rounded-full font-medium capitalize">
-                            {user.roles[0]?.replace(/_/g, " ")}
+                            {(user.roles?.[0] || "none")?.replace(/_/g, " ")}
                           </span>
                         </td>
                         <td className="px-5 py-4">
-                          <span className="text-text-muted text-xs">{user.permissions.length} permissions</span>
+                          <span className="text-text-muted text-xs">{(user.permissions?.length || 0)} permissions</span>
                         </td>
                         <td className="px-5 py-4">
                           <button onClick={() => handleToggleActive(user)}
