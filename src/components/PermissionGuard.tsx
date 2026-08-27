@@ -57,10 +57,16 @@ export default function PermissionGuard({ required, children }: PermissionGuardP
           return;
         }
 
-        const data = snap.data() as { roles?: string[]; permissions?: Permission[] };
+        const data = snap.data() as { roles?: string[]; permissions?: Permission[]; active?: boolean };
         const isMasterAdmin =
           data.roles?.includes("master_admin") ||
           data.roles?.includes("super_admin");
+
+        // Disabled users get denied (active === false blocks access)
+        if (data.active === false) {
+          if (!cancelled) setStatus("denied");
+          return;
+        }
 
         if (isMasterAdmin || data.permissions?.includes(required)) {
           setStatus("allowed");

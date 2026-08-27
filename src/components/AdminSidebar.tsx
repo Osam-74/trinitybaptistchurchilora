@@ -126,7 +126,15 @@ export default function AdminSidebar() {
           if (snap.exists()) {
             const data = snap.data() as Omit<AdminProfile, "uid">;
             setUserProfile({ uid: fbUser.uid, ...data });
+            // If the user is disabled, sign them out immediately
+            if (data.active === false) {
+              console.warn("[AdminSidebar] Account is disabled. Signing out.");
+              await signOut(auth);
+              router.push("/sanctuary-g8?disabled=1");
+              return;
+            }
           } else {
+            // No admin_users document — original super admin, always active
             setUserProfile(null);
           }
         }

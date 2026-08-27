@@ -5,7 +5,7 @@ import AdminShell from "@/components/AdminShell";
 import PermissionGuard from "@/components/PermissionGuard";
 import { PERMISSIONS, ROLE_DEFAULTS, Permission } from "@/types";
 import { auth, db, firebaseConfig } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, getAuth, signOut as fbSignOut, sendPasswordResetEmail } from "firebase/auth";
+import { createUserWithEmailAndPassword, getAuth, signOut as fbSignOut, sendPasswordResetEmail, onAuthStateChanged, User as FbUser } from "firebase/auth";
 import { initializeApp, deleteApp } from "firebase/app";
 import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 
@@ -32,13 +32,53 @@ export default function AdminUsersPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [currentUid, setCurrentUid] = useState<string>("");
+  const [isCurrentUserMasterAdmin, setIsCurrentUserMasterAdmin] = useState(false);
+  const [showTransferPrompt, setShowTransferPrompt] = useState(false);
+  const [transferTargetUid, setTransferTargetUid] = useState("");
+  const [pendingDisableUid, setPendingDisableUid] = useState("");
+
+  // Track current user
+  useEffect(() => {
+    if (!auth) return;
+    const unsub = onAuthStateChanged(auth, async (fbUser: FbUser | null) => {
+      if (!fbUser) return;
+      setCurrentUid(fbUser.uid);
+      if (db) {
+        try {
+          const snap = await getDocs(collection(db, "admin_users"));
+          const myDoc = snap.docs.find(d => d.id === fbUser.uid);
+          if (myDoc) {
+            const data = myDoc.data();
+            setIsCurrentUserMasterAdmin(data.roles?.includes("master_admin") || data.roles?.includes("super_admin"));
+          } else {
+            // No doc = original super admin
+            setIsCurrentUserMasterAdmin(true);
+          }
+        } catch { /* ignore */ }
+      }
+    });
+    return () => unsub();
+  }, []);
 
   const load = async () => {
     setLoading(true);
     try {
       if (!db) { setLoading(false); return; }
       const snap = await getDocs(collection(db, "admin_users"));
-      const data = snap.docs.map(d => ({ id: d.id, ...(d.data() as Omit<AdminUser, "id">) })) as AdminUser[];
+      const data = snap.docs.map(d => {
+        const raw = d.data() as Record<string, unknown>;
+        return {
+          id: d.id,
+          email: (raw.email as string) || "",
+          displayName: (raw.displayName as string) || (raw.email as string) || "Unknown",
+          roles: (raw.roles as string[]) || [],
+          permissions: (raw.permissions as Permission[]) || [],
+          active: (raw.active as boolean) ?? true,
+          createdAt: (raw.createdAt as string) || "",
+          ministryAccess: (raw.ministryAccess as string[]) || [],
+        } as AdminUser;
+      });
       setUsers(data);
     } catch { /* ignore */ }
     setLoading(false);
@@ -56,7 +96,7 @@ export default function AdminUsersPage() {
 
   const openEdit = (user: AdminUser) => {
     setEditingUser(user);
-    setForm({ email: user.email || "", displayName: user.displayName || "", password: "", role: (user.roles?.[0]) || "editor", permissions: [...(user.permissions || [])], ministryAccess: user.ministryAccess || [] });
+    setForm({ email: user.email, displayName: user.displayName, password: "", role: (user.roles?.[0]) || "editor", permissions: [...(user.permissions || [])], ministryAccess: user.ministryAccess || [] });
     setError("");
     setSuccess("");
     setShowForm(true);
@@ -83,27 +123,46 @@ export default function AdminUsersPage() {
     setSaving(true);
     try {
       if (editingUser) {
-        // Update existing user profile in Firestore
         if (!db) throw new Error("Database not configured");
+
+        // Check if email is being changed
+        const emailChanged = form.email.trim() !== editingUser.email;
+
         const updates: Partial<AdminUser> = {
-          email: form.email,
+          email: form.email.trim(),
           displayName: form.displayName,
           roles: [form.role],
           permissions: form.permissions,
-            ministryAccess: form.ministryAccess,
+          ministryAccess: form.ministryAccess,
         };
         await updateDoc(doc(db, "admin_users", editingUser.id), updates as Record<string, unknown>);
+
+        // If email changed, update Firebase Auth via server-side API
+        if (emailChanged) {
+          try {
+            const res = await fetch("/api/admin/update-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ uid: editingUser.id, newEmail: form.email.trim() }),
+            });
+            const result = await res.json();
+            if (!res.ok) {
+              setError(`Firestore updated, but email change in Firebase Auth failed: ${result.error}`);
+              setSaving(false);
+              return;
+            }
+          } catch (err) {
+            setError(`Firestore updated, but email change in Firebase Auth failed: ${(err as Error).message}`);
+            setSaving(false);
+            return;
+          }
+        }
+
         // If a new password was entered, update it via Firebase Auth
         if (form.password && auth) {
-          // Note: client-side Firebase Auth can't update another user's password directly.
-          // The admin would need to use the Firebase Admin SDK for this.
-          // For now, we show a note — password resets can be done from the Firebase Console.
           setError("Password changes for existing users must be done from the Firebase Console → Authentication → Users.");
         }
       } else {
-        // Create new Firebase Auth user using a SECONDARY app instance
-        // so the admin's own session is NOT affected (createUserWithEmailAndPassword
-        // on the primary auth would auto-sign-in the new user, kicking out the admin).
         if (!form.password || form.password.length < 6) { setError("Password must be at least 6 characters."); setSaving(false); return; }
 
         const secondaryApp = initializeApp(firebaseConfig, "secondary-" + Date.now());
@@ -112,14 +171,11 @@ export default function AdminUsersPage() {
           const secondaryAuth = getAuth(secondaryApp);
           const cred = await createUserWithEmailAndPassword(secondaryAuth, form.email.trim(), form.password);
           uid = cred.user.uid;
-          // Sign out the new user from the secondary instance immediately
           await fbSignOut(secondaryAuth);
         } finally {
-          // Clean up the secondary app instance
           deleteApp(secondaryApp).catch(() => {});
         }
 
-        // Store profile in Firestore
         if (db) {
           await setDoc(doc(db, "admin_users", uid), {
             uid,
@@ -135,7 +191,7 @@ export default function AdminUsersPage() {
       }
 
       setShowForm(false);
-      setSuccess(editingUser ? "User updated successfully." : `User created! ${form.email} can now sign in with the password you set. If they have trouble, use the "Reset Password" button to send them a reset link.`);
+      setSuccess(editingUser ? "User updated successfully." : `User created! ${form.email} can now sign in with the password you set.`);
       setTimeout(() => setSuccess(""), 8000);
       await load();
     } catch (err) {
@@ -148,7 +204,7 @@ export default function AdminUsersPage() {
       } else if (code === "auth/invalid-email") {
         setError("Invalid email address.");
       } else if (code === "permission-denied" || message.toLowerCase().includes("insufficient permissions") || message.toLowerCase().includes("missing or insufficient")) {
-        setError("Permission denied by Firestore rules. The updated firestore.rules (with the admin_users collection) need to be pasted into Firebase Console → Firestore Database → Rules → Publish before this will work.");
+        setError("Permission denied by Firestore rules. Make sure the firestore.rules are published in Firebase Console.");
       } else {
         setError(message);
       }
@@ -170,11 +226,75 @@ export default function AdminUsersPage() {
   };
 
   const handleToggleActive = async (user: AdminUser) => {
+    // If enabling, just do it
+    if (!user.active) {
+      try {
+        if (!db) return;
+        await updateDoc(doc(db, "admin_users", user.id), { active: true });
+        setSuccess(`${user.displayName} has been re-enabled.`);
+        setTimeout(() => setSuccess(""), 4000);
+        load();
+      } catch { /* ignore */ }
+      return;
+    }
+
+    // If disabling — check if this is the last master admin
+    const isMasterAdminUser = user.roles?.includes("master_admin") || user.roles?.includes("super_admin");
+    if (isMasterAdminUser) {
+      const otherMasterAdmins = users.filter(u =>
+        u.id !== user.id &&
+        (u.roles?.includes("master_admin") || u.roles?.includes("super_admin")) &&
+        u.active !== false
+      );
+
+      if (otherMasterAdmins.length === 0) {
+        // No other master admins — show transfer prompt
+        setPendingDisableUid(user.id);
+        setTransferTargetUid("");
+        setShowTransferPrompt(true);
+        return;
+      }
+    }
+
+    // Safe to disable
     try {
       if (!db) return;
-      await updateDoc(doc(db, "admin_users", user.id), { active: !user.active });
+      await updateDoc(doc(db, "admin_users", user.id), { active: false });
+      setSuccess(`${user.displayName} has been disabled. They will be signed out on next visit.`);
+      setTimeout(() => setSuccess(""), 4000);
       load();
     } catch { /* ignore */ }
+  };
+
+  const handleTransferAndDisable = async () => {
+    if (!transferTargetUid) {
+      setError("Select a user to transfer the master admin role to.");
+      return;
+    }
+    if (!db) return;
+
+    try {
+      // Promote the selected user to master_admin
+      const targetUser = users.find(u => u.id === transferTargetUid);
+      if (!targetUser) return;
+
+      await updateDoc(doc(db, "admin_users", transferTargetUid), {
+        roles: ["master_admin"],
+        permissions: [...(targetUser.permissions || []), ...((ROLE_DEFAULTS.master_admin as Permission[]) || [])]
+      });
+
+      // Now disable the original master admin
+      await updateDoc(doc(db, "admin_users", pendingDisableUid), { active: false });
+
+      setShowTransferPrompt(false);
+      setSuccess(`Master admin role transferred to ${targetUser.displayName}. ${targetUser.displayName}'s account has been disabled.`);
+      setTimeout(() => setSuccess(""), 6000);
+      setPendingDisableUid("");
+      setTransferTargetUid("");
+      load();
+    } catch (err) {
+      setError("Failed to transfer role: " + (err as Error).message);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -203,8 +323,6 @@ export default function AdminUsersPage() {
             </button>
           </div>
 
-
-
           {success && (
             <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-4 py-3 rounded-xl mb-6 flex items-start gap-2">
               <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
@@ -217,6 +335,46 @@ export default function AdminUsersPage() {
           {!loading && users.length === 0 && (
             <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center text-text-muted">
               No admin users found. Click &ldquo;Add User&rdquo; to create the first account.
+            </div>
+          )}
+
+          {/* Transfer master admin prompt */}
+          {showTransferPrompt && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)" }}>
+              <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6">
+                <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mb-4">
+                  <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/>
+                  </svg>
+                </div>
+                <h2 className="font-serif text-lg font-bold text-primary mb-2">Transfer Master Admin Role</h2>
+                <p className="text-sm text-stone-600 mb-4">
+                  You are about to disable the last master admin. You must transfer the <span className="font-semibold">master_admin</span> role to another user to avoid being locked out.
+                </p>
+                <select
+                  value={transferTargetUid}
+                  onChange={e => setTransferTargetUid(e.target.value)}
+                  className="input-field bg-white mb-4"
+                >
+                  <option value="">Select a user to promote…</option>
+                  {users.filter(u => u.id !== pendingDisableUid && u.active !== false).map(u => (
+                    <option key={u.id} value={u.id}>{u.displayName} ({u.email})</option>
+                  ))}
+                </select>
+                {users.filter(u => u.id !== pendingDisableUid && u.active !== false).length === 0 && (
+                  <p className="text-sm text-red-600 mb-4">No other active users available. Create another user first.</p>
+                )}
+                <div className="flex gap-3">
+                  <button onClick={handleTransferAndDisable} disabled={!transferTargetUid}
+                    className="flex-1 bg-[#0D4A35] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#0B2C22] transition-all disabled:opacity-50">
+                    Transfer &amp; Disable
+                  </button>
+                  <button onClick={() => { setShowTransferPrompt(false); setPendingDisableUid(""); }}
+                    className="px-4 py-2.5 rounded-xl border border-stone-200 text-text-muted hover:bg-stone-50 text-sm font-medium transition-colors">
+                    Cancel
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -238,8 +396,14 @@ export default function AdminUsersPage() {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">Email Address *</label>
-                    <input type="email" required value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} className="input-field" disabled={!!editingUser}/>
-                    {editingUser && <p className="text-xs text-text-muted mt-1">Email cannot be changed after creation.</p>}
+                    <input type="email" required value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} className="input-field"
+                      placeholder={editingUser ? editingUser.email : "new.user@example.com"}/>
+                    {editingUser && form.email === editingUser.email && (
+                      <p className="text-xs text-text-muted mt-1">Change this field to update the user&apos;s email. This updates both Firestore and Firebase Auth.</p>
+                    )}
+                    {editingUser && form.email !== editingUser.email && (
+                      <p className="text-xs text-amber-600 mt-1 font-medium">Email will be updated in Firebase Auth for this user.</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-primary mb-1.5 uppercase tracking-wide">
@@ -266,7 +430,7 @@ export default function AdminUsersPage() {
                             className="w-4 h-4 rounded accent-amber-600"/>
                           <div>
                             <p className="text-sm font-medium text-primary">{({
-                              manage_pastor_speaks: "Pastor\'s Word",
+                              manage_pastor_speaks: "Pastor's Word",
                               manage_users: "Users & Permissions",
                               manage_posts: "Blog Posts",
                               manage_bookings: "Bookings",
@@ -279,13 +443,20 @@ export default function AdminUsersPage() {
                               manage_announcements: "Announcements",
                               manage_calendar: "Calendar",
                               manage_declarations: "Daily Declarations",
+                              manage_hymns: "Hymns",
+                              manage_leadership: "Leadership",
+                              manage_members: "Choir & Media",
+                              manage_ministry_members: "Ministry Members",
+                              manage_contacts: "Messages",
+                              manage_news: "News & Events",
+                              view_activity_log: "View Activity Log",
                             } as Record<string, string>)[perm] || perm.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</p>
                             <p className="text-xs text-text-muted">{perm}</p>
                           </div>
                         </label>
                       ))}
                     </div>
-                  
+
                     {/* Ministry Access */}
                     <div className="mt-4">
                       <label className="block text-xs font-semibold text-primary mb-2 uppercase tracking-wide">Ministry Access</label>
@@ -336,15 +507,15 @@ export default function AdminUsersPage() {
                   </thead>
                   <tbody>
                     {users.map(user => (
-                      <tr key={user.id} className="border-b border-stone-50 hover:bg-stone-50/50 transition-colors">
+                      <tr key={user.id} className={`border-b border-stone-50 hover:bg-stone-50/50 transition-colors ${user.active === false ? "opacity-60" : ""}`}>
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
                               {(user.displayName || user.email || "?").charAt(0)}
                             </div>
                             <div>
-                              <p className="font-semibold text-primary text-sm">{user.displayName}</p>
-                              <p className="text-text-muted text-xs">{user.email}</p>
+                              <p className="text-sm font-medium text-primary">{user.displayName || user.email}</p>
+                              <p className="text-xs text-text-muted">{user.email}</p>
                             </div>
                           </div>
                         </td>
