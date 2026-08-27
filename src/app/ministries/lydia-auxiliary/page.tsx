@@ -240,7 +240,7 @@ export default function LydiaAuxiliaryPage() {
       {/* Registration */}
       <section className="py-16 bg-primary-dark relative overflow-hidden">
         <div className="absolute inset-0 pattern-overlay opacity-10"/>
-        <div className="max-w-2xl mx-auto px-4 text-center relative z-10 reveal">
+        <div className="max-w-5xl mx-auto px-4 text-center relative z-10 reveal">
           <h2 className="font-serif text-3xl lg:text-4xl text-white font-bold mb-4">Join Lydia Auxiliary</h2>
           <p className="text-white/70 mb-8">Register to become a member of the Lydia Auxiliary at Trinity Baptist Church, Ilora. Upload a photo in Lydia uniform and select your current step.</p>
           {success ? (
@@ -257,7 +257,6 @@ export default function LydiaAuxiliaryPage() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>
                 Register as a Lydia Member
               </button>
-                <MemberDirectory ministry="lydia-auxiliary" ministryLabel="Lydia Auxiliary" />
               </div>
               {showForm && (
                 <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6 text-left space-y-4 mt-4">
@@ -294,6 +293,7 @@ export default function LydiaAuxiliaryPage() {
                   </div>
                 </form>
               )}
+              <MemberDirectory ministry="lydia-auxiliary" ministryLabel="Lydia Auxiliary" />
             </>
           )}
         </div>

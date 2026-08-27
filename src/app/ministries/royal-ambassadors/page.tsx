@@ -191,7 +191,7 @@ export default function RoyalAmbassadorsPage() {
       {/* Registration */}
       <section className="py-16 bg-primary-dark relative overflow-hidden">
         <div className="absolute inset-0 pattern-overlay opacity-10"/>
-        <div className="max-w-2xl mx-auto px-4 text-center relative z-10 reveal">
+        <div className="max-w-5xl mx-auto px-4 text-center relative z-10 reveal">
           <h2 className="font-serif text-3xl lg:text-4xl text-white font-bold mb-4">Join the Royal Ambassadors</h2>
           <p className="text-white/70 mb-8">Register your son or yourself to become a member of the RA chapter at Trinity Baptist Church, Ilora. Upload a photo in RA uniform and select your current rank.</p>
           {success ? (
@@ -210,7 +210,6 @@ export default function RoyalAmbassadorsPage() {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>
                   Register as Royal Ambassador
                 </button>
-                <MemberDirectory ministry="royal-ambassadors" ministryLabel="Royal Ambassadors" />
               </div>
               {showForm && (
                 <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6 text-left space-y-4 mt-4">
@@ -260,6 +259,7 @@ export default function RoyalAmbassadorsPage() {
                   </div>
                 </form>
               )}
+              <MemberDirectory ministry="royal-ambassadors" ministryLabel="Royal Ambassadors" />
             </>
           )}
         </div>
