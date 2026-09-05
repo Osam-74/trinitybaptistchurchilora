@@ -47,13 +47,17 @@ export async function submitMembership(data: {
 export async function listMembersForMinistry(ministry: MinistryKey): Promise<MinistryMember[]> {
   try {
     if (!db) return [];
+    // NOTE: no orderBy in the Firestore query on purpose.
+    // "where ministry == X + orderBy submittedAt" needs a composite index
+    // which can be missing/stale — silently returning zero members on the
+    // public ministry pages. Equality-only queries are served by the
+    // automatic single-field index; we sort client-side instead.
     const q = query(
       collection(db, "ministry_members"),
-      where("ministry", "==", ministry),
-      orderBy("submittedAt", "desc")
+      where("ministry", "==", ministry)
     );
     const snap = await getDocs(q);
-    return snap.docs.map(d => {
+    const members = snap.docs.map(d => {
     const data = d.data();
     return {
       id: d.id,
@@ -69,6 +73,10 @@ export async function listMembersForMinistry(ministry: MinistryKey): Promise<Min
       occupation: data.occupation || "",
     };
   });
+    members.sort((a, b) =>
+      (b.submittedAt || "").localeCompare(a.submittedAt || "")
+    );
+    return members;
   } catch (err) {
     console.error("[ministryMembers] listMembersForMinistry failed:", err);
     return [];
