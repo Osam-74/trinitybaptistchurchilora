@@ -1,7 +1,7 @@
 import { db } from "@/lib/firebase";
 import {
   collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot,
-  query, orderBy, getDocs,
+  query, orderBy, getDocs, getDoc,
 } from "firebase/firestore";
 import { Post } from "@/types";
 
@@ -62,6 +62,21 @@ export async function seedArticlesIfEmpty() {
         createdAt: p.createdAt || new Date().toISOString(),
       });
     }
+  }
+}
+
+/** Get a single published article by id (public article page) */
+export async function getArticleById(id: string): Promise<Post | null> {
+  if (!db) return null;
+  try {
+    const snap = await getDoc(doc(db, COLL, id));
+    if (!snap.exists()) return null;
+    const data = snap.data() as Post;
+    if (data.status && data.status !== "published") return null;
+    return { ...data, id: snap.id };
+  } catch (err) {
+    console.error("[posts] getArticleById failed:", err);
+    return null;
   }
 }
 

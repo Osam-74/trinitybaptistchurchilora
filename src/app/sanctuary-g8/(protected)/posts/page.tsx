@@ -9,6 +9,7 @@ import { subscribeArticles, createArticle, updateArticle, deleteArticle, seedArt
 import { auth } from "@/lib/firebase";
 import { logActivity } from "@/lib/activityLog";
 import { useCurrentUser } from "@/lib/useCurrentUser";
+import ShareButton from "@/components/ShareButton";
 
 export default function AdminPostsPage() {
   const currentUser = useCurrentUser();
@@ -92,7 +93,7 @@ export default function AdminPostsPage() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="font-serif text-lg font-bold text-primary">Faith Articles</h1>
-              <p className="text-text-muted text-sm mt-1">Manage faith articles and devotional content</p>
+              <p className="text-text-muted text-sm mt-1">Manage faith articles, Sunday sermon recaps, and devotional content</p>
             </div>
             <button onClick={openNew}
               className="btn-shine btn-gold inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold">
@@ -146,6 +147,14 @@ export default function AdminPostsPage() {
                         <td className="px-5 py-4 text-xs text-text-muted whitespace-nowrap">{formatDate(post.createdAt)}</td>
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-1.5">
+                            {post.status === "published" && (
+                              <ShareButton
+                                url={typeof window !== "undefined" ? `${window.location.origin}/articles/${post.id}` : ""}
+                                title={post.title}
+                                label="Share"
+                                className="px-3 py-1.5 rounded-lg bg-accent/15 text-primary-dark text-xs font-medium hover:bg-accent/25"
+                              />
+                            )}
                             <button onClick={() => openEdit(post)}
                               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/8 text-primary text-xs font-medium hover:bg-primary/15 transition-colors">
                               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>

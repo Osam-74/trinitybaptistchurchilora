@@ -186,7 +186,10 @@ export default function Navbar() {
                     onMouseEnter={handleDropdownEnter}
                     onMouseLeave={handleDropdownLeave}
                   >
-                    <button className="px-2.5 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 flex items-center gap-1 transition-all duration-300">
+                    <button
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className={`px-2.5 py-2 rounded-lg text-sm font-medium flex items-center gap-1 transition-all duration-300 active:scale-95 ${isDropdownOpen ? "text-accent bg-white/10" : "text-white/80 hover:text-white hover:bg-white/5"}`}
+                      aria-expanded={isDropdownOpen} aria-haspopup="menu">
                       {link.label}
                       <svg className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -198,12 +201,17 @@ export default function Navbar() {
                       <div className="px-4 py-2 border-b border-white/10 mb-1">
                         <Link href="/ministries" className="text-xs font-bold text-accent uppercase tracking-wider">View All Ministries →</Link>
                       </div>
-                      {ministries.map((m) => (
-                        <Link key={m.slug} href={m.href}
-                          className="block px-4 py-2.5 text-sm text-white/80 hover:text-accent hover:bg-white/5 transition-colors">
-                          {m.name}
-                        </Link>
-                      ))}
+                      {ministries.map((m) => {
+                        const mActive = pathname === m.href;
+                        return (
+                          <Link key={m.slug} href={m.href}
+                            onClick={() => setIsDropdownOpen(false)}
+                            className={`flex items-center gap-2 px-4 py-2.5 text-sm transition-all duration-150 active:scale-95 active:bg-white/10 rounded-lg ${mActive ? "text-accent bg-white/5" : "text-white/80 hover:text-accent hover:bg-white/5"}`}>
+                            {mActive && <span className="w-1.5 h-1.5 bg-accent rounded-full flex-shrink-0" />}
+                            {m.name}
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -211,7 +219,7 @@ export default function Navbar() {
               const isActive = pathname === link.href;
               return (
                 <Link key={link.href} href={link.href}
-                  className={`relative px-2.5 py-2 text-sm font-medium transition-all duration-300 hover:text-white rounded-lg ${isActive ? "text-accent bg-white/5" : "text-white/80 hover:bg-white/5"}`}>
+                  className={`relative px-2.5 py-2 text-sm font-medium transition-all duration-300 hover:text-white rounded-lg active:scale-95 active:bg-white/10 ${isActive ? "text-accent bg-white/5" : "text-white/80 hover:bg-white/5"}`}>
                   {link.label}
                   {isActive && <span className="absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-accent rounded-full" />}
                 </Link>
@@ -267,19 +275,25 @@ export default function Navbar() {
                 return (
                   <div key={link.label} className="space-y-1">
                     <button onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="w-full flex items-center justify-between text-left px-4 py-2.5 text-base font-semibold text-white/80 hover:text-white hover:bg-white/5 rounded-xl transition-all">
+                      className={`w-full flex items-center justify-between text-left px-4 py-2.5 text-base font-semibold rounded-xl transition-all active:scale-95 ${isDropdownOpen ? "text-accent bg-white/10" : "text-white/80 hover:text-white hover:bg-white/5"}`}
+                      aria-expanded={isDropdownOpen}>
                       {link.label}
                       <svg className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
                     <div className={`pl-4 space-y-1 transition-all duration-300 overflow-hidden ${isDropdownOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
-                      {ministries.map((m) => (
-                        <Link key={m.slug} href={m.href}
-                          className="block px-4 py-2 text-sm text-white/60 hover:text-accent transition-colors">
-                          {m.name}
-                        </Link>
-                      ))}
+                      {ministries.map((m) => {
+                        const mActive = pathname === m.href;
+                        return (
+                          <Link key={m.slug} href={m.href}
+                            onClick={() => { setIsOpen(false); setIsDropdownOpen(false); }}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-150 active:scale-95 active:bg-white/10 ${mActive ? "text-accent bg-white/5" : "text-white/60 hover:text-accent hover:bg-white/5"}`}>
+                            {mActive && <span className="w-1.5 h-1.5 bg-accent rounded-full flex-shrink-0" />}
+                            {m.name}
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -287,7 +301,7 @@ export default function Navbar() {
               const isActive = pathname === link.href;
               return (
                 <Link key={link.href} href={link.href}
-                  className={`block px-4 py-2.5 rounded-xl text-base font-semibold transition-all ${isActive ? "text-accent bg-white/5 border border-accent/20" : "text-white/80 hover:text-white hover:bg-white/5"}`}>
+                  className={`block px-4 py-2.5 rounded-xl text-base font-semibold transition-all active:scale-95 active:bg-white/10 ${isActive ? "text-accent bg-white/5 border border-accent/20" : "text-white/80 hover:text-white hover:bg-white/5"}`}>
                   {link.label}
                 </Link>
               );

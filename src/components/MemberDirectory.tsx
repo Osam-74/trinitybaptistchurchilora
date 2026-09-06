@@ -14,12 +14,6 @@ interface Props {
   ministryLabel: string;
 }
 
-function formatDate(iso?: string) {
-  if (!iso) return "";
-  try { return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }); }
-  catch { return iso; }
-}
-
 export default function MemberDirectory({ ministry, ministryLabel }: Props) {
   const [allMembers, setAllMembers] = useState<MinistryMember[]>([]);
   const [filtered, setFiltered] = useState<MinistryMember[]>([]);
@@ -83,7 +77,7 @@ export default function MemberDirectory({ ministry, ministryLabel }: Props) {
               <button
                 key={m.id}
                 onClick={() => setSelected(m)}
-                className="group relative aspect-square rounded-2xl overflow-hidden border border-white/20 hover:border-accent transition-all duration-300 hover:scale-105"
+                className="group relative aspect-square rounded-full overflow-hidden border-2 border-white/25 hover:border-accent transition-all duration-300 hover:scale-105 active:scale-95"
               >
                 {m.photoUrl ? (
                   <img
@@ -114,66 +108,84 @@ export default function MemberDirectory({ ministry, ministryLabel }: Props) {
         </>
       )}
 
-      {/* Profile Modal */}
+      {/* Profile Modal — photo on the left, details on the right */}
       {selected && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
           onClick={() => setSelected(null)}
         >
           <div
             onClick={e => e.stopPropagation()}
-            className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col"
+            className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col md:flex-row animate-scale-in"
           >
             {/* Close button */}
             <button
               onClick={() => setSelected(null)}
-              className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center transition-colors backdrop-blur-sm"
+              className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center transition-colors backdrop-blur-sm"
+              aria-label="Close profile"
             >
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
-            {/* Photo at top */}
-            <div className="w-full aspect-square overflow-hidden flex-shrink-0">
-              {selected.photoUrl ? (
-                <img
-                  src={selected.photoUrl}
-                  alt={selected.fullName}
-                  className="w-full h-full object-cover"
-                  onError={e => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden");
-                  }}
-                />
-              ) : null}
-              {!selected.photoUrl && (
-                <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary/40 text-6xl font-bold">
-                  {selected.fullName.charAt(0).toUpperCase()}
-                </div>
-              )}
+            {/* Left — profile picture */}
+            <div className="relative flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-primary/10 via-primary/5 to-accent/15 px-6 py-8 md:py-0 md:w-[42%]">
+              {/* Decorative ring */}
+              <div className="absolute inset-4 rounded-[2rem] border border-primary/10 hidden md:block" />
+              <div className="w-36 h-36 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-full overflow-hidden border-4 border-white shadow-xl">
+                {selected.photoUrl ? (
+                  <img
+                    src={selected.photoUrl}
+                    alt={selected.fullName}
+                    className="w-full h-full object-cover"
+                    onError={e => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden");
+                    }}
+                  />
+                ) : null}
+                {!selected.photoUrl && (
+                  <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary/40 text-7xl font-bold">
+                    {selected.fullName.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Content — left aligned */}
-            <div className="p-6 overflow-y-auto flex-1">
-              <h3 className="font-serif text-2xl font-bold text-primary mb-3 text-left">{selected.fullName}</h3>
-              <span className="inline-block bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full mb-4">
-                ✓ Approved Member
+            {/* Right — submitted details */}
+            <div className="p-6 sm:p-8 overflow-y-auto flex-1">
+              <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-100 mb-3">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                APPROVED MEMBER
               </span>
+              <h3 className="font-serif text-2xl sm:text-3xl font-bold text-primary leading-tight">{selected.fullName}</h3>
+              <p className="text-text-muted text-xs font-semibold uppercase tracking-wider mt-1">{ministryLabel}</p>
 
-              <div className="space-y-3 text-left">
-                <div className="bg-stone-50 rounded-xl px-4 py-3 border border-stone-100">
-                  <p className="text-xs text-text-muted font-semibold uppercase tracking-wider mb-0.5">Ministry</p>
-                  <p className="text-primary font-medium">{ministryLabel}</p>
+              <div className="mt-5 space-y-3">
+                <div className="flex items-start gap-3 bg-stone-50 rounded-xl px-4 py-3 border border-stone-100">
+                  <svg className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7 8h10M7 12h10M7 16h6"/></svg>
+                  <div className="min-w-0">
+                    <p className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">Rank / Step</p>
+                    <p className="text-primary font-semibold text-sm break-words">{selected.rank || "—"}</p>
+                  </div>
                 </div>
-                <div className="bg-stone-50 rounded-xl px-4 py-3 border border-stone-100">
-                  <p className="text-xs text-text-muted font-semibold uppercase tracking-wider mb-0.5">Rank / Step</p>
-                  <p className="text-primary font-medium text-sm">{selected.rank}</p>
-                </div>
-                {selected.approvedAt && (
-                  <div className="bg-stone-50 rounded-xl px-4 py-3 border border-stone-100">
-                    <p className="text-xs text-text-muted font-semibold uppercase tracking-wider mb-0.5">Member Since</p>
-                    <p className="text-primary font-medium">{formatDate(selected.approvedAt)}</p>
+                {selected.occupation && (
+                  <div className="flex items-start gap-3 bg-stone-50 rounded-xl px-4 py-3 border border-stone-100">
+                    <svg className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">Occupation</p>
+                      <p className="text-primary font-semibold text-sm break-words">{selected.occupation}</p>
+                    </div>
+                  </div>
+                )}
+                {selected.raIdCardNumber && (
+                  <div className="flex items-start gap-3 bg-stone-50 rounded-xl px-4 py-3 border border-stone-100">
+                    <svg className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0h4m-6 7h.01M14 13h.01M10 17h.01M14 17h.01"/></svg>
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">ID Card Number</p>
+                      <p className="text-primary font-semibold text-sm break-words">{selected.raIdCardNumber}</p>
+                    </div>
                   </div>
                 )}
               </div>

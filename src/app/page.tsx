@@ -14,7 +14,7 @@ import { doc, onSnapshot, collection, getDocs, query, orderBy, limit } from "fir
 import { db } from "@/lib/firebase";
 import { listPublishedPosts } from "@/lib/news";
 import { getPublishedArticles } from "@/lib/posts";
-import { trackView } from "@/lib/analytics";
+import ShareButton from "@/components/ShareButton";
 import LikeButton from "@/components/LikeButton";
 
 // Custom useScrollReveal Hook
@@ -140,7 +140,6 @@ export default function HomePage() {
     id: string; title: string; body: string; scripture: string;
     pinned: boolean; authorName?: string; amenCount: number; likeCount: number; createdAt: string;
   }>>([]);
-  const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
 
   useEffect(() => {
     getPublishedArticles(6).then(articles => {
@@ -919,13 +918,12 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <span className="inline-block text-primary bg-primary/5 font-bold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full border border-primary/10 mb-3">Spiritual Nourishment</span>
-              <h2 className="font-serif text-3xl lg:text-4xl text-primary font-bold mb-3">Faith Articles</h2>
-              <p className="text-text-muted text-sm max-w-xl mx-auto">Weekly devotionals, reflections, and messages from our pastor to encourage your walk with Christ.</p>
+              <h2 className="font-serif text-3xl lg:text-4xl text-primary font-bold mb-3">Faith Articles &amp; Sermon Recaps</h2>
+              <p className="text-text-muted text-sm max-w-xl mx-auto">Weekly devotionals, Sunday sermon recaps, reflections, and messages from our pastor to encourage your walk with Christ.</p>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {faithArticles.map((article, i) => {
-                const isExpanded = expandedArticle === article.id;
                 return (
                   <div
                     key={article.id}
@@ -942,32 +940,34 @@ export default function HomePage() {
                     {article.scripture && (
                       <p className="text-accent text-xs font-semibold italic mb-3 border-l-2 border-accent/30 pl-2">{article.scripture}</p>
                     )}
-                    <div className={"text-text-muted text-sm leading-relaxed flex-1 " + (isExpanded ? "" : "line-clamp-4")}>
+                    <div className="text-text-muted text-sm leading-relaxed flex-1 line-clamp-4">
                       {article.body}
                     </div>
-                    <button
-                      onClick={() => {
-                        const newId = isExpanded ? null : article.id;
-                        setExpandedArticle(newId);
-                        if (newId) {
-                          trackView({ collection: "faith_articles", docId: article.id, title: article.title });
-                        }
-                      }}
-                      className="mt-4 text-xs font-semibold text-accent hover:text-primary transition-colors inline-flex items-center gap-1 w-fit"
+                    <Link
+                      href={`/articles/${article.id}`}
+                      className="mt-4 text-xs font-semibold text-accent hover:text-primary transition-colors inline-flex items-center gap-1 w-fit group"
                     >
-                      {isExpanded ? "Show Less" : "Read More"}
-                      <svg className={"w-3.5 h-3.5 transition-transform " + (isExpanded ? "rotate-180" : "")} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
-                    </button>
-                    <div className="mt-4 pt-3 border-t border-stone-50 flex items-center justify-between">
+                      Read Full Article
+                      <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </Link>
+                    <div className="mt-4 pt-3 border-t border-stone-50 flex items-center justify-between gap-2">
                       {article.authorName ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0">
                             {article.authorName.charAt(0).toUpperCase()}
                           </div>
-                          <span className="text-xs text-text-muted font-medium">{article.authorName}</span>
+                          <span className="text-xs text-text-muted font-medium truncate">{article.authorName}</span>
                         </div>
                       ) : <span />}
-                      <LikeButton collection="faith_articles" docId={article.id} initialCount={article.likeCount ?? 0} size="sm" />
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <ShareButton
+                          url={typeof window !== "undefined" ? `${window.location.origin}/articles/${article.id}` : ""}
+                          title={article.title}
+                          label="Share"
+                          className="text-stone-500 hover:text-primary"
+                        />
+                        <LikeButton collection="faith_articles" docId={article.id} initialCount={article.likeCount ?? 0} size="sm" />
+                      </div>
                     </div>
                   </div>
                 );
