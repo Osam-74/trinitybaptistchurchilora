@@ -153,39 +153,33 @@ export default function MemberDirectory({ ministry, ministryLabel }: Props) {
               </div>
             </div>
 
-            {/* Right — submitted details */}
-            <div className="p-6 sm:p-8 overflow-y-auto flex-1">
-              <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-100 mb-3">
+            {/* Right — submitted details, left-aligned field rows */}
+            <div className="p-6 sm:p-8 overflow-y-auto flex-1 text-left">
+              <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-100 mb-1">
                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                 APPROVED MEMBER
               </span>
-              <h3 className="font-serif text-2xl sm:text-3xl font-bold text-primary leading-tight">{selected.fullName}</h3>
-              <p className="text-text-muted text-xs font-semibold uppercase tracking-wider mt-1">{ministryLabel}</p>
+              <p className="text-text-muted text-[11px] font-semibold uppercase tracking-wider mt-2">{ministryLabel}</p>
 
-              <div className="mt-5 space-y-3">
-                <div className="flex items-start gap-3 bg-stone-50 rounded-xl px-4 py-3 border border-stone-100">
-                  <svg className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7 8h10M7 12h10M7 16h6"/></svg>
-                  <div className="min-w-0">
-                    <p className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">Rank / Step</p>
-                    <p className="text-primary font-semibold text-sm break-words">{selected.rank || "—"}</p>
-                  </div>
+              <div className="mt-4 divide-y divide-stone-100 border-t border-stone-100">
+                <div className="py-3.5">
+                  <p className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">Full Name</p>
+                  <p className="text-primary font-bold text-lg leading-snug">{selected.fullName}</p>
+                </div>
+                <div className="py-3.5">
+                  <p className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">Rank</p>
+                  <p className="text-primary font-semibold text-sm leading-snug">{selected.rank || "—"}</p>
                 </div>
                 {selected.occupation && (
-                  <div className="flex items-start gap-3 bg-stone-50 rounded-xl px-4 py-3 border border-stone-100">
-                    <svg className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                    <div className="min-w-0">
-                      <p className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">Occupation</p>
-                      <p className="text-primary font-semibold text-sm break-words">{selected.occupation}</p>
-                    </div>
+                  <div className="py-3.5">
+                    <p className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">Occupation</p>
+                    <p className="text-primary font-semibold text-sm leading-snug">{selected.occupation}</p>
                   </div>
                 )}
                 {selected.raIdCardNumber && (
-                  <div className="flex items-start gap-3 bg-stone-50 rounded-xl px-4 py-3 border border-stone-100">
-                    <svg className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0h4m-6 7h.01M14 13h.01M10 17h.01M14 17h.01"/></svg>
-                    <div className="min-w-0">
-                      <p className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">ID Card Number</p>
-                      <p className="text-primary font-semibold text-sm break-words">{selected.raIdCardNumber}</p>
-                    </div>
+                  <div className="py-3.5">
+                    <p className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">ID Card Number</p>
+                    <p className="text-primary font-semibold text-sm leading-snug">{selected.raIdCardNumber}</p>
                   </div>
                 )}
               </div>
