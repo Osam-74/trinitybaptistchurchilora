@@ -125,13 +125,17 @@ export async function updateMemberStatus(
 
 export async function updateMemberDetails(
   id: string,
-  details: { raIdCardNumber?: string; occupation?: string; rank?: string }
+  details: { raIdCardNumber?: string; occupation?: string; rank?: string; photoUrl?: string }
 ): Promise<void> {
   if (!db) throw new Error("Firestore not configured");
   const update: Record<string, string> = {};
   if (details.raIdCardNumber !== undefined) update.raIdCardNumber = details.raIdCardNumber;
   if (details.occupation !== undefined) update.occupation = details.occupation;
   if (details.rank !== undefined) update.rank = details.rank;
+  // "" is a valid, intentional value here — it's how the admin removes the
+  // passport photograph (see EditDetailsModal's "Remove photo" action) — so
+  // this must stay an explicit undefined check, not a truthy check.
+  if (details.photoUrl !== undefined) update.photoUrl = details.photoUrl;
   await updateDoc(doc(db, "ministry_members", id), update);
 }
 

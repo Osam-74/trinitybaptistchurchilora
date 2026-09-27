@@ -44,6 +44,14 @@ const STATUS_PILL: Record<MemberStatus, string> = {
   rejected: "bg-red-100 text-red-700",
 };
 
+// Left accent border per status — lets the eye scan a long list for what
+// still needs attention (pending) without reading every pill.
+const STATUS_ACCENT: Record<MemberStatus, string> = {
+  pending:  "border-l-yellow-400",
+  approved: "border-l-emerald-400",
+  rejected: "border-l-red-400",
+};
+
 function formatDate(iso?: string) {
   if (!iso) return "—";
   try { return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }); }
@@ -202,20 +210,55 @@ function EditDetailsModal({
   const [raIdCardNumber, setRaIdCardNumber] = useState(member.raIdCardNumber || "");
   const [occupation, setOccupation] = useState(member.occupation || "");
   const [rank, setRank] = useState(member.rank);
+  // Photo state: photoFile (a newly chosen replacement, not yet uploaded),
+  // photoPreview (what to show — the new file, the existing photoUrl, or
+  // nothing if removed) and photoRemoved (explicit "clear the photo" flag,
+  // since photoPreview alone can't distinguish "unchanged" from "removed").
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState(member.photoUrl || "");
+  const [photoRemoved, setPhotoRemoved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   const rankOptions = RANK_OPTIONS[member.ministry] || [];
 
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setPhotoFile(f);
+    setPhotoRemoved(false);
+    setPhotoPreview(URL.createObjectURL(f));
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoFile(null);
+    setPhotoPreview("");
+    setPhotoRemoved(true);
+  };
+
   const handleSave = async () => {
     setSaving(true); setError("");
     try {
+      let photoUrl: string | undefined;
+      if (photoFile) {
+        const { uploadToR2 } = await import("@/lib/r2");
+        photoUrl = await uploadToR2(photoFile, "members");
+      } else if (photoRemoved) {
+        photoUrl = "";
+      }
       await updateMemberDetails(member.id, {
         raIdCardNumber: raIdCardNumber.trim(),
         occupation: occupation.trim(),
         rank,
+        ...(photoUrl !== undefined ? { photoUrl } : {}),
       });
-      onSaved({ ...member, raIdCardNumber: raIdCardNumber.trim(), occupation: occupation.trim(), rank });
+      onSaved({
+        ...member,
+        raIdCardNumber: raIdCardNumber.trim(),
+        occupation: occupation.trim(),
+        rank,
+        ...(photoUrl !== undefined ? { photoUrl } : {}),
+      });
     } catch (err) {
       setError("Failed to update. Please try again.");
       console.error(err);
@@ -240,6 +283,33 @@ function EditDetailsModal({
           </button>
         </div>
         <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
+          {/* Passport photograph */}
+          <div>
+            <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">Passport Photograph</label>
+            <div className="flex items-center gap-3">
+              {photoPreview ? (
+                <img src={photoPreview} alt={member.fullName} className="w-16 h-16 rounded-xl object-cover border-2 border-stone-200"/>
+              ) : (
+                <div className="w-16 h-16 rounded-xl bg-stone-100 flex items-center justify-center text-stone-400">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </div>
+              )}
+              <div className="flex-1 flex flex-col gap-1.5">
+                <label className="cursor-pointer text-center text-xs font-bold bg-stone-100 text-stone-700 rounded-lg py-2 hover:bg-stone-200 transition-colors">
+                  {photoPreview ? "Replace photo" : "Upload photo"}
+                  <input type="file" accept="image/*" onChange={handleFile} className="hidden" />
+                </label>
+                {photoPreview && (
+                  <button type="button" onClick={handleRemovePhoto}
+                    className="text-center text-xs font-bold bg-red-50 text-red-600 rounded-lg py-2 hover:bg-red-100 transition-colors">
+                    Remove photo
+                  </button>
+                )}
+              </div>
+            </div>
+            {photoRemoved && <p className="text-xs text-amber-600 mt-1.5">Photo will be removed when you save.</p>}
+          </div>
+
           {/* Rank (editable for all ministries) */}
           <div>
             <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1.5">
@@ -610,53 +680,57 @@ export default function MinistryMembersAdmin() {
       ) : (
         <div className="space-y-3">
           {filtered.map(m => (
-            <div key={m.id} className="bg-white border border-stone-100 rounded-2xl p-4 flex gap-4 items-start shadow-sm">
-              {/* Photo */}
-              <button onClick={() => setLightbox(m.photoUrl)} className="flex-shrink-0">
-                {m.photoUrl ? (
-                  <img src={m.photoUrl} alt={m.fullName}
-                    className="w-16 h-16 rounded-xl object-cover border border-stone-200 hover:opacity-80 transition-opacity"
-                    onError={e => { (e.target as HTMLImageElement).src = ""; }} />
-                ) : (
-                  <div className="w-16 h-16 rounded-xl bg-stone-100 flex items-center justify-center text-stone-400">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                  </div>
-                )}
-              </button>
+            <div key={m.id} className={`bg-white border border-stone-100 border-l-4 ${STATUS_ACCENT[m.status]} rounded-2xl shadow-sm overflow-hidden`}>
+              <div className="p-4 flex gap-4 items-start">
+                {/* Photo */}
+                <button onClick={() => setLightbox(m.photoUrl)} className="flex-shrink-0">
+                  {m.photoUrl ? (
+                    <img src={m.photoUrl} alt={m.fullName}
+                      className="w-16 h-16 rounded-xl object-cover border border-stone-200 hover:opacity-80 transition-opacity"
+                      onError={e => { (e.target as HTMLImageElement).src = ""; }} />
+                  ) : (
+                    <div className="w-16 h-16 rounded-xl bg-stone-100 flex items-center justify-center text-stone-400">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    </div>
+                  )}
+                </button>
 
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <p className="font-bold text-stone-800 text-sm">{m.fullName}</p>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${STATUS_PILL[m.status]}`}>
-                    {m.status}
-                  </span>
-                  <span className="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full">
-                    {MINISTRY_LABELS[m.ministry] || m.ministry}
-                  </span>
-                </div>
-                <p className="text-xs text-stone-500 mb-0.5">{m.rank}</p>
-                <p className="text-xs text-stone-400">
-                  Submitted: {formatDate(m.submittedAt)}
-                  {m.approvedAt && <span className="ml-2 text-emerald-600">· Approved: {formatDate(m.approvedAt)}</span>}
-                </p>
-                {m.note && <p className="text-xs text-stone-500 italic mt-1 bg-stone-50 rounded-lg px-2 py-1">Note: {m.note}</p>}
-                {(m.raIdCardNumber || m.occupation) && (
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {m.raIdCardNumber && (
-                      <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">ID: {m.raIdCardNumber}</span>
-                    )}
-                    {m.occupation && (
-                      <span className="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full font-medium">Work: {m.occupation}</span>
-                    )}
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <p className="font-bold text-stone-800 text-sm">{m.fullName}</p>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${STATUS_PILL[m.status]}`}>
+                      {m.status}
+                    </span>
+                    <span className="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full">
+                      {MINISTRY_LABELS[m.ministry] || m.ministry}
+                    </span>
                   </div>
-                )}
+                  <p className="text-xs text-stone-500 mb-0.5">{m.rank}</p>
+                  <p className="text-xs text-stone-400">
+                    Submitted: {formatDate(m.submittedAt)}
+                    {m.approvedAt && <span className="ml-2 text-emerald-600">· Approved: {formatDate(m.approvedAt)}</span>}
+                  </p>
+                  {m.note && <p className="text-xs text-stone-500 italic mt-1 bg-stone-50 rounded-lg px-2 py-1">Note: {m.note}</p>}
+                  {(m.raIdCardNumber || m.occupation) && (
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {m.raIdCardNumber && (
+                        <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">ID: {m.raIdCardNumber}</span>
+                      )}
+                      {m.occupation && (
+                        <span className="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full font-medium">Work: {m.occupation}</span>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex flex-col gap-1.5 flex-shrink-0">
+              {/* Actions — a single horizontal toolbar (wraps on narrow
+                  screens) instead of a cramped vertical stack, with the
+                  destructive Delete pushed to the far right. */}
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-stone-50 border-t border-stone-100 flex-wrap">
                 <button onClick={() => setEditMember(m)}
-                  className="px-3 py-1.5 border border-stone-200 text-stone-600 text-xs font-semibold rounded-lg hover:bg-stone-50 transition-colors">
+                  className="px-3 py-1.5 border border-stone-200 bg-white text-stone-600 text-xs font-semibold rounded-lg hover:bg-stone-100 transition-colors">
                   Edit
                 </button>
                 {m.status === "pending" && (
@@ -673,7 +747,7 @@ export default function MinistryMembersAdmin() {
                 )}
                 {m.status === "approved" && (
                   <button onClick={() => handleStatus(m.id, "pending")} disabled={saving === m.id}
-                    className="px-3 py-1.5 border border-stone-200 text-stone-600 text-xs font-semibold rounded-lg hover:bg-stone-50 transition-colors disabled:opacity-50">
+                    className="px-3 py-1.5 border border-stone-200 bg-white text-stone-600 text-xs font-semibold rounded-lg hover:bg-stone-100 transition-colors disabled:opacity-50">
                     Revoke
                   </button>
                 )}
@@ -683,8 +757,9 @@ export default function MinistryMembersAdmin() {
                     Approve
                   </button>
                 )}
+                <div className="flex-1" />
                 <button onClick={() => handleDelete(m.id)} disabled={saving === m.id}
-                  className="px-3 py-1.5 bg-stone-100 text-stone-500 text-xs font-semibold rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50">
+                  className="px-3 py-1.5 bg-white border border-stone-200 text-stone-500 text-xs font-semibold rounded-lg hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors disabled:opacity-50">
                   Delete
                 </button>
               </div>
